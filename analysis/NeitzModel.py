@@ -15,7 +15,7 @@ class SchematicEyeAnalysis(Images):
     
     **Legend for figures:**
     
-    .. figure:: ../SchematicEye/OSLO/Figures/Legend.png
+    .. figure:: ../../Figures/Legend.png
        :height: 200px
        :width: 300px
        :align: center
@@ -235,6 +235,8 @@ class SchematicEyeAnalysis(Images):
     def estimateInfo(self, Receptive_Field):
         """Estimate the information in a simple linear cone receptive field.
         
+        :param Receptive_Field: type of receptive field to use (FFT, Jay)
+        
         This function is under development. It will be called by 
         ComputeConeActivity() function.
 
@@ -318,7 +320,7 @@ class SchematicEyeAnalysis(Images):
         Currently this function outputs the following:
 
             
-        .. figure:: ../SchematicEye/OSLO/Figures/ConeRF.png 
+        .. figure:: ../../Figures/ConeRF.png 
            :height: 300px
            :width: 400px
            :align: center   
@@ -326,7 +328,7 @@ class SchematicEyeAnalysis(Images):
            **Fig 1:** A simple Diff of Gaussian receptive field
 
            
-        .. figure:: ../SchematicEye/OSLO/Figures/ConeRF_FFT.png  
+        .. figure:: ../../Figures/ConeRF_FFT.png  
            :height: 300px
            :width: 400px
            :align: center
@@ -385,7 +387,7 @@ class SchematicEyeAnalysis(Images):
             
             if save_plots:
                 fig.show()
-                fig.savefig('./Figures/ConeRF.png')
+                fig.savefig('../../Figures/ConeRF.png')
                 plt.close()
             else:
                 plt.show()
@@ -411,7 +413,7 @@ class SchematicEyeAnalysis(Images):
             
             if save_plots:
                 fig2.show()
-                fig2.savefig('./Figures/ConeRF_FFT.png')
+                fig2.savefig('../../Figures/ConeRF_FFT.png')
                 plt.close()
             else:
                 plt.show()
@@ -427,7 +429,7 @@ class SchematicEyeAnalysis(Images):
         
         :returns: two plots.
         
-        .. figure:: ../SchematicEye/OSLO/Figures/RecField_JAY.png
+        .. figure:: ../../Figures/RecField_JAY.png
            :height: 300px
            :width: 400px
            :align: center
@@ -436,7 +438,7 @@ class SchematicEyeAnalysis(Images):
            (blue = 1 cpd, green = 5 cpd and red = 10 cpd)
 
 
-        .. figure:: ../SchematicEye/OSLO/Figures/FFT_JAY.png
+        .. figure:: ../../Figures/FFT_JAY.png
            :height: 300px
            :width: 400px
            :align: center
@@ -494,7 +496,7 @@ class SchematicEyeAnalysis(Images):
     
             if save_plots:
                 fig.show()
-                fig.savefig('./Figures/RecField_JAY.png')
+                fig.savefig('../../Figures/RecField_JAY.png')
                 plt.close()
             else:
                 plt.show()
@@ -523,7 +525,7 @@ class SchematicEyeAnalysis(Images):
     
             if save_plots:
                 fig2.show()
-                fig2.savefig('./Figures/FFT_JAY.png')
+                fig2.savefig('../../Figures/FFT_JAY.png')
                 plt.close()
             else:
                 plt.show()
@@ -537,7 +539,7 @@ class SchematicEyeAnalysis(Images):
         
         **This function produces:**
         
-        .. figure:: ../SchematicEye/OSLO/FIgures/ampSpec.png
+        .. figure:: ../../Figures/ampSpec.png
            :height: 300px
            :width: 400px
            :align: center  
@@ -569,7 +571,7 @@ class SchematicEyeAnalysis(Images):
         
         if save_plots:
             fig.show()
-            fig.savefig('./Figures/ampSpec.png')
+            fig.savefig('../../Figures/ampSpec.png')
             plt.close()
         else:
             plt.show()
@@ -595,7 +597,7 @@ class SchematicEyeAnalysis(Images):
         
         **This produces:**
         
-        .. figure:: ../SchematicEye/OSLO/Figures/MTFfamily.png
+        .. figure:: ../../Figures/MTFfamily.png
            :height: 300px
            :width: 400px
            :align: center        
@@ -654,9 +656,9 @@ class SchematicEyeAnalysis(Images):
         if save_plots:
             fig.show()
             if plot_option == 1:
-                fig.savefig('./Figures/MTFfamilyOnAxis.png')
+                fig.savefig('../../Figures/MTFfamilyOnAxis.png')
             if plot_option == 2:
-                fig.savefig('./Figures/MTFfamily.png')
+                fig.savefig('../../Figures/MTFfamily.png')
             plt.close()
         else:
             plt.show()
@@ -685,7 +687,7 @@ class SchematicEyeAnalysis(Images):
         
         if save_plots:
             fig2.show()
-            fig2.savefig('./Figures/Legend.png')
+            fig2.savefig('../../Figures/Legend.png')
             plt.close()
         else:
             plt.show()
@@ -708,7 +710,7 @@ class SchematicEyeAnalysis(Images):
                   field included as well.  This is the final plot in this series.
         :rtype: plt.plot
 
-        .. note:: 
+        .. note:: ../../Figures/
            Eventually would like to introduce a heuristic to determine the 
            location of the power law text that is plotted. Currently hard coded.
            
@@ -716,14 +718,14 @@ class SchematicEyeAnalysis(Images):
         
         **This function plots estimates of the photoreceptor activity**
         
-        .. figure:: ../SchematicEye/OSLO/FIgures/MTFfamilyMod.png
+        .. figure:: ../../Figures/MTFfamilyMod.png
            :height: 300px
            :width: 400px
            :align: center    
            
            **Fig 1:** Amplitude * MTF
         
-        .. figure:: ../SchematicEye/OSLO/FIgures/MTFfamilyModAmp.png
+        .. figure:: ../../Figures/MTFfamilyModAmp.png
            :height: 300px
            :width: 400px
            :align: center  
@@ -855,9 +857,9 @@ class SchematicEyeAnalysis(Images):
        
         if save_plots:
             if Receptive_Field.lower() == 'jay':
-                save_name = './Figures/MTFfamilyModAmpJAY.png'
+                save_name = '../../Figures/MTFfamilyModAmpJAY.png'
             else:
-                save_name = './Figures/MTFfamilyModAmp.png'
+                save_name = '../../Figures/MTFfamilyModAmp.png'
             
             fig2.show()
             fig2.savefig(save_name)     

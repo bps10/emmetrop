@@ -1,5 +1,5 @@
-Database submodule
-=======================
+Database
+==========
 
-.. automodule:: Database
+.. automodule:: database.Database
    :members:

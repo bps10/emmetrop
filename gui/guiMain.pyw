@@ -4,26 +4,23 @@ Created on Fri Oct 26 13:30:48 2012
 
 @author: Brian
 """
-# PyQt4 imports
-from PyQt4.QtGui import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
+# guidata imports
+from guidata.qt.QtGui import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
                               QMainWindow, QLineEdit, QTreeWidget, QTreeWidgetItem, 
                               QCheckBox, QSpacerItem, QLabel, QFont, QDockWidget,
                               QMessageBox, QGroupBox, QDialog, QComboBox,
-                              QFileDialog, QTabWidget, QTabBar)
-from PyQt4.QtCore import (SIGNAL, Qt, QRect, pyqtSignal, QObject)
-
-# guidata imports
+                              QFileDialog)
+from guidata.qt.QtCore import (SIGNAL, Qt, QRect)
 from guidata.qthelpers import create_action, add_actions, get_std_icon
 
 # user defined imports
-import Database as Db
-import Preprocessing as pp
-from ProgressBar import BusyBar
+from database import Database as Db
+from gui import Preprocessing as pp
+from gui import ProgressBar as BusyBar
 
-# general imports
+# general
 import numpy as np
 import os
-import datetime as dt
 
 #---Import plot widget base class
 from guiqwt.curve import CurvePlot
@@ -40,8 +37,13 @@ class FilterTestWidget(QWidget):
     parent: parent widget (QWidget)
     x, y: NumPy arrays
     func: function object (the signal filter to be tested)
+    
+    .. todo::
+       Write documentation!
     """
     def __init__(self, parent):
+        """
+        """
         QWidget.__init__(self, parent)
         
         self.data = Dbase(DBaseName = None)
@@ -55,6 +57,8 @@ class FilterTestWidget(QWidget):
         #---
         
     def setup_widget(self, title):
+        """
+        """
         #---Create the plot widget:
         self.plot = CurvePlot(self)
         self.curve_item = (make.curve([], [], color='b'))
@@ -69,7 +73,6 @@ class FilterTestWidget(QWidget):
         spacer = QSpacerItem(30,40)
         
         preprocessData = QGroupBox(u"preprocess data")
-        
         # create buttons
         listButton = QPushButton(u"Refresh list")
         processButton = QPushButton(u"       run preprocessing       ")
@@ -85,8 +88,9 @@ class FilterTestWidget(QWidget):
 
         # connect user actions with methods:
         self.connect(listButton, SIGNAL('clicked()'), self.but_clicked)
+        #self.connect(queryButton, SIGNAL('clicked()'), self.query_database)
         self.connect(processButton, SIGNAL('clicked()'), self.run_preprocess)
-        self.connect(self.databaseScroll.TreeWid, SIGNAL("doubleClicked(QModelIndex)"), 
+        self.connect(self.databaseScroll, SIGNAL("doubleClicked(QModelIndex)"), 
                      self.double_clicked)
         self.connect(addwaveletButton, SIGNAL('clicked()'), self.add_data_to_DBase)
         
@@ -94,7 +98,7 @@ class FilterTestWidget(QWidget):
         hlayout = QHBoxLayout()
 
         
-        vlayout.addWidget(self.databaseScroll.TabWid)
+        vlayout.addWidget(self.databaseScroll)
         vlayout.addWidget(listButton)
 
         vlayout.addWidget(self.plot)
@@ -116,7 +120,8 @@ class FilterTestWidget(QWidget):
 
                                              
     def run_preprocess(self):
-        
+        """
+        """        
         if self.wavelet.isChecked():
             try:
                 yData = self.y1Data
@@ -151,24 +156,22 @@ class FilterTestWidget(QWidget):
 
 
     def add_data_to_DBase(self):
+        """
+        """
         self.checkAddData.setText("Are you sure you want to add filtered spikes (green trace) to the DB?")
         self.checkAddData.setInformativeText("This will overwrite the existing spike data.")
         self.checkAddData.setStandardButtons(QMessageBox.Yes | QMessageBox.No )
         self.checkAddData.setDefaultButton(QMessageBox.Yes)
         choice = self.checkAddData.exec_() == QMessageBox.Yes
         if choice:
-            tim = dt.datetime.utcnow().ctime()
-            
+
             self.data = Dbase(self.spikeOverwriteLoc[0], PRINT = 1)
             self.data.Data.RemoveChild(self.spikeOverwriteLoc[1], option=1)
             self.data.Data.AddData2Database('spikes', self.spikes,
                                             self.spikeOverwriteLoc[2])
             self.data.Data.AddGitVersion(self.spikeOverwriteLoc[3],
                                          Action = 'updated_{0}'.format(
-                                         self.spikeOverwriteLoc[4] + 
-                                         str(tim.day) + '_' +
-                                         str(tim.month) + '_' +
-                                         str(tim.year) ))
+                                         self.spikeOverwriteLoc[4]))
                                          
             self.data.Data.CloseDatabase(PRINT=1)
             
@@ -177,6 +180,8 @@ class FilterTestWidget(QWidget):
 
     
     def update_curve(self):
+        """
+        """
         #---Update curve
         
         self.curve_item.set_data(self.xData, self.y1Data)
@@ -195,19 +200,18 @@ class FilterTestWidget(QWidget):
         when a name button is clicked, iterate over the model, 
         find the neuron with this name, and set the treeviews current item
         '''
-        print 'here'
-        index = self.databaseScroll.TabWid.GetCurrentTab()
-        print index
+        
+        index = self.databaseScroll.currentIndex()
+
         if index.column() == 2:
             root = index.parent().parent().row()
             neuron = index.parent().row()
             epoch = index.row()
-            print root, neuron, epoch
+
             r = self.databaseScroll.DataBasesOpen[root]
             self.data = Dbase(r, PRINT = 1)
             
-            neurons = self.data.GetTree()         
-            n = neurons[neuron]
+            n = self.databaseScroll.neuronName[neuron]
                 
             epochs = self.data.GetTree(n)
             e = epochs[epoch]
@@ -242,9 +246,8 @@ class FilterTestWidget(QWidget):
                 r = self.databaseScroll.DataBasesOpen[root]
                 self.data = Dbase(r, PRINT = 1)
                 
-                neurons = self.data.GetTree()
-                n = neurons[neuron]
-                
+                n = self.databaseScroll.neuronName[neuron]
+
                 epochs = self.data.GetTree(n)
                 e = epochs[epoch]
                 
@@ -290,8 +293,7 @@ class FilterTestWidget(QWidget):
 
             r = self.databaseScroll.DataBasesOpen[root]
             self.data = Dbase(r, PRINT = 1)           
-            neurons = self.data.GetTree()
-            n = neurons[neuron]
+            n = self.databaseScroll.neuronName[neuron]
             
             epochs = self.data.GetTree(n)
             e = epochs[epoch]
@@ -304,28 +306,37 @@ class FilterTestWidget(QWidget):
             print p, ': ', query
             self.data.Data.CloseDatabase(PRINT=1)
             
-
-class treeList(QTreeWidget):
+            
+class databaseListModel(QTreeWidget):
+    """
+    """
+        
     def __init__(self, DBaseName = None):
+        """
+        """
+        
         QTreeWidget.__init__(self)
         self.DataBasesOpen = []
         self.DataBasesOpenPath = []
         
-        header = QTreeWidgetItem(["Neuron","Epoch","Data", 
+        header = QTreeWidgetItem(["Database","Neuron","Epoch","Data", 
                                   "Parameters"])
         self.setHeaderItem(header)   
 
         self.constructTree(DBname = DBaseName)
     
     def constructTree(self, DBname):   
+        """
+        """
+        
         if DBname == None:
-            pass
+            root = QTreeWidgetItem(self)
         
         else:
+            root = QTreeWidgetItem(self)
+            root.setText(0, DBname[:-3])
             
-            self.busyBar = BusyBar( text = "Updating tree" ) 
-            self.busyBar.changeValue.connect(self.busyBar.proBar.setValue, 
-                                             Qt.QueuedConnection)
+            self.busyBar = BusyBar( text = "Updating tree" )
             self.busyBar.start()
             
             self.neuronName = []
@@ -335,10 +346,10 @@ class treeList(QTreeWidget):
             
             self.Db = Dbase(DBname)
             top = self.Db.GetTree()      
-            for countNeuron,neuron in enumerate(top):
-
-                neurons = QTreeWidgetItem(self) 
-                neurons.setText(0, neuron)
+            for countNeuro,neuron in enumerate(top):
+                
+                neurons = QTreeWidgetItem(root) 
+                neurons.setText(1, neuron)
                 
                 self.neuronName.append(neuron)
     
@@ -346,13 +357,13 @@ class treeList(QTreeWidget):
                 for countEpoch, epoch in enumerate(neuronTree):
                     
                     singleEpoch = QTreeWidgetItem(neurons) 
-                    singleEpoch.setText(1, epoch)
+                    singleEpoch.setText(2, epoch)
                     
                     
                     epochTree = self.Db.GetTree( neuron + '.' + epoch)
                     for countData,data in enumerate(epochTree):
                         singleData = QTreeWidgetItem(singleEpoch) 
-                        singleData.setText(2, data)
+                        singleData.setText(3, data)
                         
                         if countEpoch == 1:
                             self.dataName.append(data)
@@ -361,7 +372,7 @@ class treeList(QTreeWidget):
                             paramTree = self.Db.GetTree( neuron + '.' + epoch + '.' + data)
                             for countParam,param in enumerate(paramTree):
                                 singleParam = QTreeWidgetItem(singleData)
-                                singleParam.setText(3, param)
+                                singleParam.setText(4, param)
                                 
                                 if countEpoch == 1:
                                     self.paramName.append(param)
@@ -371,9 +382,15 @@ class treeList(QTreeWidget):
             #QTimer.singleShot(10000, self.busyBar.Kill)
             
     def stopBar(self):
+        """
+        """
+        
         self.busyBar.Kill()   
         
     def refreshTree(self): 
+        """
+        """
+        
         self.clear()
         for DB in self.DataBasesOpen:
             self.constructTree(DB)        
@@ -381,18 +398,30 @@ class treeList(QTreeWidget):
 
         
     def AppendDatabasesOpen(self, DBname):
+        """
+        """
+        
         self.DataBasesOpenPath.append(DBname)
         self.DataBasesOpen.append(os.path.basename(DBname))
+        print 'databases open: ', self.DataBasesOpen   
     
     def CloseDatabase(self, DBname):
-
-        self.DataBasesOpen.remove(DBname)
+        """
+        """
+        
+        self.DataBasesOpen.remove(DBname )
         #self.DataBasesOpenPath.remove(endswith(DBname + '.h5'))        
         
     def GetOpenDatabases(self):
+        """
+        """
+        
         return self.DataBasesOpen
 
     def isOpen(self, DBname):
+        """
+        """
+        
         truth = False
         for DB in self.DataBasesOpen:
             if DB == DBname:
@@ -402,86 +431,14 @@ class treeList(QTreeWidget):
                 pass
         return truth
 
-            
-class databaseListModel(QWidget):
-    def __init__(self, DBaseName = None):
-        QWidget.__init__(self)
-        self.TabWid = QTabWidget(self)
-        self.here = treeList(DBaseName)
-        self.TabWid.addTab(self.here, 'Empty')
-        
-        self.TreeWid = self.TabWid.children()[0].currentWidget()
-        print self.TreeWid
-        #for name in dir(self.TreeWid):
-            #print name
-        
-        self.DataBasesOpen = []
-        self.DataBasesOpenPath = []
-        self.TabWid.setTabsClosable(True)
-        self.TabWid.currTab = self.GetCurrentTab()
-
-        self.connect(self.TreeWid, SIGNAL("doubleClicked(QModelIndex)"),
-                     self.dud)
-        self.connect(self.TabWid, SIGNAL("currentChanged(int)"),
-                     self.switchTab)
-        self.connect(self.TabWid, SIGNAL("tabCloseRequested(int)"),
-                     self.closeTab)
-
-    def dud(self):
-        print 'here idiot'
-        
-    def switchTab(self, index):
-        print 'switching tabs!'
-        print index
-        print self.DataBasesOpen[index]
-        self.TreeWid = self.TabWid.children()[0].currentWidget()
-        #self.here = treeList(self.DataBasesOpen[index])
-        
-    def closeTab(self, index):
-        print index
-        print self.DataBasesOpen[index]
-        self.TabWid.removeTab(index)
-        self.TreeWid = self.TabWid.children()[0].currentWidget()
-        self.CloseDatabase(self.DataBasesOpen[index])
-        self.here = treeList(self.DataBasesOpen[index])
-        
-    def onTabClick(self, index):
-        print 'woohoo!'
-        
-    def GetCurrentTab(self):
-        return self.TabWid.currentIndex()
-        
-    def OpenDatabases(self, DBaseName):
-
-        
-        if self.TabWid.children()[1].tabText(0) == 'Empty':
-            self.TabWid.removeTab(0)
-        self.here = treeList(DBaseName)
-        self.TabWid.addTab(self.here, os.path.basename(DBaseName)[:-3])
-        self.TreeWid = self.TabWid.children()[0].currentWidget()
-        
-        print self.TreeWid.neuronName[0]  
-        
-    def AppendDatabasesOpen(self, DBaseName):
-        self.DataBasesOpenPath.append(DBaseName)
-        self.DataBasesOpen.append(os.path.basename(DBaseName))        
-
-    def refreshTree(self): 
-        
-        self.TreeWid = self.TabWid.children()[0].currentWidget()
-        self.TreeWid.refreshTree()
-        self.TabWid.update()
-
-    def CloseDatabase(self, DBname):
-        self.here.clear()
-        self.DataBasesOpen.remove(DBname)
-        #self.DataBasesOpenPath.remove(endswith(DBname + '.h5'))   
-        self.TabWid.update()
-
-
         
 class Dbase():
+    """
+    """
+        
     def __init__(self, DBaseName, PRINT = 0):
+        """
+        """
         
         self.Data = Db.Database()
         
@@ -494,18 +451,25 @@ class Dbase():
                     DBaseName = DBaseName[:-3]
                 
                 if PRINT == 0:
-                    print '{0} database created.'.format(DBaseName + '.h5')
+                    print 'here creating {0} database.'.format(DBaseName + '.h5')
                     
                 self.Data.CreateDatabase(DBaseName)    
         
     def Query(self, NeuronName = 'Oct0212Bc8', Epoch = 'epoch040', DataName = 'rawData'):
+        """
+        """
+        
         return self.Data.QueryDatabase( NeuronName, Epoch, DataName)
         
     def AddData(self, NeuronName, Directory):
+        """
+        """
         
         self.Data.ImportAllData(NeuronName, Directory, progBar = 0)   
 
     def GetTree(self, NeuronName = None):
+        """
+        """
         
         if NeuronName == None:
             tree = self.Data.GetChildList()
@@ -519,7 +483,12 @@ class Dbase():
     
     
 class Window(QMainWindow):
+    """
+    """
+        
     def __init__(self):
+        """
+        """
         QMainWindow.__init__(self)
         self.setWindowTitle("Neuron Database")
         self.setWindowIcon(get_icon('guiqwt.png'))
@@ -561,6 +530,7 @@ class Window(QMainWindow):
         
         # Edit menu
 
+
         edit_menu = self.menuBar().addMenu("Edit")
         editparam1_action = create_action(self, "Import dataset",
                                           shortcut ="Ctrl+A",
@@ -597,6 +567,9 @@ class Window(QMainWindow):
         
             
     def add_plot(self, title):
+        """
+        """
+        
         self.widget = FilterTestWidget(self)
         self.widget.setup_widget(title)
         self.centralWidget().layout().addWidget(self.widget)
@@ -606,6 +579,9 @@ class Window(QMainWindow):
 
         
     def setup_window(self):
+        """
+        """
+        
         #---Add toolbar and register manager tools
         toolbar = self.addToolBar("tools")
         self.manager.add_toolbar(toolbar, id(toolbar))
@@ -613,15 +589,24 @@ class Window(QMainWindow):
         #---
         
     def closeEvent(self, event):
+        """
+        """
+        
         self.console.exit_interpreter()
         event.accept()       
 
     def findOpenDBases(self):
+        """
+        """
+        
         return self.widget.databaseScroll.DataBasesOpen
         
     ### popup actions: 
         
     def add_newData(self):
+        """
+        """
+        
         DBname = Popup(self.findOpenDBases(), 
                        textMessage = "add data to a database:",
                        style = 4)
@@ -645,6 +630,9 @@ class Window(QMainWindow):
                 
 
     def open_Database(self):
+        """
+        """
+        
         DBname = Popup(self.findOpenDBases(), 
                        textMessage = "select database to open",
                        style = 3)
@@ -654,15 +642,16 @@ class Window(QMainWindow):
             
             loadedDBname = DBname.selection
             self.widget.databaseScroll.AppendDatabasesOpen(loadedDBname)
-            self.widget.databaseScroll.OpenDatabases(loadedDBname)
-            #self.widget.databaseScroll.refreshTree()
-            #print '{0} database opened.'.format(loadedDBname)
+            self.widget.databaseScroll.refreshTree()
+            print '{0} database opened.'.format(loadedDBname)
             
         else:
             pass
          
                 
     def create_Database(self):
+        """
+        """
         DBname = Popup(self.findOpenDBases(), 
                        textMessage = "enter name of new database",
                        style = 2)
@@ -679,6 +668,9 @@ class Window(QMainWindow):
             
         
     def delete_Neuron(self):
+        """
+        """
+        
         DBname = Popup(self.findOpenDBases(), 
                        textMessage = "enter name of neuron to delete",
                        style = 1)
@@ -704,6 +696,9 @@ class Window(QMainWindow):
          
          
     def close_Database(self):
+        """
+        """
+        
         DBname = Popup(self.findOpenDBases(), 
                        textMessage = "select database to close",
                        style = 0)
@@ -719,7 +714,13 @@ class Window(QMainWindow):
 
 
 class Popup(QDialog):
+    """
+    """
+    
     def __init__(self, openDB, textMessage = " ", style = 0):
+        """
+        """
+        
         QDialog.__init__(self)
         self.style = style
         
@@ -805,7 +806,14 @@ class Popup(QDialog):
             self.name.addItems(openDB)
             label2 = QLabel('database :')
             
-
+            '''
+            h0layout = QHBoxLayout()
+            h0layout.addWidget(label)
+            h0layout.addWidget(self.name)
+            vlayout.addLayout(h0layout)                
+            
+            vlayout.addWidget(self.name)            
+            '''
             enterbutton = QPushButton("Enter")
             cancelbutton = QPushButton("Cancel")
             
@@ -814,7 +822,13 @@ class Popup(QDialog):
             self.dirName.setFileMode(QFileDialog.Directory)
             self.dirName.setOptions(QFileDialog.ShowDirsOnly)
             
-
+            """
+            for child in self.dirName.isWidgetType()():
+                if child.objectName() == "qt_new_folder_action":
+                    print 'here'
+                    pass
+                    #self.dirName.removeAction(child)
+            """
             fileLayout = self.dirName.layout()
             
             items = (fileLayout.itemAt(i) for i in range(fileLayout.count())) 
@@ -850,6 +864,9 @@ class Popup(QDialog):
 
             
     def returnSelection(self):
+        """
+        """
+        
         if self.style == 0:
             self.selection = self.openDB[self.name.currentIndex()]
 
@@ -874,6 +891,9 @@ class Popup(QDialog):
             self.close()    
 
     def closePopup(self):
+        """
+        """
+        
         self.selection = None
         
         if self.style == 4:
@@ -883,7 +903,11 @@ class Popup(QDialog):
             self.close()
         
 def main():
-    """Testing this simple Qt/guiqwt example"""
+    """
+    
+    Testing this simple Qt/guiqwt example
+    
+    """
     
     from guidata.qt.QtGui import QApplication
     

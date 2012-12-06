@@ -3,8 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Brian P. Schmidt's Neitz Lab documentation site:
+eschaton documentation site:
 =================================================
+
+an emmetropization model
 
 Documentation of source code can be found here:
 
@@ -12,9 +14,12 @@ Documentation of source code can be found here:
    :maxdepth: 2
 
    Install.rst
-   ConeActivity.rst
-   Database.rst
-   Neitz-Lab.rst
+   analysis.rst
+   database.rst
+   eye.rst
+   scene.rst
+   gui.rst
+   
    
 Notes, links, errata, and to do's can be found here:
 
@@ -41,4 +46,4 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-.. _GitHub: https://github.com/bps10
+.. _GitHub: https://github.com/bps10/eschaton

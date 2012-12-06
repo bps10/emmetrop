@@ -462,7 +462,7 @@ void Eye::SpotPlot(int option = 1)
             Io::RendererSvg     renderer("spot.svg",        300 * 1, 300 * number, Io::rgb_black);   
             
             sys->get_tracer_params().set_default_distribution(
-                                                Trace::Distribution(Trace::HexaPolarDist, 200)); 
+                                                Trace::Distribution(Trace::RandomDist, 200)); 
             renderer.set_margin_ratio(0.1, 0.1, 0.1, 0.1);
             renderer.set_page_layout(1, number);
             
@@ -509,7 +509,7 @@ void Eye::SpotPlot(int option = 1)
                 renderer1.set_page(i);
                 renderer2.set_page(i);
                 sys->get_tracer_params().set_default_distribution(
-                                            Trace::Distribution(Trace::HexaPolarDist, 500)); 
+                                            Trace::Distribution(Trace::RandomDist, 500)); 
                 
                 
                 Analysis::Spot spot1(*sys);

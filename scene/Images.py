@@ -54,8 +54,8 @@ class Images(object):
          
         :param Directory: list of directories of images to analyze.
         :type Directory: list
-        :param GroupName: name of groups in directory list. If None a name 
-        is approximated based on directory paths
+        :param GroupName: name of groups in directory list. If None a name \
+                            is approximated based on directory paths
         :type GroupName: str
         
         :returns: Amplitude spectrum

@@ -14,9 +14,8 @@ from guidata.qt.QtCore import (SIGNAL, Qt, QRect)
 from guidata.qthelpers import create_action, add_actions, get_std_icon
 
 # user defined imports
-import Database as Db
-import Preprocessing as pp
-from ProgressBar import BusyBar
+from database import Database as Db
+
 
 # general
 import numpy as np

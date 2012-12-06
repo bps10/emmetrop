@@ -35,7 +35,3 @@ def NavarroParams():
     print 'anterior lens aspher : ', anterior_lens_asphericity
     print 'posterior lens aspher: ', posterior_lens_asphericity
 
-if __name__ == "__main__":
-    
-    NavarroParams()
-    
