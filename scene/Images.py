@@ -1,12 +1,13 @@
 import numpy as np
 from matplotlib.pylab import imread
-from scipy import optimize
 from scipy import io as sio
+from scipy import optimize
 import os
 
+from scene import SignalProcessing as sig
 from scene import DataManip as dm
 from database import Database as db
-from analysis import Information as info
+
 
 class Images(object):
     
@@ -41,7 +42,7 @@ class Images(object):
         except db.DatabaseError:
             self.Dbase.CreateDatabase('ImageDatabase')
             
-        self.amp = None
+        self.amp_mean = None
         self.getData()
         
     def getData(self, Directory = ['C:/Data/UPenn_Images/Images/cd01a',
@@ -70,7 +71,7 @@ class Images(object):
 
 
         """
-        amp_Specs = []        
+        self.ampSpecs = []        
         for group in Directory:
             GroupName = group[-5:]
             print 'GroupName: ', GroupName
@@ -151,7 +152,7 @@ class Images(object):
                                                             name + '.' 'Image', 
                                                             'grayscale')
                         
-                    amplitude = self.welch2d(imgBW[500:2000, 500:2000]) 
+                    amplitude = sig.welch2d(imgBW[500:2000, 500:2000]) 
                     self.Dbase.AddData2Database('raw_amplitude', amplitude, 
                                                    GroupName + '.' + name 
                                                    + '.' + 'amplitude')
@@ -170,13 +171,13 @@ class Images(object):
                                                    + 'amplitude')
                                                    
                     if goodFile != False or goodFile != 'F': 
-                        amp_Specs.append(amplitude)
+                        self.amp_Specs.append(amplitude)
                     else:
                         pass
                 # if already exists, query database to get amplitude spectrums here:
                 else:
                     if goodFile:
-                        amp_Specs.append(self.Dbase.QueryDatabase(GroupName, 
+                        self.ampSpecs.append(self.Dbase.QueryDatabase(GroupName, 
                                                               name + '.' + 'amplitude', 
                                                               'amplitude_density'))
                     else:
@@ -185,11 +186,11 @@ class Images(object):
             self.Dbase.file.flush()
         self.Dbase.CloseDatabase()
     
-        self.amp = np.zeros((amp_Specs[0].shape))
-        total_images = len(amp_Specs)
+        self.amp_mean = np.zeros((self.ampSpecs[0].shape))
+        total_images = len(self.ampSpecs)
         print 'number of images: ', total_images
-        for amp in amp_Specs:
-            self.amp += amp / total_images
+        for amp in self.ampSpecs:
+            self.amp_mean += amp / total_images
 
 
     def computeImageHist(self,img):
@@ -237,178 +238,8 @@ class Images(object):
             goodFile = True
 
         return goodFile
-    
-    
-    def estimateInfo(self):
-        """Estimate the information in a simple linear cone receptive field.
-        
-        This function is under development. It will be called by getData 
-        function.
 
-        """ 
-        information = {}
-        information['cone'] = info.ConeInfoFunc()
-        information['array'] = info.ArrayInfoFunc()
-        information['optPercent'] = info.OptPercentX()
-        print information           
-        pass
-    
-    
-    def Density(self, dat):
-        """Compute the density of a power spectrum.
-        
-        :param dat: data to normalize.
-        :type dat: np.array
-        
-        :returns: normalized data.
-        
-        .. note::
-           Currently very simply data / sum(data)
-        """
-    
-        return dat / np.sum(dat)
-    
-    
-    def PowerSpectrum2(self, im,win=2,n1=1,n2=0):
-        """2D spectrum estimation using the modified periodogram.
-        This one includes a window function to decrease variance in \
-        the estimate.
-        
-        :param x: input sequence
-        :type x: numpy.array
-        :param n1: starting index, x(n1)
-        :type n1: int
-        :param n2: ending index, x(n2)
-        :type n2: int
-        :param win: The window type \n
-                    1 = Rectangular \n
-                    2 = Hamming \n
-                    3 = Hanning \n
-                    4 = Bartlett \n
-                    5 = Blackman \n
-        :type win: int
-        
-        :returns: spectrum estimate.
-        :rtype: numpy.array
-                
-        .. note:: 
-           If n1 and n2 are not specified the periodogram of the entire 
-           sequence is computed.
-        
-        """
-        
-        if n2 == 0:
-            n2 = len(im[:,1])
-        
-        N  = n2 - n1 + 1
-        w  = np.ones((N))
-        
-        if (win == 2):
-            w = np.hamming(N)
-        elif (win == 3):
-            w = np.hanning(N)
-        elif (win == 4):
-            w = np.bartlett(N)
-        elif (win == 5): 
-            w = np.blackman(N);
-        
-        
-        
-        xs, ys = im.shape
-        if xs/ys != 1:
-            raise ValueError('Dimensions must be equal')
-        
-        
-        m = w[:] * w[:][np.newaxis,:]
-        
-        U  = np.linalg.norm(w)**2.0 / N**2.0
-        
-        fftim = np.abs(np.fft.fftshift(np.fft.fft2(((im) * m)))) / ( (N**2.0) * U)
-        
-        return fftim
-    
-    
-    
-    def welch2d(self, x,L = None, over = 0.5, win = 2.0):
-        """2D spectrum estimation using Welch's method.
-        The spectrum of a process x is estimated using Welch's \
-        method of averaging modified periodograms.
-        
-        :param x: input sequence
-        :param L: section length
-        :param over: amount of overlap, where 0<over<1,
-        :param win: The window type \n
-                        1 = Rectangular \n
-                        2 = Hamming \n
-                        3 = Hanning \n
-                        4 = Bartlett \n
-                        5 = Blackman \n
-        
-        
-        :returns: Welch's estimate of the power spectrum, returned in decibels. 
-        
-        .. note:: 
-           Modified from: M.H. Hayes. \
-           "Statistical Digital Signal Processing and Modeling" \
-           (John Wiley & Sons, 1996).
-            
-        """
-        
-        xs, ys = x.shape
-        
-        if L == None:
-            L = xs
-        
-        
-        if xs / ys != 1.0:
-            raise ValueError('This is a stupid program. Dimensions need to be \
-            equal (len(x)=len(y))')
-        
-        
-        
-        if L < len(x[:,0]) / 2.0:
-            raise ValueError('Length must be longer than 1/2 length of x')
-        
-        
-        if (over >= 1) or (over < 0):
-            raise ValueError('Overlap is invalid')
-        
-        
-        n0 = (1.0 - over) * L
-        n1 = np.array([1.0, 1.0]) - n0
-        n2 = np.array([L, L]) - n0
-        nsect = int(1.0 + np.floor((len(x) - L) /( n0)))
-        
-        Px = 0
-        for ix in range(0,nsect):
-            n1[0] = n1[0] + n0
-            n2[0] = n2[0] + n0
-            for iy in range(0,nsect):
-                n1[1] = n1[1] + n0
-                n2[1] = n2[1] + n0
-                Px += self.PowerSpectrum2(x[ n1[0]:n2[0],n1[1]:n2[1] ],
-                                          win) / (nsect**2)
-        
-        xs, ys = Px.shape
-        
-        f2 = np.arange(-xs / 2.0, xs / 2.0)
-        f1 = np.arange(-ys / 2.0, ys / 2.0)
-        XX, YY = np.meshgrid(f1,f2)
-        foo, r = dm.cart2pol(XX,YY)
-        if np.mod(xs,2)==1 or np.mod(ys,2)==1:
-            r = np.around(r)-1
-        else:
-            r = np.around(r)
-        
-        r = np.array(r,dtype=int)
-        ### need to possibly use a for loop.
-        avg = dm.accum(r.flatten() + 1, Px.flatten()
-                        )[1:] / dm.accum(r.flatten() + 1)[1:]
-        avg = avg[:(xs / 2 + 1)]
-        
-        
-        return avg
-    
+
     
     def PowerLaw(self, xdata, ydata):
         """Create an array according to a power law for plotting.
@@ -451,26 +282,7 @@ class Images(object):
         
         index = pfinal[1]
         amp = 10.0**pfinal[0]
-        
         self.powerlaw = lambda x,: amp * (x**index)
     
-    
-    def rgb2gray(self, rgb):
-        """Convert an image from rbg into gray scale.
-        
-        :param rgb: RGB image to be converted.
-        
-        :returns: Grayscale image of the same size as RGB input image.
-        
-        *Stole this one from stackoverflow.*
-        
-        Formula used in conversion:
-        .. math::
-           0.2999*R_{channel} + 0.587*G_{channel} + 0.114*B_{channel}
-            
-        """
-        
-        r, g, b = np.rollaxis(rgb[...,:3], axis = -1)
-        return 0.299 * r + 0.587 * g + 0.114 * b
-
+ 
 

@@ -3,9 +3,10 @@ import matplotlib.pylab as plt
 from scipy import interpolate
 import shlex
 import os
+
 from scene.Images import Images
 from analysis import PlottingFun as pf
-
+from analysis import Information as info
 
 class SchematicEyeAnalysis(Images):
     """This class is designed to estimate the response of a linear photoreceptor 
@@ -55,7 +56,8 @@ class SchematicEyeAnalysis(Images):
         self.SixteenFocus_SixteenObj_Offaxis = self.importOSLOfile(p + 'OFFaxisMTF16inFocus16inObjNavarrow1999.txt')        
         self.SixteenFocus_TwentyObj_Offaxis = self.importOSLOfile(p + 'OFFaxisMTF16inFocus20ftObjNavarrow1999.txt')
     
-        self.xval = self.INF[:,1] / 2.38732415 ## convert mm to deg (1mm image/24mm axial length)
+        ## convert mm to deg (1mm image/24mm axial length)
+        self.xval = self.INF[:,1] / 2.38732415 
         
         Images.__init__(self)
         
@@ -151,9 +153,9 @@ class SchematicEyeAnalysis(Images):
             raise('Run {0} receptive field function'.format(Receptive_Field))
             
         
-        imagexval = np.arange(1,self.amp.shape[0] + 1) / 46.0
+        imagexval = np.arange(1,self.amp_mean.shape[0] + 1) / 46.0
         if not self.powerlaw:
-            self.PowerLaw(imagexval, self.amp)
+            self.PowerLaw(imagexval, self.amp_mean)
             
         powerlaw = self.powerlaw(self.xval[1:])
 
@@ -190,7 +192,7 @@ class SchematicEyeAnalysis(Images):
         self.UnderAccommFarObject['xval'] = self.xval[1:8]
         
         self.TotalActivity()
-        
+        self.estimateInfo(Receptive_Field)
 
                   
     def TotalActivity(self):
@@ -211,6 +213,7 @@ class SchematicEyeAnalysis(Images):
         self.NearFocusFarObject['total'] = np.sum(self.NearFocusFarObject['yval'])
         self.UnderAccommFarObject['total'] = np.sum(self.UnderAccommFarObject['yval'])
 
+
         self.Infinity['percent'] = (self.Infinity['total'] / 
                                         self.DiffractionLim['total'])
         self.NearFocusFarObject['percent'] = (self.NearFocusFarObject['total'] / 
@@ -219,13 +222,77 @@ class SchematicEyeAnalysis(Images):
                                                 self.DiffractionLim['total'] )
         self.UnderAccommFarObject['percent'] = (self.UnderAccommFarObject['total'] /
                                                 self.DiffractionLim['total'] )
-        
+
+        print ' '
+        print 'Total activity (proportion of diffraction)'
+        print '-------------------------------------------'
         print self.Infinity['name'], ': ', self.Infinity['percent']
         print self.NearFocusFarObject['name'], ': ', self.NearFocusFarObject['percent']
         print self.NearFocusNearObject['name'], ': ', self.NearFocusNearObject['percent']
         print self.UnderAccommFarObject['name'], ': ', self.UnderAccommFarObject['percent']
+
         
-    
+    def estimateInfo(self, Receptive_Field):
+        """Estimate the information in a simple linear cone receptive field.
+        
+        This function is under development. It will be called by 
+        ComputeConeActivity() function.
+
+        """ 
+        if Receptive_Field == None:
+            raise('Run {0} receptive field function'.format(Receptive_Field))
+                    
+        #imagexval = np.arange(1,self.amp_mean.shape[0] + 1) / 46.0
+        
+        #RField = interpolate.splev(imagexval, Receptive_Field, der = 0)
+        RField = interpolate.splev(self.xval[1:], Receptive_Field, der = 0)
+        RField = RField / sum(RField)
+
+        cones = [1,2,3,4,5,6]
+        total_images = len(self.ampSpecs)
+        self.DiffractionLim['info'] = np.zeros(len(cones))
+        for amp in self.ampSpecs:
+            #Diffraction:
+            fooInfo = info.SingleConeEntropyFunc((amp[:60] * 
+                                                self.DiffractionLim['yval'] * 
+                                                RField), cones)
+            self.DiffractionLim['info'] += fooInfo / total_images
+            
+            """
+            #Infinity
+            fooInfo = info.SingleConeEntropyFunc((self.ampSpecs * 
+                                                    self.Infinity['yval'] * 
+                                                    self.RField), cones)
+            self.Infinity['info'] = fooInfo
+            #Near focus, far object                            
+            fooInfo = info.SingleConeEntropyFunc((self.ampSpecs * 
+                                            self.NearFocusFarObject['yval'] * 
+                                            self.RField), cones)
+            self.NearFocusFarObject['info'] = fooInfo 
+
+            #Near focus, near object                            
+            fooInfo = info.SingleConeEntropyFunc((self.ampSpecs * 
+                                            self.NearFocusNearObject['yval'] * 
+                                            self.RField), cones)
+            self.NearFocusNearObject['info'] = fooInfo 
+
+            #Under accommodated                           
+            fooInfo = info.SingleConeEntropyFunc((self.ampSpecs * 
+                                            self.UnderAccommFarObject['yval'] * 
+                                            self.RField), cones)
+                                            
+            self.UnderAccommFarObject['info'] = fooInfo 
+            """
+        print ' '
+        print 'Information'
+        print '------------'
+        print self.DiffractionLim['name'], ': ', self.DiffractionLim['info']
+        """
+        print self.Infinity['name'], ': ', self.Infinity['info']
+        print self.NearFocusFarObject['name'], ': ', self.NearFocusFarObject['info']
+        print self.NearFocusNearObject['name'], ': ', self.NearFocusNearObject['info']
+        print self.UnderAccommFarObject['name'], ': ', self.UnderAccommFarObject['info']        
+        """
     
     ### ANALYSIS and PLOTTING FUNCTIONS ###
     #######################################
@@ -399,7 +466,6 @@ class SchematicEyeAnalysis(Images):
                                         + (np.pi / 2.0) ))/ 2.0
             cone_response[i] = np.sum(sine_wave[:,i] * self.RF_DOG)
 
-        print cone_response.shape, Xvals[length:].shape  
         self.Jay_RF = interpolate.splrep(Xvals[length:] * 60,
                                             cone_response, s=0)
         RF = interpolate.splev(Xvals[length:], self.Jay_RF, der = 0)
@@ -480,16 +546,16 @@ class SchematicEyeAnalysis(Images):
            
         """
         
-        imagexval = np.arange(1,self.amp.shape[0] + 1) / 46.0
+        imagexval = np.arange(1,self.amp_mean.shape[0] + 1) / 46.0
         if not self.powerlaw:
-            self.PowerLaw(imagexval, self.amp)
+            self.PowerLaw(imagexval, self.amp_mean)
             
         fig = plt.figure(figsize=(8,6))
         ax = fig.add_subplot(111)
         pf.AxisFormat()
         pf.TufteAxis(ax, ['left', 'bottom'])
 
-        ax.loglog(imagexval , self.amp,
+        ax.loglog(imagexval , self.amp_mean,
                     'r.', markersize = 10, markeredgewidth = 0)
      
         ax.loglog(imagexval, self.powerlaw(imagexval), 'k', linewidth = 2.5)

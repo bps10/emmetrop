@@ -12,9 +12,9 @@ def main():
     Eye = SchematicEyeAnalysis()
     
     
-    Eye.MTFfamilyPlots(plot_option=2, legend = 0)
-    Eye.PlotPowerSpec()
-    Eye.DiffOfGaussian()  
+    #Eye.MTFfamilyPlots(plot_option=2, legend = 0)
+    #Eye.PlotPowerSpec()
+    #Eye.DiffOfGaussian()  
     
     Eye.DeconstructedFFT(plot_option = 0)
     Eye.AmpModPlot(save_plots = False, Receptive_Field = 'Jay')
