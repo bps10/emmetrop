@@ -33,3 +33,11 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+# HDF5
+*.h5
+
+# Mac
+.DS_Store
+
+
