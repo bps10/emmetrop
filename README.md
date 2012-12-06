@@ -1,4 +1,0 @@
-eschaton
-========
-
-an emmetropization model
