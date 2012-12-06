@@ -40,4 +40,7 @@ nosetests.xml
 # Mac
 .DS_Store
 
+# Images
+*.ai
+*.eps
 
