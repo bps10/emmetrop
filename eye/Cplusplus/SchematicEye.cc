@@ -5,119 +5,11 @@
 //  Created by Brian Schmidt on 10/8/12.
 //
 
-#include <math.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glext.h>
-#include <GL/glut.h>
-
-#include <algorithm>
-#include <string>
-#include <iostream>
-#include <fstream>
-
-#include <Goptical/Math/Vector>
-#include <Goptical/Math/VectorPair>
-
-#include <Goptical/Material/Abbe>
-#include <Goptical/Material/Base>
-
-#include <Goptical/Data/Set>
-#include <Goptical/Data/PlotData>
-#include <Goptical/Data/DiscreteSet>
-#include <Goptical/Data/Plot>
-
-#include <Goptical/Sys/System>
-#include <Goptical/Sys/OpticalSurface>
-#include <Goptical/Sys/Source>
-#include <Goptical/Sys/SourceRays>
-#include <Goptical/Sys/SourcePoint>
-#include <Goptical/Sys/Image>
-#include <Goptical/Sys/Stop>
-
-#include <Goptical/Curve/Sphere>
-#include <Goptical/Curve/Conic>
-#include <Goptical/Shape/Disk>
-
-#include <Goptical/Trace/Tracer>
-#include <Goptical/Trace/Result>
-#include <Goptical/Trace/Distribution>
-#include <Goptical/Trace/Sequence>
-#include <Goptical/Trace/Params>
-
-#include <Goptical/Light/SpectralLine>
-
-#include <Goptical/Analysis/RayFan>
-#include <Goptical/Analysis/Spot>
-#include <Goptical/Analysis/Focus>
-
-
-#include <Goptical/Io/RendererSvg>
-#include <Goptical/Io/RendererOpengl>
-#include <Goptical/Io/Rgb>
-#include <X11/Xlib.h>
-
-// 1. User options: age. GUI.
-// 2. Work out GRIN model.
-// 3. MTF, PSF.
-// 4. Plot in python.
-// 5. Off axis.
-// 6. Add spectacle lens option!
+#include "SchematicEye.h"
 
 
 using namespace Goptical;
 
-class Eye 
-{
-    
-private:    
-    float diopters, pupil_size, age, init_diop;
-    int print;
-    std::string  model;
-    
-    Sys::System * sys;
-    Trace::Tracer * tracer;
-    
-    Sys::SourceRays  * source_rays;
-    Sys::SourcePoint  *  source_point; 
-    
-    Sys::OpticalSurface * anterior_cornea;
-    Sys::OpticalSurface * posterior_cornea;
-    Sys::Stop * pupil;
-    Sys::OpticalSurface * anterior_lens;
-    Sys::OpticalSurface * posterior_lens;
-    Sys::Image * image;
-    
-    Curve::Conic * anterior_cornea_curve;
-    Curve::Conic * posterior_cornea_curve;
-    Curve::Conic * anterior_lens_curve;
-    Curve::Conic * posterior_lens_curve;
-    Shape::Disk * ant_cornea_shape;
-    Shape::Disk * post_cornea_shape;
-    Shape::Disk * lens_shape;
-    Shape::Disk * EyeShape;
-    Curve::Sphere * EyeCurve;
-    
-    Analysis::RayFan * fan;
-    
-public:
-
-    Eye();
-    void set_params(int option, std::string mod );
-    void set_params(float diop, float pup, std::string mod, float a );
-    void SchematicEye( );
-    void EyeTracer( );
-    void EyePlots( int option );
-    void SpotPlot( int option );
-    
-    float GetCornealThickness(std::string model);
-    float GetAnteriorChamber(std::string model, float age, float diopters);
-    float GetLensThickness(std::string model, float age, float diopters);
-    float GetAxialLength(std::string model, float age, float diopters);
-    float GetVitreousLen(std::string model);
-    float FindOpticalPower(int opt);
-    float Diopters(int option);
-}; 
 
 Eye::Eye() {
     
@@ -144,6 +36,11 @@ Eye::Eye() {
     
     fan = NULL;
 }
+
+Eye::~Eye()
+{
+}
+
 
 void Eye::set_params(int option, std::string mod = "dubbelman")
 {
@@ -648,6 +545,7 @@ float Eye::Diopters(int option = 0)
 }
 
 
+
 int main(int argc, const char * argv[])
 {
     int option (0);
@@ -689,13 +587,14 @@ int main(int argc, const char * argv[])
     eye.EyeTracer();
     eye.EyePlots(1); 
     eye.Diopters();
+    return 0;
     }
     
     if (option == 1)
     {
 
     std::ofstream outputfile;
-    outputfile.open ("EyeLSA.csv", std::ios::trunc);
+    outputfile.open("EyeLSA.csv", std::ios::trunc);
     float AGE, LensAccomm, PupilSize, AccommOptPower, RelaxedOptPower, Defocus_diopters;
     std::string mod;
     
@@ -723,6 +622,7 @@ int main(int argc, const char * argv[])
                             "," << RelaxedOptPower << "," << Defocus_diopters << std::endl;
             }
         }
+    return 0;
     }
     
     outputfile.close();
@@ -737,8 +637,9 @@ int main(int argc, const char * argv[])
     eye.set_params(option);
     eye.EyePlots(2);
     eye.SpotPlot(2);
+    return 0;
     }
     
     
-    return 0;
+    //return 0;
 }

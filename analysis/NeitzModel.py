@@ -56,6 +56,9 @@ class SchematicEyeAnalysis(Images):
         self.SixteenFocus_SixteenObj_Offaxis = self.importOSLOfile(p + 'OFFaxisMTF16inFocus16inObjNavarrow1999.txt')        
         self.SixteenFocus_TwentyObj_Offaxis = self.importOSLOfile(p + 'OFFaxisMTF16inFocus20ftObjNavarrow1999.txt')
     
+        self.TwentyDegOffAxis_InfFoc = self.importOSLOfile(p + '20degOFFaxisMTFinfFocusNavarrow1999.txt')
+        self.FortyDegOffAxis_InfFoc = self.importOSLOfile(p + '40degOFFaxisMTFinfFocusNavarrow1999.txt')       
+        
         ## convert mm to deg (1mm image/24mm axial length)
         self.xval = self.INF[:,1] / 2.38732415 
         
@@ -691,6 +694,64 @@ class SchematicEyeAnalysis(Images):
             plt.close()
         else:
             plt.show()
+
+
+
+
+    def PeripheralPlot(self, save_plots=False, legend=False):
+        """
+        """
+        from eye.Optics import MTF
+        
+        Fovea = MTF(self.xval[:], 0)
+        TenDeg = MTF(self.xval[:], 10)
+        TwentyDeg = MTF(self.xval[:],20)
+        FourtyDeg = MTF(self.xval[:],40)
+        
+        fig = plt.figure(figsize=(8,6))
+        ax = fig.add_subplot(111)
+
+        pf.AxisFormat()
+        pf.TufteAxis(ax, ['left', 'bottom'], [5,5])
+        
+        #Navarro et al 1993 analytical func:
+        ax.plot(self.xval[:], Fovea, 'm--', label='fovea', linewidth=2.5)
+        ax.plot(self.xval[:], TenDeg, 'r--', label='10 deg', linewidth=2.5)
+        ax.plot(self.xval[:], TwentyDeg, 'g--', label='20 deg', linewidth=2.5)
+        ax.plot(self.xval[:], FourtyDeg, 'b--',label='40 deg', linewidth=2.5)
+        
+        #OSLO ray trace data:
+        ax.plot(self.xval[:], self.INF[:,2], 'm-', label='fovea', linewidth=2.5)
+        ax.plot(self.xval[:], self.INF_offaxis[:,2], 'r-', label='10 deg',
+                linewidth=2.5)        
+        ax.plot(self.xval[:], self.TwentyDegOffAxis_InfFoc[:,2], 'g-', 
+                label='20 deg', linewidth=2.5)
+        ax.plot(self.xval[:30], self.FortyDegOffAxis_InfFoc[:30,2], 'b-',
+                label='40 deg', linewidth=2.5)
+                
+        if legend: 
+            ax.legend(loc='lower left')#, title='object dist, retinal location')
+        
+        ax.get_xaxis().tick_bottom()
+        ax.get_yaxis().tick_left()
+        
+        mi, ma = plt.ylim()
+        
+        plt.ylim([10**-2.5, 10**0])
+        #plt.xlim([self.xval[1], 100])
+        
+        plt.xlabel('spatial frequency (cycles / deg)')
+        plt.ylabel('modulation')
+        
+        plt.tight_layout()
+        
+        if save_plots:
+            fig.show()
+            fig.savefig('./Figures/MTFperiphery.png')
+            plt.close()
+        else:
+            plt.show()
+                
                     
     def AmpModPlot(self, Receptive_Field = 'FFT', save_plots = False, 
                    legend = False):

@@ -3,72 +3,9 @@ import numpy as np
 import glob as glob
 
 
-
-### Optics ###
-##############
-
-def StilesCrawford1stKind(x, xmax, n, rho):
-    """
-    
-    Stiles-Crawford effect of the 1st order.
-    
-    :param x: array of x values
-    :param xmax: maximum value
-    :param n: 
-    :param rho: angle
-    
-    :returns: styles-crawford effect
-    
-    .. warning::
-       This funciton is not finished or tested.
-    """
-    
-    return np.log(n) - rho*(x - xmax)**2
-
-    
-    
-def SterhlRatio(sigma, lam):
-    """
-    Find the Sterhl ratio.
-    
-    .. warning::
-       This funciton is not finished or tested.
-       
-    """
-    
-    return np.exp(-2.0 * np.pi * sigma / lam)**2.0
-
     
 
-def NumericalAperature(n, theta):
-    """
-    Find the numerical aperature of a system
-    
-    .. warning::
-       Not really working. Untested.
-       
-    """
-    return n * np.sin(theta)
-
-    
-def DiffractionLimit(lam, n,theta):
-    """
-    
-    Find the diffraction limit of a system.
-    
-    :param lam: wavelength
-    :param n: 
-    :param theta:
-    
-    .. warning::
-       This funciton is not finished or tested.
-        
-    """
-    return lam / 2.0 * ( NumericalAperature(n, theta) )
-    
-    
-
-def MTF(spatial_frequency,eccentricity):
+def MTF(spatial_frequency,eccentricity, paper='Williams1996_astig'):
     """    
     Compute the modulation frequency transfer as a function of eccentricity
     as derrived in Navarro, Artal, and Williams 1993. 
@@ -84,11 +21,23 @@ def MTF(spatial_frequency,eccentricity):
 
     
     """
-    theta = [0.0, 5.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0] # in degrees
-    A_theta = [0.172, 0.245, 0.245, 0.328, 0.606, 0.82, 0.93, 1.89] # in degrees
-    B_theta = [0.037, 0.041, 0.041, 0.038, 0.064, 0.064, 0.059, 0.108] # in degrees
-    C_theta = [0.22, 0.2, 0.2, 0.14, 0.12, 0.09, 0.067, 0.05] # unitless
+    if paper == 'Navarro1993':    
+        theta = [0.0, 5.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0] # in degrees
+        A_theta = [0.172, 0.245, 0.245, 0.328, 0.606, 0.82, 0.93, 1.89] # in degrees
+        B_theta = [0.037, 0.041, 0.041, 0.038, 0.064, 0.064, 0.059, 0.108] # in degrees
+        C_theta = [0.22, 0.2, 0.2, 0.14, 0.12, 0.09, 0.067, 0.05] # unitless
 
+    if paper == 'Williams1996_astig':
+        theta = [0.0, 10.0, 20.0,  40.0]
+        A_theta = [0.0129, 0.0140, 0.0082, 0.0059]
+        B_theta = [0.0816, 0.1036, 0.1313, 0.1555]
+        C_theta = [0.7921, 0.8299, 0.9120, 0.9178]
+ 
+    if paper == 'Williams1996_clc':
+        theta =   [0.0,    10.0,   20.0,   40.0]
+        A_theta = [0.0122, 0.0154, 0.0000, 0.0000]
+        B_theta = [0.0988, 0.1466, 0.2305, 0.4663]
+        C_theta = [0.8172, 0.8266, 0.9378, 0.9515]       
     # linear interpolation:
 
     A = np.interp(eccentricity,theta,A_theta)
@@ -241,5 +190,63 @@ def spectsens(LambdaMax = 559, OpticalDensity = 0.2, Output = 'log', StartWavele
     return withOD[0], extinction
     
 
+def StilesCrawford1stKind(x, xmax, n, rho):
+    """
+    
+    Stiles-Crawford effect of the 1st order.
+    
+    :param x: array of x values
+    :param xmax: maximum value
+    :param n: 
+    :param rho: angle
+    
+    :returns: styles-crawford effect
+    
+    .. warning::
+       This funciton is not finished or tested.
+    """
+    
+    return np.log(n) - rho*(x - xmax)**2
 
+    
+    
+def SterhlRatio(sigma, lam):
+    """
+    Find the Sterhl ratio.
+    
+    .. warning::
+       This funciton is not finished or tested.
+       
+    """
+    
+    return np.exp(-2.0 * np.pi * sigma / lam)**2.0
+
+    
+
+def NumericalAperature(n, theta):
+    """
+    Find the numerical aperature of a system
+    
+    .. warning::
+       Not really working. Untested.
+       
+    """
+    return n * np.sin(theta)
+
+    
+def DiffractionLimit(lam, n,theta):
+    """
+    
+    Find the diffraction limit of a system.
+    
+    :param lam: wavelength
+    :param n: 
+    :param theta:
+    
+    .. warning::
+       This funciton is not finished or tested.
+        
+    """
+    return lam / 2.0 * ( NumericalAperature(n, theta) )
+    
 
