@@ -3,14 +3,15 @@ import sys, os
 
 version = '0.1'
 
-setup(name='SchematicEye',
+setup(name='eschaton',
       version=version,
-      description="Analysis of OSLO files and natural images",
+      description="A biological analysis of a schematic eye and natural images",
       long_description=""" """,
       install_requires=["Sphinx",
                         "numpy",
                         "scipy",
-                        "matplotlib"
+                        "matplotlib",
+                        "tables"
                         ],
       classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='',

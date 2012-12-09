@@ -1,24 +1,24 @@
 Installing
 ==========
 
-This code is not yet complete.  As such, proper install files have not been created.  Therefore, you are on your own and should consider contacting the author, Brian Schmidt: bps10 at u dot washington dot edu
+This code is not yet complete.  As such, install files should be used with caution.  This is not a stable release.  Therefore, you are on your own and should consider contacting the author, Brian Schmidt: bps10 at u dot washington dot edu
 
-Eventually you will be able to use commands such as::
+If you are still interested, you can use::
 
    python setup.py build
-   python setup.py install  
+   [sudo] python setup.py install  
  
-For now you will have to clone the repository using::
+Additionally you can clone the repository using::
 
    git clone https://github.com/bps10/
-
-The following dependencies should automatically be installed via ``easy_install`` or ``pip``, provided these programs are installed.
 
 
 Dependencies
 ------------
 
-The natter toolbox requires the following python modules to be installed:
+The following dependencies should automatically be installed via ``easy_install`` or ``pip``, provided these programs are installed.
+
+eschaton requires the following python modules to be installed:
 
 * Python 2.5/2.6/2.7
 
