@@ -9,6 +9,8 @@ import datetime as dt
 #from ProgressBar import BusyBar
 #from guidata.qt.QtCore import Qt
 
+from scene import DataManip as dm
+
 class Database():
     """
     A class for working with an HDF5 database. Basically a wrapper around pytables.
@@ -78,7 +80,8 @@ class Database():
         :type Parents: str
         
         .. note::
-           Do not use Parent option right now. It is untested and likely to fail.
+           Do not use Parent option right now. It is untested and \
+            likely to fail.
            
         """
         
@@ -145,7 +148,8 @@ class Database():
            2. Generalize- get rid of neuron nomen.
         """
         
-        loc = 'self.file.root.' + NeuronName + '.' + GroupName + '.' + DataName + '.read()'
+        loc = ('self.file.root.' + NeuronName + '.' + GroupName +
+               '.' + DataName + '.read()')
         return eval(loc)
 
 
@@ -246,50 +250,10 @@ class Database():
             
             self.NeuronData = loadmat(Directory + '/' + FileName + '.mat')
 
-    def getAllFiles(self, Directory, suffix = None, subdirectories = 1):
-        """
-        
-        Get a list of path names of all files in a directory.
-        
-        :param Directory: a directory.
-        :type Directory: str
-        :param suffix: find only files with a specific ending.
-        :type suffix: str
-        :param subdirectories: indicate how deep (# of directories) you would like to search; 0 - 2.
-        :type subdirectories: int
-        
-        :returns: a list of path names.
-        :rtype: list
-
-        e.g. subdirectories = 1: Find all files within a directory and its 
-        first layer of subdirectories.
-
-        
-        .. note::
-           basically a duplicate from GeneralFunc
-           
-        """
-        if suffix is None:
-            suffix = '/*'
-        
-        if subdirectories == 0:
-            self.DirFiles = []
-            for name in glob.glob(Directory + suffix):
-                self.DirFiles = np.append(self.DirFiles,name)
-        
-        if subdirectories == 1:
-            self.DirFiles = []
-            for name in glob.glob(Directory + '*/' + suffix):
-                self.DirFiles = np.append(self.DirFiles,name)
-
-        if subdirectories == 2:
-            self.DirFiles = []
-            for name in glob.glob(Directory + '*/*/' + suffix):
-                self.DirFiles = np.append(self.DirFiles,name)
 
 
-
-    def ImportAllData(self, NeuronName, Directory, GitDirectory = None, progBar = 0):
+    def ImportAllData(self, NeuronName, Directory,
+                      GitDirectory = None, progBar = 0):
         """
         
         This one calls ImportDataFromMatlab to load a .mat file
@@ -307,13 +271,14 @@ class Database():
             
         print 'Importing data, please wait ... '    
 
-        self.getAllFiles(Directory)
+        dm.getAllFiles(Directory)
         self.CreateGroup(NeuronName)
         
         """
         if progBar == 1:
             self.busyBar = BusyBar( text = "Importing data" )
-            self.busyBar.changeValue.connect(self.busyBar.proBar.setValue, Qt.QueuedConnection)
+            self.busyBar.changeValue.connect(self.busyBar.proBar.setValue, 
+                                            Qt.QueuedConnection)
             self.busyBar.start()
         """
         for i in range(0, self.DirFiles.shape[0] ):
@@ -363,9 +328,13 @@ class Database():
                                    NeuronName + '.' + FileName)           
                 
 
-        PARAMS = np.array(['binRate', 'numSegments', 'si', 'clockstep', 'sampleInterval', 'sampleRate', 'ampMode', 'ampGain',
-                           'rawData', 'monitorData', 'frameRate', 'preSamples', 'postSamples', 'stimSamples', 'time', 'epochsize',
-                           'subThreshold', 'spikes', 'spikeTimes', 'recordingMode', 'outputClass', 'stimulusType', 'epochComment'])
+        PARAMS = np.array(['binRate', 'numSegments', 'si', 'clockstep',
+                           'sampleInterval', 'sampleRate', 'ampMode', 'ampGain',
+                           'rawData', 'monitorData', 'frameRate', 'preSamples',
+                           'postSamples', 'stimSamples', 'time', 'epochsize',
+                           'subThreshold', 'spikes', 'spikeTimes',
+                           'recordingMode', 'outputClass', 'stimulusType',
+                           'epochComment'])
 
         STRINGS = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1])
 
@@ -416,11 +385,16 @@ class Database():
         # now load the params:
         self.CreateGroup('params', NeuronName + '/' + FileName )
 
-        PARAMS = np.array(['Xpos', 'Ypos', 'colorGammaTable', 'diameter', 'epochNumber', 'flipInterval', 'integratedIntensity', 'intensity',
-                  'intensity_raw', 'rand_behavior', 'repositoryVersion', 'screenX', 'screenY', 'sequential', 'spatial_meanLevel',
-                  'spatial_postpts', 'spatial_prepts', 'windowPtr', 'stimClass', 'MatlabCodeDir'], dtype = str)
+        PARAMS = np.array(['Xpos', 'Ypos', 'colorGammaTable', 'diameter',
+                           'epochNumber', 'flipInterval', 'integratedIntensity',
+                           'intensity','intensity_raw', 'rand_behavior',
+                           'repositoryVersion', 'screenX', 'screenY', '
+                           'sequential', 'spatial_meanLevel',
+                           'spatial_postpts', 'spatial_prepts', 'windowPtr',
+                           'stimClass', 'MatlabCodeDir'], dtype = str)
 
-        STRINGS = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1], dtype = int)
+        STRINGS = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                            0, 0, 0, 0, 1, 1], dtype = int)
         for i, name in enumerate(PARAMS):
 
             try:
@@ -563,6 +537,7 @@ class Database():
         self.file.close()
         if PRINT == 0:
             print "database closed"
+
 
 class DatabaseError(Exception):
     """
