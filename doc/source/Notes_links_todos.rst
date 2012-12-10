@@ -19,6 +19,16 @@ Image Databases
 * `UPenn Image Slideshow <http://tofu.psych.upenn.edu/~upennidb/gallery2/main.php>`_
 * `Eye track data <http://www.inb.uni-luebeck.de/tools-demos/gaze>`_
 
+reST related
+^^^^^^^^^^^^^
+* `reST reference_1 <http://people.ee.ethz.ch/~creller/web/tricks/reST.html>`_
+* `reST reference_2 <http://openalea.gforge.inria.fr/doc/openalea/doc/_build/html/source/sphinx/rest_syntax.html>`_
+
+Webpublishing
+^^^^^^^^^^^^^^^
+* `UW webpublishing <http://www.washington.edu/itconnect/web/publishing/>`_
+    * Host: ovid.u.washington.edu
+    * Port: 22
 
 Database related
 ^^^^^^^^^^^^^^^^^
@@ -29,6 +39,20 @@ Database related
 * `Amazon web services <http://aws.amazon.com/>`_
 * `MySQL on Amazon <http://aws.amazon.com/articles/1663>`_
 * `MySQL <http://www.mysql.com/>`_
+
+
+Matplotlib related
+^^^^^^^^^^^^^^^^^^^
+* `Matplotlib sphinx reference <http://matplotlib.org/sampledoc/getting_started.html>`_
+* `Matplotlib math reference <http://matplotlib.org/users/mathtext.html>`_
+* `Customizing matplotlib <http://matplotlib.org/users/customizing.html#dynamic-rc-settings>`_
+* `NumFOCUS <http://numfocus.org/>`_
+
+Linux/DOS/GNU
+^^^^^^^^^^^^^^
+* `DOS commands reference <http://www.yolinux.com/TUTORIALS/unix_for_dos_users.html>`_
+* `Cmake reference <http://www.cmake.org/cmake/help/cmake_tutorial.html>`_
+* `Makefiles <http://www.cs.umd.edu/class/fall2002/cmsc214/Tutorial/makefile.html>`_
 
 Optical
 ^^^^^^^^^^
@@ -42,6 +66,16 @@ Qt Gui
 * `PyQt <http://www.riverbankcomputing.com/software/pyqt/intro>`_
 * `GuiQt <http://code.google.com/p/guiqwt/>`_
 
+Stimulus generation
+^^^^^^^^^^^^^^^^^^^^
+* `PsychoPy <http://www.psychopy.org/overview.html>`_
+
+General coding references
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+* `Stackoverflow <http://www.stackoverflow.com>`_
+* `Salty Crane <http://www.saltycrane.com/blog/>`_
+* `Python ref <https://python-guide.readthedocs.org/en/latest/>`_
+* `Python unit tests <http://docs.python.org/2/library/unittest.html>`_Image 
 
 To do list from all modules
 -----------------------------
