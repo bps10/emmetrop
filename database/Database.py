@@ -388,7 +388,7 @@ class Database():
         PARAMS = np.array(['Xpos', 'Ypos', 'colorGammaTable', 'diameter',
                            'epochNumber', 'flipInterval', 'integratedIntensity',
                            'intensity','intensity_raw', 'rand_behavior',
-                           'repositoryVersion', 'screenX', 'screenY', '
+                           'repositoryVersion', 'screenX', 'screenY',
                            'sequential', 'spatial_meanLevel',
                            'spatial_postpts', 'spatial_prepts', 'windowPtr',
                            'stimClass', 'MatlabCodeDir'], dtype = str)
