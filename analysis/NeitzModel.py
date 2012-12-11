@@ -258,47 +258,57 @@ class SchematicEyeAnalysis(Images):
         self.DiffractionLim['info'] = np.zeros(len(cones))
         for amp in self.ampSpecs:
             #Diffraction:
-            fooInfo = info.SingleConeEntropyFunc((amp[:60] * 
+            fooInfo = info.SingleConeEntropyFunc((amp[:60] * 10e+5 * 
                                                 self.DiffractionLim['yval'] * 
                                                 RField), cones)
             self.DiffractionLim['info'] += fooInfo / total_images
             
-            """
+            
             #Infinity
-            fooInfo = info.SingleConeEntropyFunc((self.ampSpecs * 
+            fooInfo = info.SingleConeEntropyFunc((amp[:60] * 10e+5 * 
                                                     self.Infinity['yval'] * 
-                                                    self.RField), cones)
+                                                    RField), cones)
             self.Infinity['info'] = fooInfo
+
             #Near focus, far object                            
-            fooInfo = info.SingleConeEntropyFunc((self.ampSpecs * 
+            fooInfo = info.SingleConeEntropyFunc((amp[1:8] * 10e+5 * 
                                             self.NearFocusFarObject['yval'] * 
-                                            self.RField), cones)
+                                            RField[1:8]), cones)
             self.NearFocusFarObject['info'] = fooInfo 
 
             #Near focus, near object                            
-            fooInfo = info.SingleConeEntropyFunc((self.ampSpecs * 
+            fooInfo = info.SingleConeEntropyFunc((amp[1:60] * 10e+5 * 
                                             self.NearFocusNearObject['yval'] * 
-                                            self.RField), cones)
+                                            RField[1:60]), cones)
             self.NearFocusNearObject['info'] = fooInfo 
 
             #Under accommodated                           
-            fooInfo = info.SingleConeEntropyFunc((self.ampSpecs * 
+            fooInfo = info.SingleConeEntropyFunc((amp[1:8] * 10e+5 *
                                             self.UnderAccommFarObject['yval'] * 
-                                            self.RField), cones)
+                                            RField[1:8]), cones)
                                             
             self.UnderAccommFarObject['info'] = fooInfo 
-            """
+
         print ' '
         print 'Information'
         print '------------'
         print self.DiffractionLim['name'], ': ', self.DiffractionLim['info']
-        """
         print self.Infinity['name'], ': ', self.Infinity['info']
         print self.NearFocusFarObject['name'], ': ', self.NearFocusFarObject['info']
         print self.NearFocusNearObject['name'], ': ', self.NearFocusNearObject['info']
         print self.UnderAccommFarObject['name'], ': ', self.UnderAccommFarObject['info']        
-        """
-    
+ 
+        plt.figure(figsize=(8,6))
+        plt.plot(self.DiffractionLim['info'], label=self.DiffractionLim['name'])
+        plt.plot(self.Infinity['info'], label=self.Infinity['name'])
+        plt.plot(self.NearFocusFarObject['info'], label=self.NearFocusFarObject['name'])
+        plt.plot(self.NearFocusNearObject['info'], label=self.NearFocusNearObject['name'])
+        plt.plot(self.UnderAccommFarObject['info'], label=self.UnderAccommFarObject['name'])
+        plt.legend(loc='upper left')
+        plt.tight_layout()
+        plt.show()
+        
+        
     ### ANALYSIS and PLOTTING FUNCTIONS ###
     #######################################
 
@@ -308,8 +318,8 @@ class SchematicEyeAnalysis(Images):
         """Create a difference of gaussians receptive field and plot it.
 
         :param excite_SD: standard deviation parameter of excitatory gaussian.
-        :param inhibit_SD: standard deviation parameter of inhibitory surround \
-        gaussian. Default = 5.0.   
+        :param inhibit_SD: standard deviation parameter of inhibitory \
+        surround gaussian. Default = 5.0.   
         :param plot_opt: decide whether to output plots (True) or not (False)
         :type plot_opt: int
         :param save_plots: decide whether to save plots (True) or not (False)
@@ -359,7 +369,8 @@ class SchematicEyeAnalysis(Images):
         self.RF_DOG = self.y_excite - y_inhibit
         self.RF_DOG = self.RF_DOG / max(self.RF_DOG)
         
-        self.FFT_RF = np.fft.fftshift(np.abs(np.fft.fft(self.RF_DOG))) / np.sqrt(2 * N)
+        self.FFT_RF = (np.fft.fftshift(np.abs(np.fft.fft(self.RF_DOG))) 
+                        / np.sqrt(2 * N))
 
         length = np.floor(self.FFT_RF.shape[0] / 2.) + 1       
         ## set up for interpolation
@@ -425,9 +436,11 @@ class SchematicEyeAnalysis(Images):
     def DeconstructedFFT(self, plot_option = True, save_plots = False):
         """This one is for Jay to demonstrate the logic behind fft.
         
-        :param plot_option: decide whether to plot output (True) or not (False).
+        :param plot_option: decide whether to plot output (True) or not \
+        (False).
         :type plot_option: bool
-        :param save_plots: decide whether to save the plot (True) or not (False)
+        :param save_plots: decide whether to save the plot (True) or not\
+        (False)
         :type save_option: bool
         
         :returns: two plots.
@@ -486,7 +499,8 @@ class SchematicEyeAnalysis(Images):
             
             ax.plot(Xvals, sine_wave[:,1], 'b-', linewidth =2, label='1 cpd')
             ax.plot(Xvals, sine_wave[:,5], 'g-', linewidth = 2, label='5 cpd')
-            ax.plot(Xvals, sine_wave[:,10], 'r-', linewidth = 2, label='10 cpd')
+            ax.plot(Xvals, sine_wave[:,10], 'r-', linewidth = 2, 
+                    label='10 cpd')
             ax.plot(Xvals, self.RF_DOG, 'k-', linewidth = 3)
             
             plt.xlim([min(Xvals), max(Xvals)])
@@ -615,12 +629,16 @@ class SchematicEyeAnalysis(Images):
         pf.TufteAxis(ax, ['left', 'bottom'], [5,5])
 
         ''' on axis plots '''
-        ax.plot(self.xval, self.INF[:,4], 'k', linewidth = 2.5, label='diffraction ')
-        ax.plot(self.xval, self.INF[:,2], 'r', linewidth=2.5, label='infinity') 
+        ax.plot(self.xval, self.INF[:,4], 'k', linewidth = 2.5, 
+                label='diffraction ')
+        ax.plot(self.xval, self.INF[:,2], 'r', linewidth=2.5, 
+                label='infinity') 
         
         if plot_option == 1:
-            ax.plot(self.xval, self.TwentyFt[:,2], 'g', linewidth=2.5, label='20ft')
-            ax.plot(self.xval, self.Onemeter[:,2], 'b', linewidth=2.5, label='1m')
+            ax.plot(self.xval, self.TwentyFt[:,2], 'g', linewidth=2.5, 
+                    label='20ft')
+            ax.plot(self.xval, self.Onemeter[:,2], 'b', linewidth=2.5, 
+                    label='1m')
             ax.plot(self.xval[:20], self.SixteenIn[:20,2], 'm', 
                     linewidth=2.5, label='16in')
         
@@ -631,8 +649,10 @@ class SchematicEyeAnalysis(Images):
         if plot_option ==3:
             ax.plot(self.xval, self.INF_offaxis[:,4], 'k--', linewidth=2.5)
             
-            ax.plot(self.xval, self.TwentyFt_offaxis[:,2], 'g--', linewidth=2.5)
-            ax.plot(self.xval, self.Onemeter_offaxis[:,2], 'b--', linewidth=2.5)
+            ax.plot(self.xval, self.TwentyFt_offaxis[:,2], 'g--', 
+                    linewidth=2.5)
+            ax.plot(self.xval, self.Onemeter_offaxis[:,2], 'b--', 
+                    linewidth=2.5)
             ax.plot(self.xval[:20], self.SixteenIn_offaxis[:20,2], 'm--', 
                     linewidth=2.5)
         
@@ -640,7 +660,8 @@ class SchematicEyeAnalysis(Images):
         if plot_option == 2:
             ax.plot(self.xval, self.INF_offaxis[:,2], 'r--', linewidth=2.5)
             
-            ax.plot(self.xval[:60], self.SixteenFocus_SixteenObj_Offaxis[:60,2],
+            ax.plot(self.xval[:60], 
+                    self.SixteenFocus_SixteenObj_Offaxis[:60,2],
                     'g--', linewidth=2.5, label = 'near focus, near obj')
             ax.plot(self.xval[:20], self.Sixteen_UnderAccomm[:20,2], 
                     'c--', linewidth=2.5, label = 'underacc, far obj')
@@ -700,6 +721,25 @@ class SchematicEyeAnalysis(Images):
 
     def PeripheralPlot(self, save_plots=False, legend=False):
         """
+        Plot peripheral MTF with a comparison to Navarro et al 1993 or 
+        Williams et al. 1996
+        
+        :param save_plots: decide whether to save plots (True) or not (False).
+        :type save_plots: bool
+        :param legend: turn legend on (True) or off (False). Default = True. \n
+        :type legend: bool
+        
+        Currently supports 0, 10, 20, 40 degrees eccentricity.
+        
+        **This produces:**
+        
+        .. figure:: ../../Figures/MTFperiphery.png
+           :height: 300px
+           :width: 400px
+           :align: center        
+           
+           **Fig 1:** A family of MTF curves from experimental data (dotted) 
+           and schematic eye.        
         """
         from eye.Optics import MTF
         
@@ -721,7 +761,8 @@ class SchematicEyeAnalysis(Images):
         ax.plot(self.xval[:], FourtyDeg, 'b--',label='40 deg', linewidth=2.5)
         
         #OSLO ray trace data:
-        ax.plot(self.xval[:], self.INF[:,2], 'm-', label='fovea', linewidth=2.5)
+        ax.plot(self.xval[:], self.INF[:,2], 'm-', label='fovea', 
+                linewidth=2.5)
         ax.plot(self.xval[:], self.INF_offaxis[:,2], 'r-', label='10 deg',
                 linewidth=2.5)        
         ax.plot(self.xval[:], self.TwentyDegOffAxis_InfFoc[:,2], 'g-', 
@@ -730,14 +771,14 @@ class SchematicEyeAnalysis(Images):
                 label='40 deg', linewidth=2.5)
                 
         if legend: 
-            ax.legend(loc='lower left')#, title='object dist, retinal location')
+            ax.legend(loc='lower left')#,title='object dist, retinal location')
         
         ax.get_xaxis().tick_bottom()
         ax.get_yaxis().tick_left()
         
         mi, ma = plt.ylim()
         
-        plt.ylim([10**-2.5, 10**0])
+        #plt.ylim([10**-2.5, 10**0])
         #plt.xlim([self.xval[1], 100])
         
         plt.xlabel('spatial frequency (cycles / deg)')
@@ -755,8 +796,8 @@ class SchematicEyeAnalysis(Images):
                     
     def AmpModPlot(self, Receptive_Field = 'FFT', save_plots = False, 
                    legend = False):
-        """Plot powerlaw amplitude spectrum after accounting for MTF and MTF + \
-        receptive field
+        """Plot powerlaw amplitude spectrum after accounting for MTF and MTF \
+        + receptive field
         
         :param Receptive_Field: Indicate which receptive field to use. \
                                 Option are 'FFT' or 'Jay'
@@ -768,12 +809,14 @@ class SchematicEyeAnalysis(Images):
         :returns: Plot 1: power law times Modulation Transfer Function for 
                   three conditions \n
                   Plot 2: same plot with difference of gaussians receptive 
-                  field included as well.  This is the final plot in this series.
+                  field included as well.  This is the final plot in this \
+                  series.
         :rtype: plt.plot
 
         .. note:: ../../Figures/
            Eventually would like to introduce a heuristic to determine the 
-           location of the power law text that is plotted. Currently hard coded.
+           location of the power law text that is plotted. Currently hard \
+           coded.
            
         
         
@@ -838,7 +881,7 @@ class SchematicEyeAnalysis(Images):
                   'c--', linewidth=2.5, label='underaccom, far object')                  
         
         if legend: 
-            ax.legend(loc='lower left')#, title='object dist, retinal location')
+            ax.legend(loc='lower left')#,title='object dist, retinal location')
         
         ax.get_xaxis().tick_bottom()
         ax.get_yaxis().tick_left()
@@ -883,19 +926,23 @@ class SchematicEyeAnalysis(Images):
 
         ax.loglog(self.Infinity['xval'], 
                   self.Infinity['yval'] ,
-                  'r', linewidth=2.5, label= self.Infinity['name'])    
+                  'r', linewidth=2.5, 
+                  label= self.Infinity['name'])    
         
         ax.loglog(self.NearFocusNearObject['xval'], 
                   self.NearFocusNearObject['yval'],
-                  'g--', linewidth=2.5, label = self.NearFocusNearObject['name'])   
+                  'g--', linewidth=2.5, 
+                  label = self.NearFocusNearObject['name'])   
 
         ax.loglog(self.NearFocusFarObject['xval'], 
                   self.NearFocusFarObject['yval'],
-                  'b--', linewidth=2.5, label = self.NearFocusFarObject['name'])
+                  'b--', linewidth=2.5, 
+                  label = self.NearFocusFarObject['name'])
                   
         ax.loglog(self.UnderAccommFarObject['xval'], 
                   self.UnderAccommFarObject['yval'] ,
-                  'c--', linewidth=2.5, label =self.UnderAccommFarObject['name'])                  
+                  'c--', linewidth=2.5, 
+                  label =self.UnderAccommFarObject['name'])                  
         
         if legend: 
             ax.legend(loc='upper right')

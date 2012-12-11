@@ -23,6 +23,7 @@ reST related
 ^^^^^^^^^^^^^
 * `reST reference_1 <http://people.ee.ethz.ch/~creller/web/tricks/reST.html>`_
 * `reST reference_2 <http://openalea.gforge.inria.fr/doc/openalea/doc/_build/html/source/sphinx/rest_syntax.html>`_
+* `Graph Viz <http://graphviz.org/>`_
 
 Webpublishing
 ^^^^^^^^^^^^^^^
@@ -75,7 +76,7 @@ General coding references
 * `Stackoverflow <http://www.stackoverflow.com>`_
 * `Salty Crane <http://www.saltycrane.com/blog/>`_
 * `Python ref <https://python-guide.readthedocs.org/en/latest/>`_
-* `Python unit tests <http://docs.python.org/2/library/unittest.html>`_Image 
+* `Python unit tests <http://docs.python.org/2/library/unittest.html>`_ 
 
 To do list from all modules
 -----------------------------

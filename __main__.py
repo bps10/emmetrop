@@ -16,9 +16,9 @@ def main():
     #Eye.PlotPowerSpec()
     #Eye.DiffOfGaussian()  
     
-    #Eye.DeconstructedFFT(plot_option = 0)
-    #Eye.AmpModPlot(save_plots = False, Receptive_Field = 'Jay')
-    Eye.PeripheralPlot()
+    Eye.DeconstructedFFT(plot_option = 0)
+    Eye.AmpModPlot(save_plots = False, Receptive_Field = 'Jay')
+    #Eye.PeripheralPlot()
     return Eye
     
 if __name__ == "__main__":

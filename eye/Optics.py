@@ -1,22 +1,26 @@
 from __future__ import division
 import numpy as np
-import glob as glob
 
-
-    
 
 def MTF(spatial_frequency,eccentricity, paper='Williams1996_astig'):
     """    
     Compute the modulation frequency transfer as a function of eccentricity
-    as derrived in Navarro, Artal, and Williams 1993. 
-    F = 1-C * exp(-A*f) + C*exp(-B*f)
+    based on the equation derrived in Navarro, Artal, and Williams 1993. 
+    
+    .. math::
+       F = 1-C * exp(-A*f) + C*exp(-B*f)
     
     :param spatial_frequency: array or integer of spatial frequencies
     :param eccentricity: eccentricity from 0 to 60 degrees at which to compute MTF.\
     Linear interpolation is used for values that fall inbetween those \
     reported in Navarro et al and are, therefore, less reliable though as expected. \
     Eccentricities reported (in degrees): [0, 5, 10, 20, 30, 40, 50, 60]
-    
+    :param paper: Choose the coefficients to use for generating the curve.  \n
+                 Options are : \n
+                 * 'Williams1996_astig' \n
+                 * 'Williams1996_clc' \n
+                 * 'Navarro1993' 
+                 
     :returns: MTF for input frequencies at given eccentricity.
 
     
