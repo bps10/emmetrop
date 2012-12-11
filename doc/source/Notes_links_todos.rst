@@ -5,8 +5,8 @@ Lots to do.  See To Do list below.
 
 * Main focuses right now are
     * finish getting information module to talk to ConeAnalysis
-	* learning Django, AWS and mySQL for a revamped database project
-	* writing unit tests. 
+    * learning Django, AWS and mySQL for a revamped database project
+    * writing unit tests. 
     * cython project - get GOptical engine working.
 
 
