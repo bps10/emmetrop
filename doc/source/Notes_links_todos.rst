@@ -60,6 +60,7 @@ Optical
 * `GOptical <http://www.gnu.org/software/goptical/>`_
 * `Optics reference <http://www.oculist.net/downaton502/prof/ebook/duanes/pages/v1/v1c033.html>`_
 * `Liou Brennan Zemax <http://www.radiantzemax.com/kb-en/KnowledgebaseArticle50117.aspx>`_
+* `Cython GSL example <https://github.com/dagss/euroscipy2010>`_
 
 Qt Gui
 ^^^^^^^
