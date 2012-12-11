@@ -1,14 +1,14 @@
 import numpy as np
 import matplotlib.pylab as plt
 from scipy import interpolate
-import shlex
-import os
 
+
+from eye.eyeModel import SchematicEye
 from scene.Images import Images
 from analysis import PlottingFun as pf
 from analysis import Information as info
 
-class SchematicEyeAnalysis(Images):
+class SchematicEyeAnalysis(Images,SchematicEye):
     """This class is designed to estimate the response of a linear photoreceptor 
     to an amplitude spectrum derived from natural images.
     The modulation transfer functions are computed in OSLO ray tracing software.
@@ -25,43 +25,14 @@ class SchematicEyeAnalysis(Images):
     .. todo::
        * single graphic with all subfigures?
        * better plotting options.
-       * Write OSLO data into database.
-       * self.xval needs to be computed during each iteration. 
-         (__getAxialLength__)
     """
     
     def __init__(self):
         """
-        .. todo::
-           more dynamic OSLO import.
         
         """
-
-        if os.path.isdir('./eschaton'):
-            p = './eschaton/OSLO_MTF_DATA/'
-        else:
-            p = './OSLO_MTF_DATA/'
-            
-        self.INF = self.importOSLOfile(p + 'ONaxisMTFinfFocusNavarrow1999.txt')
-        self.TwentyFt = self.importOSLOfile(p + 'ONaxisMTF20ftFocusNavarrow1999.txt')
-        self.Onemeter = self.importOSLOfile(p + 'ONaxisMTF1mFocusNavarrow1999.txt')
-        self.SixteenIn = self.importOSLOfile(p + 'ONaxisMTF16inFocusNavarrow1999.txt')
         
-        self.INF_offaxis = self.importOSLOfile(p + 'OFFaxisMTFinfFocusNavarrow1999.txt')
-        self.TwentyFt_offaxis = self.importOSLOfile(p + 'OFFaxisMTF20ftFocusNavarrow1999.txt')
-        self.Onemeter_offaxis = self.importOSLOfile(p + 'OFFaxisMTF1mFocusNavarrow1999.txt')
-        self.SixteenIn_offaxis = self.importOSLOfile(p + 'OFFaxisMTF16inFocusNavarrow1999.txt')
-        
-        self.Sixteen_UnderAccomm = self.importOSLOfile(p + 'OFFaxisMTF16inUnderAccom20ftObjNavarrow1999.txt')
-        self.SixteenFocus_SixteenObj_Offaxis = self.importOSLOfile(p + 'OFFaxisMTF16inFocus16inObjNavarrow1999.txt')        
-        self.SixteenFocus_TwentyObj_Offaxis = self.importOSLOfile(p + 'OFFaxisMTF16inFocus20ftObjNavarrow1999.txt')
-    
-        self.TwentyDegOffAxis_InfFoc = self.importOSLOfile(p + '20degOFFaxisMTFinfFocusNavarrow1999.txt')
-        self.FortyDegOffAxis_InfFoc = self.importOSLOfile(p + '40degOFFaxisMTFinfFocusNavarrow1999.txt')       
-        
-        ## convert mm to deg (1mm image/24mm axial length)
-        self.xval = self.INF[:,1] / 2.38732415 
-        
+        SchematicEye.__init__(self)
         Images.__init__(self)
         
         self.powerlaw = None
@@ -75,57 +46,6 @@ class SchematicEyeAnalysis(Images):
         self.NearFocusNearObject = {}
         self.UnderAccommFarObject = {}
 
-
-    ###  DATA PROCESSING FUNCTIONS ###
-    ##################################
-    
-    def importOSLOfile(self, OSLOfile):
-        """Import a text file with MTF output from OSLO.
-        
-        :param OSLOfile: name of OSLO output text file to import. \
-        Should have 5 columns.
-        :type OSLOfile: string
-        :returns: an array containing OSLO data: Frequencies, \
-        Eye MTF, Diffraction limit MTF.
-        :rtype: numpy.array
-        
-        .. todo::
-           import OSLO files, import whole directory into a dictionary.
-        
-        """
-        
-        fil = open(OSLOfile)
-        fil = fil.read()
-        
-        MTF = []
-        foo = fil
-        partitioning = True
-        row = 0
-        while partitioning:
-            
-            f = foo.partition('\n')
-    
-            if f[0]:
-                
-                parse = shlex.split(f[0])
-                floatnum = []
-                for num in parse:
-                    if row == 0:
-                        if num == '--':
-                            floatnum.append( 0.0 )
-                    if num != '--':
-                        floatnum.append( float(num) )
-    
-                        
-                MTF.append(floatnum)
-                foo = f[2]
-                partitioning = True
-            else:
-                partitioning = False
-        
-        MTF = np.array(MTF)
-        
-        return MTF        
 
         
 
@@ -167,29 +87,29 @@ class SchematicEyeAnalysis(Images):
         
                 
         self.DiffractionLim['name'] = 'diffraction limit'
-        self.DiffractionLim['yval'] = powerlaw * RField
+        self.DiffractionLim['retina'] = powerlaw * RField
         self.DiffractionLim['xval'] = self.xval[1:]
         
         self.Infinity['name'] = 'inf focus'
-        self.Infinity['yval'] = powerlaw * self.INF[1:, 2] * RField
+        self.Infinity['retina'] = powerlaw * self.INF[1:, 2] * RField
         self.Infinity['xval'] = self.xval[1:]
         
 
         self.NearFocusNearObject['name'] = 'near focus, near object'
-        self.NearFocusNearObject['yval'] = (powerlaw[:59] *
-                                    self.SixteenFocus_SixteenObj_Offaxis[1:60,2] 
+        self.NearFocusNearObject['retina'] = (powerlaw[:59] *
+                                self.SixteenFocus_SixteenObj_Offaxis[1:60,2] 
                                     * RField[:59])
         self.NearFocusNearObject['xval'] = self.xval[1:60]                
         
 
         self.NearFocusFarObject['name'] = 'near focus, far object'
-        self.NearFocusFarObject['yval'] = (powerlaw[:7] * 
-                                        self.SixteenFocus_TwentyObj_Offaxis[1:8,2] 
+        self.NearFocusFarObject['retina'] = (powerlaw[:7] * 
+                                    self.SixteenFocus_TwentyObj_Offaxis[1:8,2] 
                                         * RField[:7])
         self.NearFocusFarObject['xval'] = self.xval[1:8]
 
         self.UnderAccommFarObject['name'] = 'underaccomm, far object'
-        self.UnderAccommFarObject['yval'] = (powerlaw[:7] * 
+        self.UnderAccommFarObject['retina'] = (powerlaw[:7] * 
                                             self.Sixteen_UnderAccomm[1:8,2]
                                             * RField[:7])
         self.UnderAccommFarObject['xval'] = self.xval[1:8]
@@ -210,11 +130,11 @@ class SchematicEyeAnalysis(Images):
         
         """
         
-        self.DiffractionLim['total'] = np.sum(self.DiffractionLim['yval'])
-        self.Infinity['total'] = np.sum(self.Infinity['yval'])
-        self.NearFocusNearObject['total'] = np.sum(self.NearFocusNearObject['yval'])
-        self.NearFocusFarObject['total'] = np.sum(self.NearFocusFarObject['yval'])
-        self.UnderAccommFarObject['total'] = np.sum(self.UnderAccommFarObject['yval'])
+        self.DiffractionLim['total'] = np.sum(self.DiffractionLim['retina'])
+        self.Infinity['total'] = np.sum(self.Infinity['retina'])
+        self.NearFocusNearObject['total'] = np.sum(self.NearFocusNearObject['retina'])
+        self.NearFocusFarObject['total'] = np.sum(self.NearFocusFarObject['retina'])
+        self.UnderAccommFarObject['total'] = np.sum(self.UnderAccommFarObject['retina'])
 
 
         self.Infinity['percent'] = (self.Infinity['total'] / 
@@ -235,14 +155,49 @@ class SchematicEyeAnalysis(Images):
         print self.UnderAccommFarObject['name'], ': ', self.UnderAccommFarObject['percent']
 
         
-    def estimateInfo(self, Receptive_Field):
+    def estimateInfo(self, Receptive_Field, print_option=False, 
+                     plot_opt=True, save_plots=False, legend=False):
         """Estimate the information in a simple linear cone receptive field.
         
-        :param Receptive_Field: type of receptive field to use (FFT, Jay)
+        Information is estimated with Garrigan et al.'s Gaussian approximation
+        method.
         
-        This function is under development. It will be called by 
-        ComputeConeActivity() function.
+        .. math::
+           I_1(S,E) = \\frac{1}{2}\log_2(1+SNR) , 
+        
+        where :math:`SNR` is the ratio of signal power to noise power.
+        
+        Information in an array of cones is then represented:
+        
+        .. math::
+           I_N(S,E) = I_1(S,E)N^\delta ,
+        
+        with :math:`\\delta` representing a derived scale factor.
+        
+        :param Receptive_Field: type of receptive field to use (FFT, Jay)
+        :param print_opt: decide whether to print results (True) or not (False)
+        :type print_opt: bool
+        :param plot_opt: decide whether to output plots (True) or not (False)
+        :type plot_opt: bool
+        :param save_plots: decide whether to save plots (True) or not (False)
+        :type save_plots: bool
+        :param legend: decide whether to add a legend (True) or not (False)
+        :type legend: bool
+        
+        :returns: plot of information estimate
+        
+        .. warning::
+           This function is under development. 
+        
+        :usage: estimateInfo is called by ComputeConeActivity() function.
 
+        **This function produces:**
+        
+        .. figure:: ../../Figures/InfoPlot.png 
+           :height: 300px
+           :width: 400px
+           :align: center   
+           
         """ 
         if Receptive_Field == None:
             raise('Run {0} receptive field function'.format(Receptive_Field))
@@ -256,58 +211,92 @@ class SchematicEyeAnalysis(Images):
         cones = [1,2,3,4,5,6]
         total_images = len(self.ampSpecs)
         self.DiffractionLim['info'] = np.zeros(len(cones))
-        for amp in self.ampSpecs:
+        self.Infinity['info'] = np.zeros(len(cones))
+        self.NearFocusFarObject['info'] = np.zeros(len(cones))
+        self.NearFocusNearObject['info'] = np.zeros(len(cones))
+        self.UnderAccommFarObject['info'] = np.zeros(len(cones))
+        for amp in self.rawAmp:
             #Diffraction:
-            fooInfo = info.SingleConeEntropyFunc((amp[:60] * 10e+5 * 
-                                                self.DiffractionLim['yval'] * 
+            fooInfo = info.SingleConeEntropyFunc((amp[:60]**2 *
+                                                self.DiffractionLim['retina'] * 
                                                 RField), cones)
             self.DiffractionLim['info'] += fooInfo / total_images
             
             
             #Infinity
-            fooInfo = info.SingleConeEntropyFunc((amp[:60] * 10e+5 * 
-                                                    self.Infinity['yval'] * 
+            fooInfo = info.SingleConeEntropyFunc((amp[:60]**2 * 
+                                                    self.Infinity['retina'] * 
                                                     RField), cones)
-            self.Infinity['info'] = fooInfo
+            self.Infinity['info'] += fooInfo / total_images
 
             #Near focus, far object                            
-            fooInfo = info.SingleConeEntropyFunc((amp[1:8] * 10e+5 * 
-                                            self.NearFocusFarObject['yval'] * 
+            fooInfo = info.SingleConeEntropyFunc((amp[1:8]**2 *
+                                            self.NearFocusFarObject['retina'] * 
                                             RField[1:8]), cones)
-            self.NearFocusFarObject['info'] = fooInfo 
+            self.NearFocusFarObject['info'] += fooInfo / total_images
 
             #Near focus, near object                            
-            fooInfo = info.SingleConeEntropyFunc((amp[1:60] * 10e+5 * 
-                                            self.NearFocusNearObject['yval'] * 
+            fooInfo = info.SingleConeEntropyFunc((amp[1:60]**2 * 
+                                            self.NearFocusNearObject['retina'] * 
                                             RField[1:60]), cones)
-            self.NearFocusNearObject['info'] = fooInfo 
+            self.NearFocusNearObject['info'] += fooInfo / total_images
 
             #Under accommodated                           
-            fooInfo = info.SingleConeEntropyFunc((amp[1:8] * 10e+5 *
-                                            self.UnderAccommFarObject['yval'] * 
+            fooInfo = info.SingleConeEntropyFunc((amp[1:8]**2 *
+                                            self.UnderAccommFarObject['retina'] * 
                                             RField[1:8]), cones)
                                             
-            self.UnderAccommFarObject['info'] = fooInfo 
+            self.UnderAccommFarObject['info'] += fooInfo / total_images 
 
-        print ' '
-        print 'Information'
-        print '------------'
-        print self.DiffractionLim['name'], ': ', self.DiffractionLim['info']
-        print self.Infinity['name'], ': ', self.Infinity['info']
-        print self.NearFocusFarObject['name'], ': ', self.NearFocusFarObject['info']
-        print self.NearFocusNearObject['name'], ': ', self.NearFocusNearObject['info']
-        print self.UnderAccommFarObject['name'], ': ', self.UnderAccommFarObject['info']        
+        if print_option == True:
+            print ' '
+            print 'Information'
+            print '------------'
+            print self.DiffractionLim['name'], ': ', self.DiffractionLim['info']
+            print self.Infinity['name'], ': ', self.Infinity['info']
+            print self.NearFocusFarObject['name'], ': ', self.NearFocusFarObject['info']
+            print self.NearFocusNearObject['name'], ': ', self.NearFocusNearObject['info']
+            print self.UnderAccommFarObject['name'], ': ', self.UnderAccommFarObject['info']        
  
-        plt.figure(figsize=(8,6))
-        plt.plot(self.DiffractionLim['info'], label=self.DiffractionLim['name'])
-        plt.plot(self.Infinity['info'], label=self.Infinity['name'])
-        plt.plot(self.NearFocusFarObject['info'], label=self.NearFocusFarObject['name'])
-        plt.plot(self.NearFocusNearObject['info'], label=self.NearFocusNearObject['name'])
-        plt.plot(self.UnderAccommFarObject['info'], label=self.UnderAccommFarObject['name'])
-        plt.legend(loc='upper left')
-        plt.tight_layout()
-        plt.show()
-        
+        if plot_opt == True:
+            
+            fig = plt.figure(figsize=(8,6))
+            ax = fig.add_subplot(111)
+
+            pf.AxisFormat()
+            pf.TufteAxis(ax, ['left', 'bottom'], [5,5])
+                        
+            plt.plot(cones, self.DiffractionLim['info'], 'ko-',
+                     label=self.DiffractionLim['name'],
+                     linewidth=2.5, markersize=10)
+            plt.plot(cones, self.Infinity['info'], 'ro-',
+                     label=self.Infinity['name'],
+                     linewidth=2.5, markersize=10)
+            plt.plot(cones, self.NearFocusFarObject['info'], 'bo--',
+                     label=self.NearFocusFarObject['name'],
+                     linewidth=2.5, markersize=10)
+            plt.plot(cones, self.NearFocusNearObject['info'], 'go--',
+                     label=self.NearFocusNearObject['name'],
+                     linewidth=2.5, markersize=10)
+            plt.plot(cones, self.UnderAccommFarObject['info'], 'co--',
+                     label=self.UnderAccommFarObject['name'],
+                     linewidth=2.5, markersize=10)
+
+            plt.xlim([min(cones)-0.1, max(cones)+0.1])
+            if legend:
+                plt.legend(loc='upper left')
+            plt.xlabel('cones in mosaic')
+            plt.ylabel('entropy (bits)')
+            
+            plt.tight_layout()
+            
+            if save_plots:
+                fig.show()
+                fig.savefig('../../Figures/InfoPlot.png')
+                plt.close()
+            else:
+                plt.show()
+            
         
     ### ANALYSIS and PLOTTING FUNCTIONS ###
     #######################################
@@ -321,8 +310,10 @@ class SchematicEyeAnalysis(Images):
         :param inhibit_SD: standard deviation parameter of inhibitory \
         surround gaussian. Default = 5.0.   
         :param plot_opt: decide whether to output plots (True) or not (False)
-        :type plot_opt: int
+        :type plot_opt: bool
         :param save_plots: decide whether to save plots (True) or not (False)
+        :type save_plots: bool
+        
         :returns: Plot1: difference of gaussians receptive field \n
                     Plot2: FFT spectrum of plot 1.
                 
@@ -813,7 +804,7 @@ class SchematicEyeAnalysis(Images):
                   series.
         :rtype: plt.plot
 
-        .. note:: ../../Figures/
+        .. note::
            Eventually would like to introduce a heuristic to determine the 
            location of the power law text that is plotted. Currently hard \
            coded.
@@ -921,26 +912,26 @@ class SchematicEyeAnalysis(Images):
      
 
         ax.loglog(self.DiffractionLim['xval'], 
-                  self.DiffractionLim['yval'],
+                  self.DiffractionLim['retina'],
                   'k', linewidth = 2.5)
 
         ax.loglog(self.Infinity['xval'], 
-                  self.Infinity['yval'] ,
+                  self.Infinity['retina'] ,
                   'r', linewidth=2.5, 
                   label= self.Infinity['name'])    
         
         ax.loglog(self.NearFocusNearObject['xval'], 
-                  self.NearFocusNearObject['yval'],
+                  self.NearFocusNearObject['retina'],
                   'g--', linewidth=2.5, 
                   label = self.NearFocusNearObject['name'])   
 
         ax.loglog(self.NearFocusFarObject['xval'], 
-                  self.NearFocusFarObject['yval'],
+                  self.NearFocusFarObject['retina'],
                   'b--', linewidth=2.5, 
                   label = self.NearFocusFarObject['name'])
                   
         ax.loglog(self.UnderAccommFarObject['xval'], 
-                  self.UnderAccommFarObject['yval'] ,
+                  self.UnderAccommFarObject['retina'] ,
                   'c--', linewidth=2.5, 
                   label =self.UnderAccommFarObject['name'])                  
         

@@ -6,7 +6,17 @@ import glob
 ### Data manipulation tools ###
 ###############################
 
+def rad2deg(radians):
+    """convert radians to degrees
+    """
+    return radians*180.0/np.pi
 
+def deg2rad(degrees):
+    """convert degrees to radians
+    """
+    return degrees*np.pi/180.0
+
+	
 def accum(ii, a = None):
 	"""
 	
@@ -129,8 +139,7 @@ def fromFile(filename):
     return contents
 
 	
-def radians(degrees):
-    return degrees*np.pi/180.0
+
 
 
 def image2array(im):
@@ -200,62 +209,7 @@ def sph2cart(*args):
     else:
         return x, y, z
     
-#---unit conversions
 
-def deg2pix(degrees, monitor):
-    """
-    
-    Convert size in degrees to size in pixels for a given Monitor object
-    
-    """   
-    #get monitor params and raise error if necess
-    scrWidthCm = monitor.getWidth()
-    scrSizePix = monitor.getSizePix()
-    if scrSizePix==None:
-        raise "Monitor %s has no known size in pixels (SEE MONITOR CENTER)" %monitor.name
-    if scrWidthCm==None:
-        raise "Monitor %s has no known width in cm (SEE MONITOR CENTER)" %monitor.name
-    
-    cmSize = deg2cm(degrees, monitor)
-    return cmSize*scrSizePix[0]/float(scrWidthCm)
-
-def deg2cm(degrees, monitor):
-    """
-    
-    Convert size in degrees to size in pixels for a given Monitor object
-    
-    """
-    #check we have a monitor
-    if not isinstance(monitor, monitors.Monitor):
-        raise "deg2cm requires a monitors.Monitor object as the second argument but received %s" %str(type(monitor))
-    
-    #get monitor dimensions
-    dist = monitor.getDistance()
-    
-    #check they all exist
-    if dist==None:
-        raise "Monitor %s has no known distance (SEE MONITOR CENTER)" %monitor.name
-    
-    return degrees*dist*0.017455
-
-def cm2pix(cm, monitor):
-    """
-    
-    Convert size in degrees to size in pixels for a given Monitor object
-    
-    """
-    #check we have a monitor
-    if not isinstance(monitor, monitors.Monitor):
-        raise "cm2pix requires a monitors.Monitor object as the second argument but received %s" %str(type(monitor))
-    #get monitor params and raise error if necess
-    scrWidthCm = monitor.getWidth()
-    scrSizePix = monitor.getSizePix()
-    if scrSizePix==None:
-        raise "Monitor %s has no known size in pixels (SEE MONITOR CENTER)" %monitor.name
-    if scrWidthCm==None:
-        raise "Monitor %s has no known width in cm (SEE MONITOR CENTER)" %monitor.name
-    
-    return cm*scrSizePix[0]/float(scrWidthCm)
 
 #---color conversions---#000000#FFFFFF------------------------------------------ 
 def dkl2rgb(dkl_Nx3, conversionMatrix=None):

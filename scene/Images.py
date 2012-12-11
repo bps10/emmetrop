@@ -71,7 +71,8 @@ class Images(object):
 
 
         """
-        self.ampSpecs = []        
+        self.ampSpecs = []      
+        self.rawAmp= []
         for group in Directory:
             GroupName = group[-5:]
             print 'GroupName: ', GroupName
@@ -142,7 +143,8 @@ class Images(object):
                 if self.Dbase.Exists('amplitude', GroupName + '.' + name) == False:
                     
                     self.Dbase.CreateGroup('amplitude', GroupName + '/' + name)
-                                  
+                 
+                # raw amplitude spectrum first                 
                 if self.Dbase.Exists('raw_amplitude', 
                                         GroupName + '.' + name
                                         + '.' + 'amplitude') == False:
@@ -156,7 +158,19 @@ class Images(object):
                     self.Dbase.AddData2Database('raw_amplitude', amplitude, 
                                                    GroupName + '.' + name 
                                                    + '.' + 'amplitude')
+                    if goodFile != False or goodFile != 'F': 
+                        self.rawAmp.append(amplitude)
+                    else:
+                        pass
+                else:
+                    if goodFile != False or goodFile != 'F': 
+                        self.rawAmp.append(self.Dbase.QueryDatabase(GroupName, 
+                                                              name + '.' + 'amplitude', 
+                                                              'raw_amplitude'))
+                    else:
+                        pass                    
                 
+                # then amplitude density
                 if self.Dbase.Exists('amplitude_density', 
                                         GroupName + '.' + name + 
                                         '.' + 'amplitude') == False:
@@ -165,13 +179,13 @@ class Images(object):
                         amplitude = self.Dbase.QueryDatabase(GroupName, 
                                                              name + '.' + 'amplitude',
                                                              'raw_amplitude')
-                    amplitude = self.Density(amplitude)                        
+                    amplitude = sig.Density(amplitude)                        
                     self.Dbase.AddData2Database('amplitude_density', amplitude, 
                                                    GroupName + '.' + name + '.' 
                                                    + 'amplitude')
                                                    
                     if goodFile != False or goodFile != 'F': 
-                        self.amp_Specs.append(amplitude)
+                        self.ampSpecs.append(amplitude)
                     else:
                         pass
                 # if already exists, query database to get amplitude spectrums here:

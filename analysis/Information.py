@@ -18,6 +18,8 @@ def LargeArrayInfoFunc(XY_array,interp_method = 'poly',order = 2, res = 1000):
 
     :returns: updated XY_array.
     
+    .. warning:: not currently functional
+    
     .. note:: 
        Used after a call to ConeInfoFunc()
  
