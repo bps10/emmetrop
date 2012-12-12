@@ -36,15 +36,18 @@ class SchematicEyeAnalysis(Images,SchematicEye):
         Images.__init__(self)
         
         self.powerlaw = None
-        self.RF_SPLINE = None
-        self.RF_DOG = None
+        self.RF_DOG, self.RF_SPLINE, self.FFT_RF = DiffOfGaussian(
+                                        excite_SD = 0.5, inhibit_SD = 5.0)
         self.Jay_RF = None
         
-        self.DiffractionLim = {}
-        self.Infinity = {}
-        self.NearFocusFarObject = {}
-        self.NearFocusNearObject = {}
-        self.UnderAccommFarObject = {}
+        self.Analysis = {}
+        self.Analysis['diffract periph'] = {}
+        self.Analysis['diffract fovea'] = {}
+        self.Analysis['inf perip'] = {}
+        self.Analysis['inf fovea'] = {}
+        self.Analysis['near focus, far object'] = {}
+        self.Analysis['near focus, near object'] = {}
+        self.Analysis['underaccomm, far object'] = {}
 
 
         
@@ -80,42 +83,57 @@ class SchematicEyeAnalysis(Images,SchematicEye):
         if not self.powerlaw:
             self.PowerLaw(imagexval, self.amp_mean)
             
-        powerlaw = self.powerlaw(self.xval[1:])
+        powerlaw = self.powerlaw(self.freqs[1:])
 
-        RField = interpolate.splev(self.xval[1:], Receptive_Field, der = 0)
-        RField = RField / sum(RField)
+        #peripheral RF
+        RField_P = interpolate.splev(self.freqs[1:], Receptive_Field, der = 0)
+        RField_P = RField_P / sum(RField_P)
         
+        #foveal RF
+        a, FOVEA_FFT_RF, foo = DiffOfGaussian(excite_SD=0.1, inhibit_SD=0.5)
+        RField_F = interpolate.splev(self.freqs[1:], FOVEA_FFT_RF, der = 0)
+        RField_F = RField_F / sum(RField_F)
+        
+        for key in self.Analysis:
+            if key == 'diffract periph':
+                self.Analysis[key]['retina'] = powerlaw * RField_P
+                self.Analysis[key]['freqs'] = self.freqs[1:]
+
+            if key == 'diffract fovea':
+                self.Analysis[key]['retina'] = powerlaw * RField_F
+                self.Analysis[key]['freqs'] = self.freqs[1:]
                 
-        self.DiffractionLim['name'] = 'diffraction limit'
-        self.DiffractionLim['retina'] = powerlaw * RField
-        self.DiffractionLim['xval'] = self.xval[1:]
-        
-        self.Infinity['name'] = 'inf focus'
-        self.Infinity['retina'] = powerlaw * self.INF[1:, 2] * RField
-        self.Infinity['xval'] = self.xval[1:]
-        
+            if key == 'inf perip':
+                self.Analysis[key]['retina'] = (powerlaw * self.INF[1:, 2] * 
+                                                RField_P)
+                self.Analysis[key]['freqs'] = self.freqs[1:]        
 
-        self.NearFocusNearObject['name'] = 'near focus, near object'
-        self.NearFocusNearObject['retina'] = (powerlaw[:59] *
-                                self.SixteenFocus_SixteenObj_Offaxis[1:60,2] 
-                                    * RField[:59])
-        self.NearFocusNearObject['xval'] = self.xval[1:60]                
-        
+            if key == 'inf fovea':
+                self.Analysis[key]['retina'] = (powerlaw * self.INF[1:, 2] * 
+                                                RField_F)
+                self.Analysis[key]['freqs'] = self.freqs[1:]  
+                 
+            if key == 'near focus, near object':
+                self.Analysis[key]['retina'] = (powerlaw[:59] * 
+                                 self.SixteenFocus_SixteenObj_Offaxis[1:60,2] * 
+                                                RField_P[:59])
+                self.Analysis[key]['freqs'] = self.freqs[1:60]
+            
+            if key == 'near focus, far object':
+                self.Analysis[key]['retina'] = (powerlaw[:7] * 
+                                 self.SixteenFocus_TwentyObj_Offaxis[1:8,2] * 
+                                                RField_P[:7])
+                self.Analysis[key]['freqs'] = self.freqs[1:8]        
+            
+            if key == 'underaccomm, far object':
+                self.Analysis[key]['retina'] = (powerlaw[:7] * 
+                                             self.Sixteen_UnderAccomm[1:8,2] * 
+                                                RField_P[:7])
+                self.Analysis[key]['freqs'] = self.freqs[1:8]        
 
-        self.NearFocusFarObject['name'] = 'near focus, far object'
-        self.NearFocusFarObject['retina'] = (powerlaw[:7] * 
-                                    self.SixteenFocus_TwentyObj_Offaxis[1:8,2] 
-                                        * RField[:7])
-        self.NearFocusFarObject['xval'] = self.xval[1:8]
-
-        self.UnderAccommFarObject['name'] = 'underaccomm, far object'
-        self.UnderAccommFarObject['retina'] = (powerlaw[:7] * 
-                                            self.Sixteen_UnderAccomm[1:8,2]
-                                            * RField[:7])
-        self.UnderAccommFarObject['xval'] = self.xval[1:8]
         
         self.TotalActivity()
-        self.estimateInfo(Receptive_Field)
+        self.estimateInfo(RField_P, RField_F)
 
                   
     def TotalActivity(self):
@@ -130,32 +148,21 @@ class SchematicEyeAnalysis(Images,SchematicEye):
         
         """
         
-        self.DiffractionLim['total'] = np.sum(self.DiffractionLim['retina'])
-        self.Infinity['total'] = np.sum(self.Infinity['retina'])
-        self.NearFocusNearObject['total'] = np.sum(self.NearFocusNearObject['retina'])
-        self.NearFocusFarObject['total'] = np.sum(self.NearFocusFarObject['retina'])
-        self.UnderAccommFarObject['total'] = np.sum(self.UnderAccommFarObject['retina'])
+        for key in self.Analysis:
+            self.Analysis[key]['total'] = np.sum(self.Analysis[key]['retina'])
+            self.Analysis[key]['percent'] = (self.Analysis[key]['total'] /
+                                    self.Analysis['diffract periph']['total'])
 
-
-        self.Infinity['percent'] = (self.Infinity['total'] / 
-                                        self.DiffractionLim['total'])
-        self.NearFocusFarObject['percent'] = (self.NearFocusFarObject['total'] / 
-                                                self.DiffractionLim['total'] )
-        self.NearFocusNearObject['percent'] = (self.NearFocusNearObject['total'] /
-                                                self.DiffractionLim['total'] )
-        self.UnderAccommFarObject['percent'] = (self.UnderAccommFarObject['total'] /
-                                                self.DiffractionLim['total'] )
 
         print ' '
         print 'Total activity (proportion of diffraction)'
         print '-------------------------------------------'
-        print self.Infinity['name'], ': ', self.Infinity['percent']
-        print self.NearFocusFarObject['name'], ': ', self.NearFocusFarObject['percent']
-        print self.NearFocusNearObject['name'], ': ', self.NearFocusNearObject['percent']
-        print self.UnderAccommFarObject['name'], ': ', self.UnderAccommFarObject['percent']
+        for key in self.Analysis:
+            print key, ': ', self.Analysis[key]['percent']
+
 
         
-    def estimateInfo(self, Receptive_Field, print_option=False, 
+    def estimateInfo(self, RField_P, RField_F, print_option=False, 
                      plot_opt=True, save_plots=False, legend=False):
         """Estimate the information in a simple linear cone receptive field.
         
@@ -199,64 +206,69 @@ class SchematicEyeAnalysis(Images,SchematicEye):
            :align: center   
            
         """ 
-        if Receptive_Field == None:
-            raise('Run {0} receptive field function'.format(Receptive_Field))
-                    
-        #imagexval = np.arange(1,self.amp_mean.shape[0] + 1) / 46.0
-        
-        #RField = interpolate.splev(imagexval, Receptive_Field, der = 0)
-        RField = interpolate.splev(self.xval[1:], Receptive_Field, der = 0)
-        RField = RField / sum(RField)
 
+
+        
         cones = [1,2,3,4,5,6]
         total_images = len(self.ampSpecs)
-        self.DiffractionLim['info'] = np.zeros(len(cones))
-        self.Infinity['info'] = np.zeros(len(cones))
-        self.NearFocusFarObject['info'] = np.zeros(len(cones))
-        self.NearFocusNearObject['info'] = np.zeros(len(cones))
-        self.UnderAccommFarObject['info'] = np.zeros(len(cones))
+        
+        for key in self.Analysis:
+            self.Analysis[key]['info'] = np.zeros(len(cones))
+
         for amp in self.rawAmp:
-            #Diffraction:
-            fooInfo = info.SingleConeEntropyFunc((amp[:60]**2 *
-                                                self.DiffractionLim['retina'] * 
-                                                RField), cones)
-            self.DiffractionLim['info'] += fooInfo / total_images
-            
-            
-            #Infinity
-            fooInfo = info.SingleConeEntropyFunc((amp[:60]**2 * 
-                                                    self.Infinity['retina'] * 
-                                                    RField), cones)
-            self.Infinity['info'] += fooInfo / total_images
+            for key in self.Analysis:
+                
+                #Diffraction:
+                if key == 'diffract periph':
+                    fooInfo = info.SingleConeEntropyFunc((amp[:60]**2 *
+                                                self.Analysis[key]['retina'] * 
+                                                RField_P), cones)
+                    self.Analysis[key]['info'] += fooInfo / total_images
 
-            #Near focus, far object                            
-            fooInfo = info.SingleConeEntropyFunc((amp[1:8]**2 *
-                                            self.NearFocusFarObject['retina'] * 
-                                            RField[1:8]), cones)
-            self.NearFocusFarObject['info'] += fooInfo / total_images
+                if key == 'diffract fovea':
+                    fooInfo = info.SingleConeEntropyFunc((amp[:60]**2 *
+                                                self.Analysis[key]['retina'] * 
+                                                RField_F), cones)
+                    self.Analysis[key]['info'] += fooInfo / total_images
+           
+                #Infinity
+                if key == 'inf perip':
+                    fooInfo = info.SingleConeEntropyFunc((amp[:60]**2 * 
+                                                    self.Analysis[key]['retina'] * 
+                                                    RField_P), cones)
+                    self.Analysis[key]['info'] += fooInfo / total_images
 
-            #Near focus, near object                            
-            fooInfo = info.SingleConeEntropyFunc((amp[1:60]**2 * 
-                                            self.NearFocusNearObject['retina'] * 
-                                            RField[1:60]), cones)
-            self.NearFocusNearObject['info'] += fooInfo / total_images
+                if key == 'inf fovea':
+                    fooInfo = info.SingleConeEntropyFunc((amp[:60]**2 * 
+                                                    self.Analysis[key]['retina'] * 
+                                                    RField_F), cones)
+                    self.Analysis[key]['info'] += fooInfo / total_images
+    
+                if key == 'near focus, far object':                           
+                    fooInfo = info.SingleConeEntropyFunc((amp[1:8]**2 *
+                                            self.Analysis[key]['retina'] * 
+                                            RField_P[1:8]), cones)
+                    self.Analysis[key]['info'] += fooInfo / total_images
 
-            #Under accommodated                           
-            fooInfo = info.SingleConeEntropyFunc((amp[1:8]**2 *
-                                            self.UnderAccommFarObject['retina'] * 
-                                            RField[1:8]), cones)
+                if key == 'near focus, near object':            
+                    fooInfo = info.SingleConeEntropyFunc((amp[1:60]**2 * 
+                                            self.Analysis[key]['retina'] * 
+                                            RField_P[1:60]), cones)
+                    self.Analysis[key]['info'] += fooInfo / total_images
+
+                if key == 'underaccomm, far object':                          
+                    fooInfo = info.SingleConeEntropyFunc((amp[1:8]**2 *
+                                            self.Analysis[key]['retina'] * 
+                                            RField_P[1:8]), cones)
                                             
-            self.UnderAccommFarObject['info'] += fooInfo / total_images 
+                    self.Analysis[key]['info'] += fooInfo / total_images 
 
         if print_option == True:
             print ' '
             print 'Information'
             print '------------'
-            print self.DiffractionLim['name'], ': ', self.DiffractionLim['info']
-            print self.Infinity['name'], ': ', self.Infinity['info']
-            print self.NearFocusFarObject['name'], ': ', self.NearFocusFarObject['info']
-            print self.NearFocusNearObject['name'], ': ', self.NearFocusNearObject['info']
-            print self.UnderAccommFarObject['name'], ': ', self.UnderAccommFarObject['info']        
+            for key in self.Analysis:
+                print key, ': ', self.Analysis[key]['info']        
  
         if plot_opt == True:
             
@@ -265,21 +277,46 @@ class SchematicEyeAnalysis(Images,SchematicEye):
 
             pf.AxisFormat()
             pf.TufteAxis(ax, ['left', 'bottom'], [5,5])
-                        
-            plt.plot(cones, self.DiffractionLim['info'], 'ko-',
-                     label=self.DiffractionLim['name'],
+                    
+            plt.plot(cones, self.Analysis['diffract periph']['info'], 
+                     'ko-',
+                     label='diffract periph',
                      linewidth=2.5, markersize=10)
-            plt.plot(cones, self.Infinity['info'], 'ro-',
-                     label=self.Infinity['name'],
+
+            plt.plot(cones, self.Analysis['diffract periph']['info'], 
+                     'ko-.',
+                     label='diffract fova',
                      linewidth=2.5, markersize=10)
-            plt.plot(cones, self.NearFocusFarObject['info'], 'bo--',
-                     label=self.NearFocusFarObject['name'],
+                     
+            plt.plot(cones, 
+                     self.Analysis['inf perip']['info'], 
+                     'ro-',
+                     label='inf perip',
                      linewidth=2.5, markersize=10)
-            plt.plot(cones, self.NearFocusNearObject['info'], 'go--',
-                     label=self.NearFocusNearObject['name'],
+
+            plt.plot(cones, 
+                     self.Analysis['inf fovea']['info'], 
+                     'ro-.',
+                     label='inf perip',
                      linewidth=2.5, markersize=10)
-            plt.plot(cones, self.UnderAccommFarObject['info'], 'co--',
-                     label=self.UnderAccommFarObject['name'],
+                     
+                     
+            plt.plot(cones, 
+                     self.Analysis['near focus, far object']['info'], 
+                     'bo--',
+                     label='near focus, far object',
+                     linewidth=2.5, markersize=10)
+                     
+            plt.plot(cones, 
+                     self.Analysis['near focus, near object']['info'], 
+                     'go--',
+                     label='near focus, near object',
+                     linewidth=2.5, markersize=10)
+                     
+            plt.plot(cones, 
+                     self.Analysis['underaccomm, far object']['info'],
+                     'co--',
+                     label='underaccomm, far object',
                      linewidth=2.5, markersize=10)
 
             plt.xlim([min(cones)-0.1, max(cones)+0.1])
@@ -302,127 +339,6 @@ class SchematicEyeAnalysis(Images,SchematicEye):
     #######################################
 
     
-    def DiffOfGaussian(self, excite_SD = 0.5, inhibit_SD = 5.0, plot_opt = True,
-                       save_plots = False):
-        """Create a difference of gaussians receptive field and plot it.
-
-        :param excite_SD: standard deviation parameter of excitatory gaussian.
-        :param inhibit_SD: standard deviation parameter of inhibitory \
-        surround gaussian. Default = 5.0.   
-        :param plot_opt: decide whether to output plots (True) or not (False)
-        :type plot_opt: bool
-        :param save_plots: decide whether to save plots (True) or not (False)
-        :type save_plots: bool
-        
-        :returns: Plot1: difference of gaussians receptive field \n
-                    Plot2: FFT spectrum of plot 1.
-                
-        .. note:: This functions needs to become more flexible. Should \
-        eventually add more cone models
-        
-        
-        Currently this function outputs the following:
-
-            
-        .. figure:: ../../Figures/ConeRF.png 
-           :height: 300px
-           :width: 400px
-           :align: center   
-           
-           **Fig 1:** A simple Diff of Gaussian receptive field
-
-           
-        .. figure:: ../../Figures/ConeRF_FFT.png  
-           :height: 300px
-           :width: 400px
-           :align: center
-           
-           **Fig 2:** And converted into a probability density and Fourier 
-           transformed
-
-        """
-        
-        N = 400
-        Xvals = np.arange(-15, 15, 10./ (2.0 * N) )
-        
-        gauss1 = lambda x : 1.0*np.exp(-(x)**2 / (2 * excite_SD**2)) 
-        self.y_excite = gauss1(Xvals)
-
-        #self.y_excite = ( max(self.y_excite) / self.y_excite) * a
-        
-        gauss2 = lambda x : 1.0*np.exp(-(x)**2 / (2 * inhibit_SD**2))     
-        y_inhibit = gauss2(Xvals) 
-
-        normFact = sum(self.y_excite) / sum(y_inhibit)
-        y_inhibit *= normFact
-        
-
-        self.RF_DOG = self.y_excite - y_inhibit
-        self.RF_DOG = self.RF_DOG / max(self.RF_DOG)
-        
-        self.FFT_RF = (np.fft.fftshift(np.abs(np.fft.fft(self.RF_DOG))) 
-                        / np.sqrt(2 * N))
-
-        length = np.floor(self.FFT_RF.shape[0] / 2.) + 1       
-        ## set up for interpolation
-        self.RF_SPLINE = interpolate.splrep(Xvals[length:] * 60,
-                                            self.FFT_RF[length:], s=0)
-        
-        RF = interpolate.splev(Xvals[length:] * 60, self.RF_SPLINE, der = 0)
-        RF = RF / np.sum(RF)
-            
-        if plot_opt:
-            fig = plt.figure(figsize=(8,6))
-            ax = fig.add_subplot(111)
-
-            pf.AxisFormat()
-            pf.TufteAxis(ax, ['left', 'bottom'])
-            
-            ax.plot(Xvals, self.RF_DOG, 'k', linewidth=2.5)
-            #ax.plot(Xvals, self.FFT_RF, linewidth=2.5)
-            
-    
-            ax.get_xaxis().tick_bottom()
-            ax.get_yaxis().tick_left()
-    
-            plt.xlabel('distance (arcmin)')
-            plt.ylabel('amplitude')
-            
-            plt.tight_layout()
-            
-            if save_plots:
-                fig.show()
-                fig.savefig('../../Figures/ConeRF.png')
-                plt.close()
-            else:
-                plt.show()
-            
-            fig2 = plt.figure(figsize=(8,6))
-            ax = fig2.add_subplot(111)
-            pf.AxisFormat()
-            pf.TufteAxis(ax, ['left', 'bottom'])
-            
-            ax.loglog(Xvals[length:] * 60, RF, 'k',
-                          linewidth=2.5)
-            
-    
-            ax.get_xaxis().tick_bottom()
-            ax.get_yaxis().tick_left()
-    
-            plt.ylim([10**-4, 10**-1])
-            plt.xlim([self.xval[1], 100])
-            plt.xlabel('spatial frequency (cycles / deg)')
-            plt.ylabel('density')
-            
-            plt.tight_layout()
-            
-            if save_plots:
-                fig2.show()
-                fig2.savefig('../../Figures/ConeRF_FFT.png')
-                plt.close()
-            else:
-                plt.show()
-        
 
     def DeconstructedFFT(self, plot_option = True, save_plots = False):
         """This one is for Jay to demonstrate the logic behind fft.
@@ -453,9 +369,6 @@ class SchematicEyeAnalysis(Images,SchematicEye):
            **Fig 2:** Response of receptive field to sine waves. 
            
         """
-        
-        if self.RF_DOG == None:
-            self.DiffOfGaussian(plot_opt = 0)
             
         N = 400
         Xvals = np.arange(-15, 15, 10./ (2.0 * N) )
@@ -523,7 +436,7 @@ class SchematicEyeAnalysis(Images,SchematicEye):
             ax.loglog(Xvals[length:] * 60, RF, 'k-', linewidth = 2.5)
             
             plt.ylim([10**-4, 10**-1])
-            plt.xlim([self.xval[1], 100])
+            plt.xlim([self.freqs[1], 100])
             
             plt.xlabel('spatial frequency (cycles / deg)')
             plt.ylabel('density')      
@@ -620,17 +533,17 @@ class SchematicEyeAnalysis(Images,SchematicEye):
         pf.TufteAxis(ax, ['left', 'bottom'], [5,5])
 
         ''' on axis plots '''
-        ax.plot(self.xval, self.INF[:,4], 'k', linewidth = 2.5, 
+        ax.plot(self.freqs, self.INF[:,4], 'k', linewidth = 2.5, 
                 label='diffraction ')
-        ax.plot(self.xval, self.INF[:,2], 'r', linewidth=2.5, 
+        ax.plot(self.freqs, self.INF[:,2], 'r', linewidth=2.5, 
                 label='infinity') 
         
         if plot_option == 1:
-            ax.plot(self.xval, self.TwentyFt[:,2], 'g', linewidth=2.5, 
+            ax.plot(self.freqs, self.TwentyFt[:,2], 'g', linewidth=2.5, 
                     label='20ft')
-            ax.plot(self.xval, self.Onemeter[:,2], 'b', linewidth=2.5, 
+            ax.plot(self.freqs, self.Onemeter[:,2], 'b', linewidth=2.5, 
                     label='1m')
-            ax.plot(self.xval[:20], self.SixteenIn[:20,2], 'm', 
+            ax.plot(self.freqs[:20], self.SixteenIn[:20,2], 'm', 
                     linewidth=2.5, label='16in')
         
         
@@ -638,25 +551,25 @@ class SchematicEyeAnalysis(Images,SchematicEye):
         
         
         if plot_option ==3:
-            ax.plot(self.xval, self.INF_offaxis[:,4], 'k--', linewidth=2.5)
+            ax.plot(self.freqs, self.INF_offaxis[:,4], 'k--', linewidth=2.5)
             
-            ax.plot(self.xval, self.TwentyFt_offaxis[:,2], 'g--', 
+            ax.plot(self.freqs, self.TwentyFt_offaxis[:,2], 'g--', 
                     linewidth=2.5)
-            ax.plot(self.xval, self.Onemeter_offaxis[:,2], 'b--', 
+            ax.plot(self.freqs, self.Onemeter_offaxis[:,2], 'b--', 
                     linewidth=2.5)
-            ax.plot(self.xval[:20], self.SixteenIn_offaxis[:20,2], 'm--', 
+            ax.plot(self.freqs[:20], self.SixteenIn_offaxis[:20,2], 'm--', 
                     linewidth=2.5)
         
         
         if plot_option == 2:
-            ax.plot(self.xval, self.INF_offaxis[:,2], 'r--', linewidth=2.5)
+            ax.plot(self.freqs, self.INF_offaxis[:,2], 'r--', linewidth=2.5)
             
-            ax.plot(self.xval[:60], 
+            ax.plot(self.freqs[:60], 
                     self.SixteenFocus_SixteenObj_Offaxis[:60,2],
                     'g--', linewidth=2.5, label = 'near focus, near obj')
-            ax.plot(self.xval[:20], self.Sixteen_UnderAccomm[:20,2], 
+            ax.plot(self.freqs[:20], self.Sixteen_UnderAccomm[:20,2], 
                     'c--', linewidth=2.5, label = 'underacc, far obj')
-            ax.plot(self.xval[:20], self.SixteenFocus_TwentyObj_Offaxis[:20,2], 
+            ax.plot(self.freqs[:20], self.SixteenFocus_TwentyObj_Offaxis[:20,2], 
                     'b--',linewidth=2.5, label = 'near focus, far obj')
         
         if legend: 
@@ -734,10 +647,10 @@ class SchematicEyeAnalysis(Images,SchematicEye):
         """
         from eye.Optics import MTF
         
-        Fovea = MTF(self.xval[:], 0)
-        TenDeg = MTF(self.xval[:], 10)
-        TwentyDeg = MTF(self.xval[:],20)
-        FourtyDeg = MTF(self.xval[:],40)
+        Fovea = MTF(self.freqs[:], 0)
+        TenDeg = MTF(self.freqs[:], 10)
+        TwentyDeg = MTF(self.freqs[:],20)
+        FourtyDeg = MTF(self.freqs[:],40)
         
         fig = plt.figure(figsize=(8,6))
         ax = fig.add_subplot(111)
@@ -746,19 +659,19 @@ class SchematicEyeAnalysis(Images,SchematicEye):
         pf.TufteAxis(ax, ['left', 'bottom'], [5,5])
         
         #Navarro et al 1993 analytical func:
-        ax.plot(self.xval[:], Fovea, 'm--', label='fovea', linewidth=2.5)
-        ax.plot(self.xval[:], TenDeg, 'r--', label='10 deg', linewidth=2.5)
-        ax.plot(self.xval[:], TwentyDeg, 'g--', label='20 deg', linewidth=2.5)
-        ax.plot(self.xval[:], FourtyDeg, 'b--',label='40 deg', linewidth=2.5)
+        ax.plot(self.freqs[:], Fovea, 'm--', label='fovea', linewidth=2.5)
+        ax.plot(self.freqs[:], TenDeg, 'r--', label='10 deg', linewidth=2.5)
+        ax.plot(self.freqs[:], TwentyDeg, 'g--', label='20 deg', linewidth=2.5)
+        ax.plot(self.freqs[:], FourtyDeg, 'b--',label='40 deg', linewidth=2.5)
         
         #OSLO ray trace data:
-        ax.plot(self.xval[:], self.INF[:,2], 'm-', label='fovea', 
+        ax.plot(self.freqs[:], self.INF[:,2], 'm-', label='fovea', 
                 linewidth=2.5)
-        ax.plot(self.xval[:], self.INF_offaxis[:,2], 'r-', label='10 deg',
+        ax.plot(self.freqs[:], self.INF_offaxis[:,2], 'r-', label='10 deg',
                 linewidth=2.5)        
-        ax.plot(self.xval[:], self.TwentyDegOffAxis_InfFoc[:,2], 'g-', 
+        ax.plot(self.freqs[:], self.TwentyDegOffAxis_InfFoc[:,2], 'g-', 
                 label='20 deg', linewidth=2.5)
-        ax.plot(self.xval[:30], self.FortyDegOffAxis_InfFoc[:30,2], 'b-',
+        ax.plot(self.freqs[:30], self.FortyDegOffAxis_InfFoc[:30,2], 'b-',
                 label='40 deg', linewidth=2.5)
                 
         if legend: 
@@ -770,7 +683,7 @@ class SchematicEyeAnalysis(Images,SchematicEye):
         mi, ma = plt.ylim()
         
         #plt.ylim([10**-2.5, 10**0])
-        #plt.xlim([self.xval[1], 100])
+        #plt.xlim([self.freqs[1], 100])
         
         plt.xlabel('spatial frequency (cycles / deg)')
         plt.ylabel('modulation')
@@ -829,9 +742,6 @@ class SchematicEyeAnalysis(Images,SchematicEye):
            
         """
 
-        if self.RF_SPLINE == None:
-            self.DiffOfGaussian()
-
         if Receptive_Field.lower() == 'jay':
             Rec_Field = self.Jay_RF
             print 'Used Jay receptive field'
@@ -853,21 +763,21 @@ class SchematicEyeAnalysis(Images,SchematicEye):
         pf.AxisFormat()
         pf.TufteAxis(ax, ['left', 'bottom'])
         
-        powerlaw = self.powerlaw(self.xval[1:])
+        powerlaw = self.powerlaw(self.freqs[1:])
         
-        ax.loglog(self.xval[1:], self.powerlaw(self.xval[1:]), 'k',
+        ax.loglog(self.freqs[1:], self.powerlaw(self.freqs[1:]), 'k',
                   linewidth = 2.5)
         
-        ax.loglog(self.xval[1:], self.powerlaw(self.xval[1:]) * self.INF[1:,2], 
+        ax.loglog(self.freqs[1:], self.powerlaw(self.freqs[1:]) * self.INF[1:,2], 
                   'r', linewidth=2.5, label='inf focus')
                   
-        ax.loglog(self.xval[1:60], 
+        ax.loglog(self.freqs[1:60], 
                   powerlaw[:59] * self.SixteenFocus_SixteenObj_Offaxis[1:60,2],
                   'g--', linewidth=2.5, label='near focus, near object')          
-        ax.loglog(self.xval[1:8], 
+        ax.loglog(self.freqs[1:8], 
                   powerlaw[:7] * self.SixteenFocus_TwentyObj_Offaxis[1:8,2],
                   'b--', linewidth=2.5, label='near focus, far object')
-        ax.loglog(self.xval[1:8], 
+        ax.loglog(self.freqs[1:8], 
                   powerlaw[:7] * self.Sixteen_UnderAccomm[1:8,2],
                   'c--', linewidth=2.5, label='underaccom, far object')                  
         
@@ -882,7 +792,7 @@ class SchematicEyeAnalysis(Images,SchematicEye):
         ax.text(15, 10**-4.0, r'$\frac{1}{\mathit{f}}$', size = 35)
         
         plt.ylim([10**-8, 10**-3])
-        plt.xlim([self.xval[1], 100])
+        plt.xlim([self.freqs[1], 100])
         
         plt.xlabel('spatial frequency (cycles / deg)')
         plt.ylabel('density')
@@ -909,29 +819,28 @@ class SchematicEyeAnalysis(Images,SchematicEye):
             
         pf.AxisFormat()
         pf.TufteAxis(ax, ['left', 'bottom'])
-     
 
-        ax.loglog(self.DiffractionLim['xval'], 
-                  self.DiffractionLim['retina'],
+        ax.loglog(self.Analysis['diffract periph']['freqs'], 
+                  self.Analysis['diffract periph']['retina'],
                   'k', linewidth = 2.5)
 
-        ax.loglog(self.Infinity['xval'], 
-                  self.Infinity['retina'] ,
+        ax.loglog(self.Analysis['inf perip']['freqs'], 
+                  self.Analysis['inf perip']['retina'] ,
                   'r', linewidth=2.5, 
-                  label= self.Infinity['name'])    
+                  label= 'inf perip')    
         
-        ax.loglog(self.NearFocusNearObject['xval'], 
-                  self.NearFocusNearObject['retina'],
+        ax.loglog(self.Analysis['near focus, far object']['freqs'], 
+                  self.Analysis['near focus, far object']['retina'],
                   'g--', linewidth=2.5, 
                   label = self.NearFocusNearObject['name'])   
 
-        ax.loglog(self.NearFocusFarObject['xval'], 
-                  self.NearFocusFarObject['retina'],
+        ax.loglog(self.Analysis['near focus, near object']['freqs'], 
+                  self.Analysis['near focus, near object']['retina'],
                   'b--', linewidth=2.5, 
                   label = self.NearFocusFarObject['name'])
                   
-        ax.loglog(self.UnderAccommFarObject['xval'], 
-                  self.UnderAccommFarObject['retina'] ,
+        ax.loglog(self.Analysis['underaccomm, far object']['freqs'], 
+                  self.Analysis['underaccomm, far object']['retina'] ,
                   'c--', linewidth=2.5, 
                   label =self.UnderAccommFarObject['name'])                  
         
@@ -947,7 +856,7 @@ class SchematicEyeAnalysis(Images,SchematicEye):
         ax.text(12, 10**-5.0, r'$\frac{1}{\mathit{f}}$', size = 35)
         
         plt.ylim([10**-8, 10**-3.75])
-        plt.xlim([self.xval[1], 100])
+        plt.xlim([self.freqs[1], 100])
         
         plt.xlabel('spatial frequency (cycles / deg)')
         plt.ylabel('density')
@@ -966,3 +875,129 @@ class SchematicEyeAnalysis(Images,SchematicEye):
             
         else:
             plt.show()
+            
+def DiffOfGaussian(excite_SD = 0.5, inhibit_SD = 5.0, plot_opt = False,
+                   save_plots = False):
+    """Create a difference of gaussians receptive field and plot it.
+
+    :param excite_SD: standard deviation parameter of excitatory gaussian.
+    :param inhibit_SD: standard deviation parameter of inhibitory \
+    surround gaussian. Default = 5.0.   
+    :param plot_opt: decide whether to output plots (True) or not (False)
+    :type plot_opt: bool
+    :param save_plots: decide whether to save plots (True) or not (False)
+    :type save_plots: bool
+    
+    :returns: Plot1: difference of gaussians receptive field \n
+                Plot2: FFT spectrum of plot 1.
+            
+    .. note:: This functions needs to become more flexible. Should \
+    eventually add more cone models
+    
+    
+    Currently this function outputs the following:
+
+        
+    .. figure:: ../../Figures/ConeRF.png 
+       :height: 300px
+       :width: 400px
+       :align: center   
+       
+       **Fig 1:** A simple Diff of Gaussian receptive field
+
+       
+    .. figure:: ../../Figures/ConeRF_FFT.png  
+       :height: 300px
+       :width: 400px
+       :align: center
+       
+       **Fig 2:** And converted into a probability density and Fourier 
+       transformed
+
+    """
+    
+    N = 400
+    Xvals = np.arange(-15, 15, 10./ (2.0 * N) )
+    
+    gauss1 = lambda x : 1.0*np.exp(-(x)**2 / (2 * excite_SD**2)) 
+    y_excite = gauss1(Xvals)
+
+    
+    gauss2 = lambda x : 1.0*np.exp(-(x)**2 / (2 * inhibit_SD**2))     
+    y_inhibit = gauss2(Xvals) 
+
+    normFact = sum(y_excite) / sum(y_inhibit)
+    y_inhibit *= normFact
+    
+
+    RF_DOG = y_excite - y_inhibit
+    RF_DOG = RF_DOG / max(RF_DOG)
+    
+    FFT_RF = (np.fft.fftshift(np.abs(np.fft.fft(RF_DOG))) 
+                    / np.sqrt(2 * N))
+
+    length = np.floor(FFT_RF.shape[0] / 2.) + 1       
+    ## set up for interpolation
+    RF_SPLINE = interpolate.splrep(Xvals[length:] * 60,
+                                        FFT_RF[length:], s=0)
+    
+    RF = interpolate.splev(Xvals[length:] * 60, RF_SPLINE, der = 0)
+    RF = RF / np.sum(RF)
+        
+    if plot_opt:
+        fig = plt.figure(figsize=(8,6))
+        ax = fig.add_subplot(111)
+
+        pf.AxisFormat()
+        pf.TufteAxis(ax, ['left', 'bottom'])
+        
+        ax.plot(Xvals, RF_DOG, 'k', linewidth=2.5)
+        #ax.plot(Xvals, self.FFT_RF, linewidth=2.5)
+        
+
+        ax.get_xaxis().tick_bottom()
+        ax.get_yaxis().tick_left()
+
+        plt.xlabel('distance (arcmin)')
+        plt.ylabel('amplitude')
+        
+        plt.tight_layout()
+        
+        if save_plots:
+            fig.show()
+            fig.savefig('../../Figures/ConeRF.png')
+            plt.close()
+        else:
+            plt.show()
+        
+        fig2 = plt.figure(figsize=(8,6))
+        ax = fig2.add_subplot(111)
+        pf.AxisFormat()
+        pf.TufteAxis(ax, ['left', 'bottom'])
+        
+        ax.loglog(Xvals[length:] * 60, RF, 'k',
+                      linewidth=2.5)
+        
+
+        ax.get_xaxis().tick_bottom()
+        ax.get_yaxis().tick_left()
+
+        plt.ylim([10**-4, 10**-1])
+        plt.xlim([1, 100])
+        plt.xlabel('spatial frequency (cycles / deg)')
+        plt.ylabel('density')
+        
+        plt.tight_layout()
+        
+        if save_plots:
+            fig2.show()
+            fig2.savefig('../../Figures/ConeRF_FFT.png')
+            plt.close()
+        else:
+            plt.show()
+
+    return RF_DOG, RF_SPLINE, FFT_RF
+
+
+if __name__ == "__main__":
+    print 'nothing doing'

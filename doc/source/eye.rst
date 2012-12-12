@@ -8,4 +8,4 @@ This module mostly being used for importing OSLO data right now.  The plan is to
 
    eye_Optics.rst
    eye_navarro1999params.rst
-   eye_eye.rst
+   eye_eyeModel.rst

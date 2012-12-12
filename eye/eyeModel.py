@@ -4,7 +4,7 @@ import numpy as np
 
 from scene.DataManip import rad2deg
 
-class SchematicEye():
+class SchematicEye(object):
     """
     This class controls the loading of OSLO data.
     Eventually it will interface with a C++ ray tracer dynamically.
@@ -23,7 +23,17 @@ class SchematicEye():
                 p = './OSLO_MTF_DATA/'
         else:
             p = OSLO_directory
-            
+        self.loadOSLOData(p)
+        
+    def loadOSLOData(self,p):
+        """Load data from OSLO
+        
+        This is currently a very static function.
+        
+        :param p: directory path. Passed from init function.
+        :type p: path
+        
+        """
         self.INF = self.importOSLOfile(p + 'ONaxisMTFinfFocusNavarrow1999.txt')
         self.TwentyFt = self.importOSLOfile(p + 'ONaxisMTF20ftFocusNavarrow1999.txt')
         self.Onemeter = self.importOSLOfile(p + 'ONaxisMTF1mFocusNavarrow1999.txt')
@@ -42,7 +52,7 @@ class SchematicEye():
         self.FortyDegOffAxis_InfFoc = self.importOSLOfile(p + '40degOFFaxisMTFinfFocusNavarrow1999.txt')       
         
         ## convert mm to rad (1mm image/24mm axial length)
-        self.xval = self.INF[:,1] / rad2deg(1.0/self.getAxialLength())
+        self.freqs = self.INF[:,1] / rad2deg(1.0/self.getAxialLength())
 
 
     ###  DATA PROCESSING FUNCTIONS ###
