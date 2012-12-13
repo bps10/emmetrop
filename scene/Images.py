@@ -45,6 +45,24 @@ class Images(object):
         self.amp_mean = None
         self.getData()
         
+        self.imagexval = np.arange(1,self.amp_mean.shape[0] + 1) / 46.0
+        self.PowerLaw(self.imagexval, self.amp_mean)
+
+    def returnImageData(self):
+        """
+        """
+        
+        imageData =     {
+                        'totalImages': len(self.ampSpecs),
+                        'ampSpecs': self.ampSpecs,
+                        'ampMean': self.amp_mean,
+                        'rawAmp': self.rawAmp,
+                        'powerlaw': self.powerlaw,
+                        'imagexval': self.imagexval
+                        }
+                        
+        return imageData
+               
     def getData(self, Directory = ['C:/Data/UPenn_Images/Images/cd01a',
                                    'C:/Data/UPenn_Images/Images/cd02a',
                                    'C:/Data/UPenn_Images/Images/cd32a',
@@ -206,7 +224,10 @@ class Images(object):
         for amp in self.ampSpecs:
             self.amp_mean += amp / total_images
 
+    
 
+        
+        
     def computeImageHist(self,img):
         """Compute the histogram of a grayscale (for now) image
         

@@ -1,16 +1,16 @@
 from __future__ import division
 import numpy as np
-import sys
 import matplotlib.pylab as plt
 from matplotlib.lines import Line2D
 import matplotlib.animation as animation
 
-import PlottingFun as pf
+#eschaton imports
+from renderer import PlottingFun as pf
 from scene import DataManip as dm
 
 ## 1. Figure out relationship between spring constant and number of nodes.
 
-def main():
+def getParams():
     """
     calling this will get some user input and then create the movie.
     """
@@ -101,6 +101,8 @@ def EyeGrowthFunc(NumberofNodes=36,age=6,INTSTEP = 0.01, LengthofTime=12,Pressur
      .. note:: 
         see Hung et al. 2010.
         
+    .. todo:
+       Move plotting methods to renderer.
     """
 
     # Generate Nodes as objects
@@ -555,19 +557,22 @@ class EyeAnimation(animation.TimedAnimation):
     
 def EyeLengthPlot(Nodes1,Nodes2=0,Nodes3=0,FONTSIZE = 20,LINEWIDTH=2.5):
     """
+    Plot eye growth reported in Zadnik et al. against various models
     """
 
     
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    pf.AxisFormat()
+    pf.TufteAxis(ax,['left','bottom'], [5,5])
     
     PaperEyeLength = np.zeros(len(Nodes1['age']))
     for i in range(0,len(Nodes1['age'])):
         PaperEyeLength[i] = EyeLength(Nodes1['age'][i])
     
-    ax.plot(Nodes1['age'], Nodes1['modeleyelength'],'--b',linewidth = LINEWIDTH)
-    pf.TufteAxis(ax,['left','bottom'])
- 
+    ax.plot(Nodes1['age'], Nodes1['modeleyelength'],'--b',
+            linewidth = LINEWIDTH)
+   
     plt.xlabel('age',fontsize=FONTSIZE)
     plt.ylabel('axial length (mm)', fontsize=FONTSIZE)
     plt.xlim([Nodes1['age'][0], Nodes1['age'][-1]])
@@ -576,22 +581,27 @@ def EyeLengthPlot(Nodes1,Nodes2=0,Nodes3=0,FONTSIZE = 20,LINEWIDTH=2.5):
     
     if isinstance(Nodes2, dict):
         plt.hold(True)
-        ax.plot(Nodes1['age'], Nodes2['modeleyelength'],'-b',linewidth = LINEWIDTH)
+        ax.plot(Nodes1['age'], Nodes2['modeleyelength'],'-b',
+                linewidth = LINEWIDTH)
         plt.hold(True)
         ax.plot(Nodes1['age'],PaperEyeLength,'-k',linewidth=LINEWIDTH)
-        ax.legend(['Myopia','Emmetropia','Zadnik et al.'],loc=4,prop={'size':FONTSIZE}).get_frame().set_edgecolor('white')
+        ax.legend(['Myopia','Emmetropia','Zadnik et al.'],loc=4,
+                  prop={'size':FONTSIZE}).get_frame().set_edgecolor('white')
 
     if isinstance(Nodes3, dict):
         plt.hold(True)
-        ax.plot(Nodes1['age'], Nodes3['modeleyelength'],'-b',linewidth = LINEWIDTH)
+        ax.plot(Nodes1['age'], Nodes3['modeleyelength'],'-b',
+                linewidth = LINEWIDTH)
         plt.hold(True)
         ax.plot(Nodes1['age'],PaperEyeLength,'-k',linewidth=LINEWIDTH)
-        ax.legend(['Myopia','Emmetropia','Zadnik et al.'],loc=4,prop={'size':FONTSIZE}).get_frame().set_edgecolor('white')
+        ax.legend(['Myopia','Emmetropia','Zadnik et al.'],loc=4,
+                  prop={'size':FONTSIZE}).get_frame().set_edgecolor('white')
     
     if Nodes2 == 0:
         plt.hold(True)
         ax.plot(Nodes1['age'],PaperEyeLength,'-k',linewidth=LINEWIDTH)
-        ax.legend(['Model','Zadnik et al.'],loc=4,prop={'size':FONTSIZE}).get_frame().set_edgecolor('white')
+        ax.legend(['Model','Zadnik et al.'],loc=4,
+                  prop={'size':FONTSIZE}).get_frame().set_edgecolor('white')
     
     
     plt.tight_layout()
@@ -649,20 +659,29 @@ def NodeRate(age,timeStep):
     rate = length1 - length2
 
     return rate
+
+def main():
+    """
+    Run basic program
+    """
+    NodesEmmetr = EyeGrowthFunc(Animate=0)     
+    NodesMyopia = EyeGrowthFunc(Animate=0,Loosen=1)
+ 
+    EyeLengthPlot(NodesMyopia,NodesEmmetr)
+    plt.show()    
+
     
     
 # if enter 'python Eye_Growth.py' into console, this will run.
 if __name__ == "__main__":
-    input_params = main()
+    input_params = getParams()
     
-    Nodes,xx,yy = EyeGrowthFunc(Animate=1, **input_params)    
-    NodesEm = Nodes
-    ani = EyeAnimation()
+    NodesEm,xx,yy = EyeGrowthFunc(Animate=0, **input_params)    
+    #ani = EyeAnimation()
     #ani.save('eye.mp4', fps=20, codec='mpeg4', clear_temp=True, frame_prefix='_tmp')
     
-    Nodes,xx,yy = EyeGrowthFunc(Animate=1,Loosen=1, **input_params)
-    NodesMy = Nodes
-    ani2 = EyeAnimation()
+    NodesMy,xx,yy = EyeGrowthFunc(Animate=0,Loosen=1, **input_params)
+    #ani2 = EyeAnimation()
     
     EyeLengthPlot(NodesEm,NodesMy)
     plt.show(block=True)

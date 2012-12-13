@@ -8,5 +8,4 @@ The bulk of the magic happens here.
 
    analysis_Information.rst
    analysis_NeitzModel.rst
-   analysis_PlottingFun.rst
    analysis_Eye_Grow.rst

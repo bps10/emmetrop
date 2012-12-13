@@ -3,10 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-eschaton documentation site:
-=================================================
+eschaton:
+============
 
 an emmetropization model
+
+.. warning:: 
+   this project is very much under development.
+
+
 
 Documentation of source code can be found here:
 
@@ -15,11 +20,15 @@ Documentation of source code can be found here:
 
    Install.rst
    analysis.rst
+   cones.rst
    database.rst
    eye.rst
-   scene.rst
    gui.rst
+   renderer.rst
+   scene.rst
    
+.. seealso::
+   Source code can be found on `GitHub`_   
    
 Notes, links, errata, and to do's can be found here:
 
@@ -27,13 +36,6 @@ Notes, links, errata, and to do's can be found here:
    :maxdepth: 2
    
    Notes_links_todos.rst
-
-.. warning:: 
-   this project is very much under development.
-
-
-.. seealso::
-   Source code can be found on `GitHub`_
 
 
 
