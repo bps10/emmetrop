@@ -16,13 +16,11 @@ def main(args):
         inc_fovea = True
     else:
         inc_fovea = False
-
-        
+       
     if args.save:
         save_plots = True
     else:
         save_plots = False
-
 
     if args.rfield.lower() == 'jay':
         Receptive_Field = "Jay"
@@ -31,43 +29,40 @@ def main(args):
     else: 
         raise('Sorry, receptive field entered not supported: Jay or FFT')
         
-        
-    Eye = SchematicEyeAnalysis(RF_opt = Receptive_Field, plot_args='all', 
-                               save_arg = save_plots, fovea = inc_fovea)
-    
 
-        
+    plot_args = []
 
-        
     if args.mtf or args.verbose:
-        Eye.MTFfamilyPlots(save_plots, plot_option=2, legend = 0)
+        plot_args.append('mtf')
         
     if args.periph or args.verbose:
-        Eye.PeripheralPlot(save_plots)        
+        plot_args.append('periph')        
+    
+    if args.accomm or args.verbose:
+        plot_args.append('accomm')
         
     if args.dog or args.verbose:
         if Receptive_Field.lower() == 'fft':
-            Eye.PlotDoG(save_plots)
-        else:
-            pass
-        
-    if args.jay or args.verbose:
-        if Receptive_Field.lower() == 'jay':
-            plot = True
-        else:
-            plot = False
-        Eye.DeconstructedFFT(plot_option = plot, save_plots = save_plots)
-        
+            plot_args.append('plotDoG')
+        elif Receptive_Field.lower() == 'jay':
+            plot_args.append('plotDeconstructed')
+                
     if args.amp or args.verbose:
-        Eye.PlotPowerSpec(save_plots)
+        plot_args.append('amp')
       
     if args.activity or args.verbose:
-        Eye.AmpModPlot(Receptive_Field, save_plots)
+        plot_args.append('activity')
+    
+    if args.info or args.verbose:
+        plot_args.append('info')
         
+    Eye = SchematicEyeAnalysis(RF_opt = Receptive_Field, plot_args=plot_args, 
+                               save_arg = save_plots, fovea = inc_fovea)
+    
     if args.eyegrow:
         from analysis import Eye_Grow as eg
         eg.main()
-    
+
     
     return Eye
 
@@ -75,18 +70,20 @@ def main(args):
 if __name__ == "__main__": 
     parser = argparse.ArgumentParser()
     
+    parser.add_argument("-c", "--accomm", action="store_true",
+                        help="display accommodation MTF plots")
     parser.add_argument("-m", "--mtf", action="store_true", 
-                        help="plot MTF family")
+                        help="display MTF family plots")
     parser.add_argument("-a", "--amp", action="store_true",
                         help="plot amplitude spectrum")
     parser.add_argument("-d", "--dog", action="store_true", 
                          help="display DoG receptive field")
-    parser.add_argument("-j", "--jay", action="store_true",
-                        help="display deconstructed FFT (Jay)")
     parser.add_argument("-y", "--activity", action="store_true",
                         help="display activity plots")
     parser.add_argument("-p", "--periph", action="store_true", 
-                        help="display a square of a given number")
+                        help="display peripheral mtf plots")
+    parser.add_argument("-i", "--info", action="store_true",
+                        help="display information plot")
     parser.add_argument("-v", "--verbose", action="store_true",
                         help="run all analyses and plots")
     parser.add_argument("-s", "--save", action="store_true",

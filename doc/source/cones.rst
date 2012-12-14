@@ -8,4 +8,4 @@ Currently only supports simple Difference of Gaussian approximations.
 .. toctree::
    :maxdepth: 2
    
-   .. cones_dogRFields.rst
+   cones_dogRFields.rst

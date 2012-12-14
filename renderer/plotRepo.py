@@ -5,7 +5,8 @@ from eye.eyeModel import SchematicEye
 from renderer import PlottingFun as pf
 
 class Plotter(SchematicEye):
-
+    """A plotting repo
+    """
     def __init__(self, Analysis, recepitive_field, imageData, freqs,
                  plots, save_plots, legend):
         # import our dictionaries of data:
@@ -29,17 +30,22 @@ class Plotter(SchematicEye):
         self.findFigDirectory()
         
         # plot the appropriate plots, with options:
-        #for plot in plots:
-        self.plotAmpSpec(save_plots)
-        
-        self.plotMTFfamily(save_plots)
-        self.plotPeripheral(save_plots)
-        
-        self.plotDoG(save_plots)
-        self.plotDeconstructedRF(save_plots)        
-
-        self.plotActivity(save_plots)
-        self.plotInformation(save_plots, legend)
+        if 'amp' in plots:
+            self.plotAmpSpec(save_plots)
+        if 'mtf' in plots:
+            self.plotMTFfamily(save_plots)
+        if 'accomm' in plots:
+            self.plotMTFfamily(plot_option=2, save_plots=save_plots)
+        if 'periph' in plots:
+            self.plotPeripheral(save_plots)
+        if 'dog' in plots:
+            self.plotDoG(save_plots)
+        if 'dog' in plots:
+            self.plotDeconstructedRF(save_plots)        
+        if 'activity' in plots:
+            self.plotActivity(save_plots)
+        if 'info' in plots:
+            self.plotInformation(save_plots, legend)
         
         
 
