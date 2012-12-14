@@ -12,8 +12,6 @@ class SchematicEye(object):
     
     def __init__(self, OSLO_directory=None):
         """
-        .. todo::
-           more dynamic OSLO import.
         
         """
         if not OSLO_directory:
@@ -24,6 +22,7 @@ class SchematicEye(object):
         else:
             p = OSLO_directory
         self.loadOSLOData(p)
+
         
     def loadOSLOData(self,p):
         """Load data from OSLO
@@ -34,27 +33,72 @@ class SchematicEye(object):
         :type p: path
         
         """
-        self.INF = self.importOSLOfile(p + 'ONaxisMTFinfFocusNavarrow1999.txt')
-        self.TwentyFt = self.importOSLOfile(p + 'ONaxisMTF20ftFocusNavarrow1999.txt')
-        self.Onemeter = self.importOSLOfile(p + 'ONaxisMTF1mFocusNavarrow1999.txt')
-        self.SixteenIn = self.importOSLOfile(p + 'ONaxisMTF16inFocusNavarrow1999.txt')
         
-        self.INF_offaxis = self.importOSLOfile(p + 'OFFaxisMTFinfFocusNavarrow1999.txt')
-        self.TwentyFt_offaxis = self.importOSLOfile(p + 'OFFaxisMTF20ftFocusNavarrow1999.txt')
-        self.Onemeter_offaxis = self.importOSLOfile(p + 'OFFaxisMTF1mFocusNavarrow1999.txt')
-        self.SixteenIn_offaxis = self.importOSLOfile(p + 'OFFaxisMTF16inFocusNavarrow1999.txt')
+        self.INF = self.importOSLOfile(p + 
+                                'ONaxisMTFinfFocusNavarrow1999.txt')
+        self.TwentyFt = self.importOSLOfile(p +
+                                'ONaxisMTF20ftFocusNavarrow1999.txt')
+        self.Onemeter = self.importOSLOfile(p + 
+                                'ONaxisMTF1mFocusNavarrow1999.txt')
+        self.SixteenIn = self.importOSLOfile(p + 
+                                'ONaxisMTF16inFocusNavarrow1999.txt')
         
-        self.Sixteen_UnderAccomm = self.importOSLOfile(p + 'OFFaxisMTF16inUnderAccom20ftObjNavarrow1999.txt')
-        self.SixteenFocus_SixteenObj_Offaxis = self.importOSLOfile(p + 'OFFaxisMTF16inFocus16inObjNavarrow1999.txt')        
-        self.SixteenFocus_TwentyObj_Offaxis = self.importOSLOfile(p + 'OFFaxisMTF16inFocus20ftObjNavarrow1999.txt')
+        self.INF_offaxis = self.importOSLOfile(p + 
+                                'OFFaxisMTFinfFocusNavarrow1999.txt')
+        self.TwentyFt_offaxis = self.importOSLOfile(p + 
+                                'OFFaxisMTF20ftFocusNavarrow1999.txt')
+        self.Onemeter_offaxis = self.importOSLOfile(p +
+                                'OFFaxisMTF1mFocusNavarrow1999.txt')
+        self.SixteenIn_offaxis = self.importOSLOfile(p + 
+                                'OFFaxisMTF16inFocusNavarrow1999.txt')
+        
+        self.Sixteen_UnderAccomm = self.importOSLOfile(p +
+                            'OFFaxisMTF16inUnderAccom20ftObjNavarrow1999.txt')
+        self.Sixteen_SixteenObj_Offaxis = self.importOSLOfile(p +
+                                'OFFaxisMTF16inFocus16inObjNavarrow1999.txt')        
+        self.Sixteen_TwentyObj_Offaxis = self.importOSLOfile(p + 
+                                'OFFaxisMTF16inFocus20ftObjNavarrow1999.txt')
     
-        self.TwentyDegOffAxis_InfFoc = self.importOSLOfile(p + '20degOFFaxisMTFinfFocusNavarrow1999.txt')
-        self.FortyDegOffAxis_InfFoc = self.importOSLOfile(p + '40degOFFaxisMTFinfFocusNavarrow1999.txt')       
-        
+        self.TwentyDegOffAxis_InfFoc = self.importOSLOfile(p + 
+                                '20degOFFaxisMTFinfFocusNavarrow1999.txt')
+        self.FortyDegOffAxis_InfFoc = self.importOSLOfile(p + 
+                                '40degOFFaxisMTFinfFocusNavarrow1999.txt')       
+ 
         ## convert mm to rad (1mm image/24mm axial length)
         self.freqs = self.INF[:,1] / rad2deg(1.0/self.getAxialLength())
+        
+        
+        self.dataPackage = {
+                            'onAxis': {'diffract': self.INF[:,4],
+                                       'inf': self.INF, 
+                                       '20ft': self.TwentyFt,
+                                       '1m': self.Onemeter,
+                                       '16in': self.SixteenIn},
+                                   
+                            'offAxis': {'diffract': self.INF_offaxis[:,4],
+                                        'inf':self.INF_offaxis,
+                                        '20ft': self.TwentyFt_offaxis,
+                                        '1m': self.TwentyFt_offaxis,
+                                        '16in': self.SixteenIn_offaxis},
+                                        
+                            'object': {'16under': self.Sixteen_UnderAccomm,
+                                '16in16in': self.Sixteen_SixteenObj_Offaxis,
+                                '16in20ft': self.Sixteen_TwentyObj_Offaxis},
+                                       
+                            'farPeriph': {
+                                        '20deg': self.TwentyDegOffAxis_InfFoc,
+                                        '40deg': self.FortyDegOffAxis_InfFoc},
+                                       
+                            'freqs': self.freqs
+                            }
 
 
+    def returnOSLOdata(self):
+        """
+        Return a dictionary of imported transfer functions from OSLO.
+        """
+        return self.dataPackage
+        
     ###  DATA PROCESSING FUNCTIONS ###
     ##################################
     

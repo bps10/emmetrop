@@ -2,13 +2,14 @@ from __future__ import division
 import numpy as np
 
 # eschaton imports:
-from cones import dogRFields as dogRF
+from cones.dogRFields import ConeReceptiveFields
 from eye.eyeModel import SchematicEye
 from scene.Images import Images
+
 from analysis import Information as info
 from renderer import plotRepo as pr
 
-class SchematicEyeAnalysis(Images,SchematicEye):
+class SchematicEyeAnalysis(object):
     """This class is designed to estimate the response of a linear 
     photoreceptor to an amplitude spectrum derived from natural images.
     The modulation transfer functions are computed in OSLO ray tracing software.
@@ -32,20 +33,31 @@ class SchematicEyeAnalysis(Images,SchematicEye):
         
         """
         
-        # get ray tracer data: (this is where self.freqs comes from)
-        SchematicEye.__init__(self)
+        # get ray tracer data:
+        self.EyeOptics = SchematicEye().returnOSLOdata()
         
         # get image data stuff:
         self.ImageData = Images().returnImageData()
         
         # receptive field stuff:        
-        self.rec_field = dogRF.genReceptiveFields(self.freqs)
+        self.rec_field = ConeReceptiveFields(self.EyeOptics['freqs']).returnReceptiveField()
+        
+        # append user options:
         self.rec_field['selection'] = RF_opt.lower()
         self.rec_field['fovea'] = fovea
         
         # analysis stuff:
-        self.Analysis = {}
+        self.NeitzModel(fovea, RF_opt)
         
+        # send to renderer module for plotting:
+        pr.Plotter(self.Analysis, self.rec_field, self.ImageData, 
+                   self.EyeOptics, plot_args, save_arg, legend = False)
+
+    def NeitzModel(self, fovea, RF_opt):
+        """
+        """
+        self.Analysis = {}
+        # move to a method. Create keys, line styles by appending other keys.
         self.Analysis['diffract periph'] = {'line':'k-'}
         self.Analysis['inf perip'] = {'line':'r-'}
         if fovea:        
@@ -58,10 +70,8 @@ class SchematicEyeAnalysis(Images,SchematicEye):
         # run it all:
         self.ComputeConeActivity(RF_opt, fovea)       
         self.TotalActivity()
-        self.estimateInfo(RF_opt, fovea)
-        
-        pr.Plotter(self.Analysis, self.rec_field, self.ImageData, self.freqs,
-                   plot_args, save_arg, legend = False)
+        self.estimateInfo(RF_opt, fovea)        
+
         
     def ComputeConeActivity(self, Receptive_Field, fovea = False):
         """Compute the estimated activity of a cone photoreceptor.
@@ -86,55 +96,56 @@ class SchematicEyeAnalysis(Images,SchematicEye):
             
             print 'receptive field not understood, see options. Using FFT.'            
             
-        self.ImageData['fitLaw'] = self.ImageData['powerlaw'](self.freqs[1:])
+        self.ImageData['fitLaw'] = self.ImageData['powerlaw'](self.EyeOptics['freqs'][1:])
         powerlaw = self.ImageData['fitLaw']
         
         for key in self.Analysis:
             if key == 'diffract periph':
-                self.Analysis[key]['preCone'] = powerlaw
-                self.Analysis[key]['retina'] = powerlaw * Rec_Field['periph']
-                self.Analysis[key]['freqs'] = self.freqs[1:]
+                self.Analysis[key]['preCone'] = powerlaw * self.EyeOptics['offAxis']['diffract'][1:]
+                self.Analysis[key]['retina'] = (self.Analysis[key]['preCone'] * 
+                                                Rec_Field['periph'])
+                self.Analysis[key]['freqs'] = self.EyeOptics['freqs'][1:]
 
             if key == 'diffract fovea':
-                self.Analysis[key]['preCone'] = powerlaw
-                self.Analysis[key]['retina'] = powerlaw * Rec_Field['fovea']
-                self.Analysis[key]['freqs'] = self.freqs[1:]
+                self.Analysis[key]['preCone'] = powerlaw * self.EyeOptics['onAxis']['diffract'][1:]
+                self.Analysis[key]['retina'] = (self.Analysis[key]['preCone'] *
+                                                Rec_Field['fovea'])
+                self.Analysis[key]['freqs'] = self.EyeOptics['freqs'][1:]
                 
             if key == 'inf perip':
-                self.Analysis[key]['preCone'] = powerlaw * self.INF[1:, 2]
-                self.Analysis[key]['retina'] = (powerlaw * self.INF[1:, 2] * 
+                self.Analysis[key]['preCone'] = (powerlaw * 
+                                            self.EyeOptics['offAxis']['inf'][1:,2])
+                self.Analysis[key]['retina'] = (self.Analysis[key]['preCone'] * 
                                                 Rec_Field['periph'])
-                self.Analysis[key]['freqs'] = self.freqs[1:]        
+                self.Analysis[key]['freqs'] = self.EyeOptics['freqs'][1:]        
 
             if key == 'inf fovea':
-                self.Analysis[key]['preCone'] = powerlaw * self.INF[1:, 2]
-                self.Analysis[key]['retina'] = (powerlaw * self.INF[1:, 2] * 
+                self.Analysis[key]['preCone'] = (powerlaw * 
+                                            self.EyeOptics['onAxis']['inf'][1:,2])
+                self.Analysis[key]['retina'] = (self.Analysis[key]['preCone'] * 
                                                 Rec_Field['fovea'])
-                self.Analysis[key]['freqs'] = self.freqs[1:]  
+                self.Analysis[key]['freqs'] = self.EyeOptics['freqs'][1:]  
                  
             if key == 'near focus, near object':
                 self.Analysis[key]['preCone'] = (powerlaw[:59] * 
-                                 self.SixteenFocus_SixteenObj_Offaxis[1:60,2])
-                self.Analysis[key]['retina'] = (powerlaw[:59] * 
-                                 self.SixteenFocus_SixteenObj_Offaxis[1:60,2] * 
+                                 self.EyeOptics['object']['16in16in'][1:60,2])
+                self.Analysis[key]['retina'] = (self.Analysis[key]['preCone'] * 
                                                 Rec_Field['periph'][:59])
-                self.Analysis[key]['freqs'] = self.freqs[1:60]
+                self.Analysis[key]['freqs'] = self.EyeOptics['freqs'][1:60]
             
             if key == 'near focus, far object':
                 self.Analysis[key]['preCone'] = (powerlaw[:7] * 
-                                 self.SixteenFocus_TwentyObj_Offaxis[1:8,2])                
-                self.Analysis[key]['retina'] = (powerlaw[:7] * 
-                                 self.SixteenFocus_TwentyObj_Offaxis[1:8,2] * 
+                                 self.EyeOptics['object']['16in20ft'][1:8,2])                
+                self.Analysis[key]['retina'] = (self.Analysis[key]['preCone'] * 
                                                 Rec_Field['periph'][:7])
-                self.Analysis[key]['freqs'] = self.freqs[1:8]        
+                self.Analysis[key]['freqs'] = self.EyeOptics['freqs'][1:8]        
             
             if key == 'underaccomm, far object':
                 self.Analysis[key]['preCone'] = (powerlaw[:7] * 
-                                             self.Sixteen_UnderAccomm[1:8,2]) 
-                self.Analysis[key]['retina'] = (powerlaw[:7] * 
-                                             self.Sixteen_UnderAccomm[1:8,2] * 
+                                self.EyeOptics['object']['16under'][1:8,2]) 
+                self.Analysis[key]['retina'] = (self.Analysis[key]['preCone'] * 
                                                 Rec_Field['periph'][:7])
-                self.Analysis[key]['freqs'] = self.freqs[1:8]        
+                self.Analysis[key]['freqs'] = self.EyeOptics['freqs'][1:8]        
 
         
 

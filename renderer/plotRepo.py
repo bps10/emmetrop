@@ -7,13 +7,13 @@ from renderer import PlottingFun as pf
 class Plotter(SchematicEye):
     """A plotting repo
     """
-    def __init__(self, Analysis, recepitive_field, imageData, freqs,
+    def __init__(self, Analysis, recepitive_field, imageData, eyeOptics,
                  plots, save_plots, legend):
         # import our dictionaries of data:
         self.Analysis = Analysis
         self.rec_field = recepitive_field
         self.imageData = imageData
-        self.freqs = freqs
+        self.eyeOptics = eyeOptics
 
         # get ray tracer data: 
             
@@ -372,41 +372,43 @@ class Plotter(SchematicEye):
         pf.TufteAxis(ax, ['left', 'bottom'], [5,5])
     
         ''' on axis plots '''
-        ax.plot(self.freqs, self.INF[:,4], 'k', linewidth = 2.5, 
-                label='diffraction ')
-        ax.plot(self.freqs, self.INF[:,2], 'r', linewidth=2.5, 
-                label='infinity') 
+        ax.plot(self.freqs, self.eyeOptics['onAxis']['inf'][:,4], 'k', 
+                linewidth = 2.5, label='diffraction ')
+        ax.plot(self.freqs, self.eyeOptics['onAxis']['inf'][:,2], 'r', 
+                linewidth=2.5, label='infinity') 
         
         if plot_option == 1:
-            ax.plot(self.freqs, self.TwentyFt[:,2], 'g', linewidth=2.5, 
-                    label='20ft')
-            ax.plot(self.freqs, self.Onemeter[:,2], 'b', linewidth=2.5, 
-                    label='1m')
-            ax.plot(self.freqs[:20], self.SixteenIn[:20,2], 'm', 
-                    linewidth=2.5, label='16in')
+            ax.plot(self.freqs, self.eyeOptics['onAxis']['20ft'][:,2], 'g', 
+                    linewidth=2.5, label='20ft')
+            ax.plot(self.freqs, self.eyeOptics['onAxis']['1m'][:,2], 'b',
+                    linewidth=2.5, label='1m')
+            ax.plot(self.freqs[:20], self.eyeOptics['onAxis']['16in'][:20,2], 
+                    'm', linewidth=2.5, label='16in')
     
         ''' plot2 : off axis plots '''
     
         if plot_option == 2:
-            ax.plot(self.freqs, self.INF_offaxis[:,2], 'r--', linewidth=2.5)
+            ax.plot(self.freqs, self.eyeOptics['offAxis']['inf'][:,2], 
+                    'r--', linewidth=2.5)
             
             ax.plot(self.freqs[:60], 
-                    self.SixteenFocus_SixteenObj_Offaxis[:60,2],
+                    self.eyeOptics['object']['16in16in'][:60,2],
                     'g--', linewidth=2.5, label = 'near focus, near obj')
-            ax.plot(self.freqs[:20], self.Sixteen_UnderAccomm[:20,2], 
+            ax.plot(self.freqs[:20], self.eyeOptics['object']['16under'][:20,2], 
                     'c--', linewidth=2.5, label = 'underacc, far obj')
-            ax.plot(self.freqs[:20], self.SixteenFocus_TwentyObj_Offaxis[:20,2], 
+            ax.plot(self.freqs[:20], self.eyeOptics['object']['16in20ft'][:20,2], 
                     'b--',linewidth=2.5, label = 'near focus, far obj')
     
         if plot_option ==3:
-            ax.plot(self.freqs, self.INF_offaxis[:,4], 'k--', linewidth=2.5)
+            ax.plot(self.freqs, self.eyeOptics['offAxis']['inf'][:,4],
+                    'k--', linewidth=2.5)
             
-            ax.plot(self.freqs, self.TwentyFt_offaxis[:,2], 'g--', 
+            ax.plot(self.freqs, self.eyeOptics['offAxis']['20ft'][:,2], 'g--', 
                     linewidth=2.5)
-            ax.plot(self.freqs, self.Onemeter_offaxis[:,2], 'b--', 
+            ax.plot(self.freqs, self.eyeOptics['offAxis']['1m'][:,2], 'b--', 
                     linewidth=2.5)
-            ax.plot(self.freqs[:20], self.SixteenIn_offaxis[:20,2], 'm--', 
-                    linewidth=2.5)
+            ax.plot(self.freqs[:20], self.eyeOptics['offAxis']['16in'][:20,2],
+                    'm--', linewidth=2.5)
                     
         if legend: 
             ax.legend(loc='upper right')#title='object, retina')
@@ -502,14 +504,14 @@ class Plotter(SchematicEye):
         ax.plot(self.freqs[:], FourtyDeg, 'b--',label='40 deg', linewidth=2.5)
         
         #OSLO ray trace data:
-        ax.plot(self.freqs[:], self.INF[:,2], 'm-', label='fovea', 
-                linewidth=2.5)
-        ax.plot(self.freqs[:], self.INF_offaxis[:,2], 'r-', label='10 deg',
-                linewidth=2.5)        
-        ax.plot(self.freqs[:], self.TwentyDegOffAxis_InfFoc[:,2], 'g-', 
-                label='20 deg', linewidth=2.5)
-        ax.plot(self.freqs[:30], self.FortyDegOffAxis_InfFoc[:30,2], 'b-',
-                label='40 deg', linewidth=2.5)
+        ax.plot(self.freqs[:], self.eyeOptics['onAxis']['inf'][:,2], 
+                'm-', label='fovea', linewidth=2.5)
+        ax.plot(self.freqs[:], self.eyeOptics['offAxis']['inf'][:,2],
+                'r-', label='10 deg', linewidth=2.5)        
+        ax.plot(self.freqs[:], self.eyeOptics['farPeriph']['20deg'][:,2], 
+                'g-', label='20 deg', linewidth=2.5)
+        ax.plot(self.freqs[:30], self.eyeOptics['farPeriph']['40deg'][:30,2], 
+                'b-', label='40 deg', linewidth=2.5)
                 
         if legend: 
             ax.legend(loc='lower left')#,title='object dist, retinal location')
