@@ -1,0 +1,63 @@
+digraph RF {
+
+	subgraph Jay1{
+	j1 -> p1;
+	j1 -> fo1;
+	}
+	subgraph FFT1{
+	f1 -> p2;
+	f1 -> fo2;
+	}
+	subgraph Jay2{
+	j2 -> p3;
+	j2 -> fo3;
+	}
+	subgraph FFT2{
+	f2 -> p4;
+	f2 -> fo4;
+	}
+	subgraph Jay3{
+	j3 -> p5;
+	j3 -> fo5;
+	}
+	subgraph FFT3{
+	f3 -> p6 ;
+	f3 -> fo6;
+	}
+	
+	RF [label="receptive field", color="red"];
+	RF -> length;
+	RF -> dog;
+	RF -> sinewave;
+	RF -> xvals;
+	RF -> coneResponse;
+	RF -> spline;
+	RF -> RField;
+	dog -> periph;
+	dog -> fovea;
+	coneResponse -> j1;
+	coneResponse -> f1;
+	spline -> j2;
+	spline -> f2;
+	RField -> j3;
+	RField -> f3;
+
+	j1 [label="jay"];
+	j2 [label="jay"];
+	j3 [label="jay"];
+	f1 [label="fft"];
+	f2 [label="fft"];
+	f3 [label="fft"];
+	p1 [label="periph"];
+	p2 [label="periph"];
+	p3 [label="periph"];
+	p4 [label="periph"];
+	p5 [label="periph"];
+	p6 [label="periph"];
+	fo1 [label="fovea"];
+	fo2 [label="fovea"];
+	fo3 [label="fovea"];
+	fo4 [label="fovea"];
+	fo5 [label="fovea"];
+	fo6 [label="fovea"];
+}
