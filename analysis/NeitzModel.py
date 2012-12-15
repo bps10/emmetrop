@@ -12,7 +12,8 @@ from renderer import plotRepo as pr
 class SchematicEyeAnalysis(object):
     """This class is designed to estimate the response of a linear 
     photoreceptor to an amplitude spectrum derived from natural images.
-    The modulation transfer functions are computed in OSLO ray tracing software.
+    The modulation transfer functions are computed in OSLO ray tracing
+    software.
     
     **Legend for figures:**
     
@@ -40,7 +41,8 @@ class SchematicEyeAnalysis(object):
         self.ImageData = Images().returnImageData()
         
         # receptive field stuff:        
-        self.rec_field = ConeReceptiveFields(self.EyeOptics['freqs']).returnReceptiveField()
+        self.rec_field = ConeReceptiveFields(
+                            self.EyeOptics['freqs']).returnReceptiveField()
         
         # append user options:
         self.rec_field['selection'] = RF_opt.lower()
@@ -54,10 +56,10 @@ class SchematicEyeAnalysis(object):
                    self.EyeOptics, plot_args, save_arg, legend = False)
 
     def NeitzModel(self, fovea, RF_opt):
-        """
+        """This function organizes the entire operation...
         """
         self.Analysis = {}
-        # move to a method. Create keys, line styles by appending other keys.
+        # . Create keys, line styles by appending other keys.
         self.Analysis['diffract periph'] = {'line':'k-'}
         self.Analysis['inf perip'] = {'line':'r-'}
         if fovea:        
@@ -96,32 +98,35 @@ class SchematicEyeAnalysis(object):
             
             print 'receptive field not understood, see options. Using FFT.'            
             
-        self.ImageData['fitLaw'] = self.ImageData['powerlaw'](self.EyeOptics['freqs'][1:])
+        self.ImageData['fitLaw'] = self.ImageData['powerlaw'](
+                                                 self.EyeOptics['freqs'][1:])
         powerlaw = self.ImageData['fitLaw']
         
         for key in self.Analysis:
             if key == 'diffract periph':
-                self.Analysis[key]['preCone'] = powerlaw * self.EyeOptics['offAxis']['diffract'][1:]
+                self.Analysis[key]['preCone'] = (powerlaw * 
+                                    self.EyeOptics['offAxis']['diffract'][1:])
                 self.Analysis[key]['retina'] = (self.Analysis[key]['preCone'] * 
                                                 Rec_Field['periph'])
                 self.Analysis[key]['freqs'] = self.EyeOptics['freqs'][1:]
 
             if key == 'diffract fovea':
-                self.Analysis[key]['preCone'] = powerlaw * self.EyeOptics['onAxis']['diffract'][1:]
+                self.Analysis[key]['preCone'] = (powerlaw * 
+                                    self.EyeOptics['onAxis']['diffract'][1:])
                 self.Analysis[key]['retina'] = (self.Analysis[key]['preCone'] *
                                                 Rec_Field['fovea'])
                 self.Analysis[key]['freqs'] = self.EyeOptics['freqs'][1:]
                 
             if key == 'inf perip':
                 self.Analysis[key]['preCone'] = (powerlaw * 
-                                            self.EyeOptics['offAxis']['inf'][1:,2])
+                                        self.EyeOptics['offAxis']['inf'][1:,2])
                 self.Analysis[key]['retina'] = (self.Analysis[key]['preCone'] * 
                                                 Rec_Field['periph'])
                 self.Analysis[key]['freqs'] = self.EyeOptics['freqs'][1:]        
 
             if key == 'inf fovea':
                 self.Analysis[key]['preCone'] = (powerlaw * 
-                                            self.EyeOptics['onAxis']['inf'][1:,2])
+                                        self.EyeOptics['onAxis']['inf'][1:,2])
                 self.Analysis[key]['retina'] = (self.Analysis[key]['preCone'] * 
                                                 Rec_Field['fovea'])
                 self.Analysis[key]['freqs'] = self.EyeOptics['freqs'][1:]  
@@ -151,7 +156,7 @@ class SchematicEyeAnalysis(object):
 
 
                   
-    def TotalActivity(self):
+    def TotalActivity(self, print_opt = True):
         """Compute the estimated activity in a photoreceptor.
         
         :param self: no params yet.
@@ -168,16 +173,16 @@ class SchematicEyeAnalysis(object):
             self.Analysis[key]['percent'] = (self.Analysis[key]['total'] /
                                     self.Analysis['diffract periph']['total'])
 
-
-        print ' '
-        print 'Total activity (proportion of diffraction)'
-        print '-------------------------------------------'
-        for key in self.Analysis:
-            print key, ': ', self.Analysis[key]['percent']
+        if print_opt:
+            print ' '
+            print 'Total activity (proportion of diffraction)'
+            print '-------------------------------------------'
+            for key in self.Analysis:
+                print key, ': ', self.Analysis[key]['percent']
 
 
         
-    def estimateInfo(self, Receptive_Field, fovea = False, print_option=False):
+    def estimateInfo(self, Receptive_Field, fovea = False, print_opt=False):
         """Estimate the information in a simple linear cone receptive field.
         
         Information is estimated with Garrigan et al.'s Gaussian approximation
@@ -216,21 +221,13 @@ class SchematicEyeAnalysis(object):
            
         """ 
 
-        if Receptive_Field.lower() == 'jay':
-            Rec_Field = self.rec_field['RField']['jay']
-            
-        elif Receptive_Field.lower() == 'fft':
-            Rec_Field = self.rec_field['RField']['fft']
-            
-        else :
-            Rec_Field = self.rec_field['RField']['ftt']
-        
         
         total_images = self.ImageData['totalImages']        
 
         for key in self.Analysis:
             self.Analysis[key]['cones'] = [1,2,3,4,5,6]
-            self.Analysis[key]['info'] = np.zeros(len(self.Analysis[key]['cones']))
+            self.Analysis[key]['info'] = np.zeros(len(
+                                                self.Analysis[key]['cones']))
 
         for amp in self.ImageData['rawAmp']:
 
@@ -239,56 +236,49 @@ class SchematicEyeAnalysis(object):
                 #Diffraction:
                 if key == 'diffract periph':
                     fooInfo = info.SingleConeEntropyFunc((amp[:60]**2 *
-                                                self.Analysis[key]['retina'] * 
-                                                Rec_Field['periph']), 
+                                                self.Analysis[key]['retina']), 
                                                 self.Analysis[key]['cones'])
                     self.Analysis[key]['info'] += fooInfo / total_images
 
                 if key == 'diffract fovea':
                     fooInfo = info.SingleConeEntropyFunc((amp[:60]**2 *
-                                                self.Analysis[key]['retina'] * 
-                                                Rec_Field['fovea']), 
+                                                self.Analysis[key]['retina']), 
                                                 self.Analysis[key]['cones'])
                     self.Analysis[key]['info'] += fooInfo / total_images
            
                 #Infinity
                 if key == 'inf perip':
                     fooInfo = info.SingleConeEntropyFunc((amp[:60]**2 * 
-                                                self.Analysis[key]['retina'] * 
-                                                Rec_Field['periph']),
+                                                self.Analysis[key]['retina']),
                                                 self.Analysis[key]['cones'])
                     self.Analysis[key]['info'] += fooInfo / total_images
 
                 if key == 'inf fovea':
                     fooInfo = info.SingleConeEntropyFunc((amp[:60]**2 * 
-                                                self.Analysis[key]['retina'] * 
-                                                    Rec_Field['fovea']), 
-                                                    self.Analysis[key]['cones'])
+                                                self.Analysis[key]['retina']), 
+                                                self.Analysis[key]['cones'])
                     self.Analysis[key]['info'] += fooInfo / total_images
     
                 if key == 'near focus, far object':                           
-                    fooInfo = info.SingleConeEntropyFunc((amp[1:8]**2 *
-                                            self.Analysis[key]['retina'] * 
-                                            Rec_Field['periph'][1:8]), 
+                    fooInfo = info.SingleConeEntropyFunc((amp[:7]**2 *
+                                            self.Analysis[key]['retina']), 
                                             self.Analysis[key]['cones'])
                     self.Analysis[key]['info'] += fooInfo / total_images
 
                 if key == 'near focus, near object':            
-                    fooInfo = info.SingleConeEntropyFunc((amp[1:60]**2 * 
-                                            self.Analysis[key]['retina'] * 
-                                            Rec_Field['periph'][1:60]), 
+                    fooInfo = info.SingleConeEntropyFunc((amp[:59]**2 * 
+                                            self.Analysis[key]['retina']), 
                                             self.Analysis[key]['cones'])
                     self.Analysis[key]['info'] += fooInfo / total_images
 
                 if key == 'underaccomm, far object':                          
-                    fooInfo = info.SingleConeEntropyFunc((amp[1:8]**2 *
-                                            self.Analysis[key]['retina'] * 
-                                            Rec_Field['periph'][1:8]), 
+                    fooInfo = info.SingleConeEntropyFunc((amp[:7]**2 *
+                                            self.Analysis[key]['retina']), 
                                             self.Analysis[key]['cones'])
                                             
                     self.Analysis[key]['info'] += fooInfo / total_images 
 
-        if print_option == True:
+        if print_opt == True:
             print ' '
             print 'Information'
             print '------------'

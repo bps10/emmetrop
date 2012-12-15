@@ -1,19 +1,15 @@
 #import scipy as sp
 from scipy.io import loadmat
 import numpy as np
-import glob as glob
 import git as git
 import tables as tables
-import os
 import datetime as dt
-#from ProgressBar import BusyBar
-#from guidata.qt.QtCore import Qt
 
-from scene import DataManip as dm
 
 class Database():
     """
-    A class for working with an HDF5 database. Basically a wrapper around pytables.
+    A class for working with an HDF5 database. 
+    Basically a wrapper around pytables.
     
     """
     def __init__(self):
@@ -42,7 +38,8 @@ class Database():
             self.group = self.file.createGroup("/", GroupName, GroupName)
         
         else :
-            self.group = self.file.createGroup( ("/" + Parent), GroupName, GroupName)
+            self.group = self.file.createGroup( ("/" + Parent), GroupName, 
+                                               GroupName)
 
 
 
@@ -51,7 +48,8 @@ class Database():
         
         Create a new HDF5 database.
         
-        :param FileName:    provide a name for a new HDF5 database. **DO NOT** \
+        :param FileName:    provide a name for a new HDF5 database. \
+                            **DO NOT** \
                             include .h5 at the end - h5 suffix is \
                             automatically appended.
         :type FileName: str
@@ -126,7 +124,8 @@ class Database():
         except IOError:
             
             print '{0} does not exist'.format(DatabaseName)
-            raise DatabaseError('{0} database does not exist'.format(DatabaseName))
+            raise DatabaseError('{0} database does not exist'.format(
+                                                                DatabaseName))
 
     def QueryDatabase(self, NeuronName, GroupName, DataName):
         """
@@ -174,7 +173,8 @@ class Database():
         """
         
         if option == 0:
-            decision = raw_input( 'Are you absolutely sure you want to delete this group permenently? (y/n): ')
+            decision = raw_input( 'Are you absolutely sure you want to delete \
+                                    this group permenently? (y/n): ')
             if decision.lower() == 'y' or decision.lower() == 'yes':
                 deleteHandle = self.file.removeNode
                 deleteHandle( '/' + NeuronName, recursive=1)
@@ -202,7 +202,8 @@ class Database():
                         1 = no\n
         :type option: int
         
-        :returns: deletes child. This is a less severe than RemoveNeuron. It will not delete all of the children.
+        :returns: deletes child. This is a less severe than RemoveNeuron. \
+                    It will not delete all of the children.
         
         .. note:: 
            Not currently in use as far as I am aware. Consider removing or 
@@ -211,7 +212,8 @@ class Database():
         """
         
         if option == 0:    
-            decision = raw_input( 'Are you absolutely sure you want to delete this child permenently? (y/n): ')
+            decision = raw_input( 'Are you absolutely sure you want to delete \
+                                    this child permenently? (y/n): ')
             if decision.lower() == 'y' or decision.lower() == 'yes':
                 eval('self.file.root.' + ChildName + '._f_remove()')
                 self.file.flush()
@@ -251,174 +253,6 @@ class Database():
             self.NeuronData = loadmat(Directory + '/' + FileName + '.mat')
 
 
-
-    def ImportAllData(self, NeuronName, Directory,
-                      GitDirectory = None, progBar = 0):
-        """
-        
-        This one calls ImportDataFromMatlab to load a .mat file
-        
-        .. note:: 
-           currently hard coded.
-        
-        .. todo::
-           * Possibly incorporate Qt progress bar to throttle a Qt application.
-        
-        """
-        
-        if GitDirectory == None:
-            GitDirectory = os.getcwd()
-            
-        print 'Importing data, please wait ... '    
-
-        dm.getAllFiles(Directory)
-        self.CreateGroup(NeuronName)
-        
-        """
-        if progBar == 1:
-            self.busyBar = BusyBar( text = "Importing data" )
-            self.busyBar.changeValue.connect(self.busyBar.proBar.setValue, 
-                                            Qt.QueuedConnection)
-            self.busyBar.start()
-        """
-        for i in range(0, self.DirFiles.shape[0] ):
-
-            FileName = self.DirFiles[i][-12:-4]  # select only 'epochXXX.mat'
-
-            self.OpenMatlabData(FileName, Directory, NeuronName)
-            self.ImportDataFromMatlab(FileName, NeuronName)
-
-        self.AddGitVersion(NeuronName, NeuronName + '_InitialImport', GitDirectory)
-        self.file.flush()
-        self.CloseDatabase()
-        
-        """
-        if progBar == 1:
-            self.busyBar.Kill()
-        """
-
-    def ImportDataFromMatlab(self, FileName, NeuronName):
-        """
-        This is the big one for importing data.
-        
-        :param FileName: name of the file to import.
-        :type FileName: str
-        :param NeuronName: name of the neuron importing.
-        :type NeuronName: str        
-        
-        :returns: updated HDF5 database.
-        
-        
-        .. note:: still hard coded for the Rieke lab format.
-        
-        .. todo::
-           * Generalize. NeuronName makes sense here for now, but eventually would like to import everything.
-           
-        """
-        
-        self.CreateGroup(FileName, NeuronName)
-
-        ## Get meta data.
-        
-        try :
-            self.AddData2Database('fileComment', np.array([self.NeuronData['fileComment'][0]],dtype=str), 
-                                  NeuronName + '.' + FileName)
-        except (IndexError, ValueError):
-             self.AddData2Database('fileComment', np.array(['none entered'], dtype = str),
-                                   NeuronName + '.' + FileName)           
-                
-
-        PARAMS = np.array(['binRate', 'numSegments', 'si', 'clockstep',
-                           'sampleInterval', 'sampleRate', 'ampMode', 'ampGain',
-                           'rawData', 'monitorData', 'frameRate', 'preSamples',
-                           'postSamples', 'stimSamples', 'time', 'epochsize',
-                           'subThreshold', 'spikes', 'spikeTimes',
-                           'recordingMode', 'outputClass', 'stimulusType',
-                           'epochComment'])
-
-        STRINGS = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1])
-
-        for i, name in enumerate(PARAMS):
-
-            try:
-                if name != 'spikeTimes':
-                    
-                    try:
-                        
-                        Data = self.NeuronData['data'][name][0][0][0]
-                        
-                    except ValueError:
-                        
-                        Data = np.array(['none entered'], dtype = str)
-                        STRINGS[i] = 0
-                        
-                else:
-                    
-                    try:
-                        
-                        Data = self.NeuronData['data'][name][0][0][0][0][0]
-                        
-                    except ValueError:
-                        Data = np.array(['none entered'], dtype = str)
-                        STRINGS[i] = 0
-
-            except IndexError:
-
-                Data = np.array(['none entered'], dtype = str)
-                STRINGS[i] = 0
-
-            if STRINGS[i] == 0:
-                
-                try:
-                    
-                    self.AddData2Database(name, Data, NeuronName + '.' + FileName)
-                    
-                except ValueError: # for unicode cases.
-                
-                    Data = np.array(['none entered'], dtype = str)
-                    STRINGS[i] = 1
-                                              
-            if STRINGS[i] == 1:
-
-                self.AddData2Database(name, np.array([ Data ], dtype=str), NeuronName + '.' + FileName)
-
-        # now load the params:
-        self.CreateGroup('params', NeuronName + '/' + FileName )
-
-        PARAMS = np.array(['Xpos', 'Ypos', 'colorGammaTable', 'diameter',
-                           'epochNumber', 'flipInterval', 'integratedIntensity',
-                           'intensity','intensity_raw', 'rand_behavior',
-                           'repositoryVersion', 'screenX', 'screenY',
-                           'sequential', 'spatial_meanLevel',
-                           'spatial_postpts', 'spatial_prepts', 'windowPtr',
-                           'stimClass', 'MatlabCodeDir'], dtype = str)
-
-        STRINGS = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                            0, 0, 0, 0, 1, 1], dtype = int)
-        for i, name in enumerate(PARAMS):
-
-            try:
-                
-                Data = self.NeuronData['data']['params'][0][0][0][name][0][0]
-                
-            except ValueError:
-                
-                Data = np.array(['none entered'], dtype = str)
-                STRINGS[i] = 0
-
-            if STRINGS[i] == 0:
-                
-                try:
-                    self.AddData2Database(name, Data, NeuronName + '.' + FileName + '.params')
-                    
-                except ValueError:
-                    
-                    Data = np.array(['none entered'], dtype = str)
-                    STRINGS[i] = 1
-                
-            if STRINGS[i] == 1:
-
-                    self.AddData2Database(name, np.array([ Data ], dtype=str), NeuronName + '.' + FileName + '.params')
 
 
     def GetChildList(self, FILE = None, parent = None):
@@ -499,7 +333,8 @@ class Database():
         :param Action: description of what is being done to the neuron.
         :type Action: str
         
-        :returns: add a child to the git section of database for a given neuron.
+        :returns: add a child to the git section of database for a given \
+                    neuron.
         
         .. todo:: 
            * Generalize, change NeuronName to node.

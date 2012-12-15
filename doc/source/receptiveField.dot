@@ -1,5 +1,5 @@
 digraph RF {
-
+	size="10,10";
 	subgraph Jay1{
 	j1 -> p1;
 	j1 -> fo1;
@@ -25,7 +25,7 @@ digraph RF {
 	f3 -> fo6;
 	}
 	
-	RF [label="receptive field", color="red"];
+	RF [label="receptive field", shape=box, color=red];
 	RF -> length;
 	RF -> dog;
 	RF -> sinewave;
@@ -42,22 +42,24 @@ digraph RF {
 	RField -> j3;
 	RField -> f3;
 
-	j1 [label="jay"];
-	j2 [label="jay"];
-	j3 [label="jay"];
-	f1 [label="fft"];
-	f2 [label="fft"];
-	f3 [label="fft"];
-	p1 [label="periph"];
-	p2 [label="periph"];
-	p3 [label="periph"];
-	p4 [label="periph"];
-	p5 [label="periph"];
-	p6 [label="periph"];
-	fo1 [label="fovea"];
-	fo2 [label="fovea"];
-	fo3 [label="fovea"];
-	fo4 [label="fovea"];
-	fo5 [label="fovea"];
-	fo6 [label="fovea"];
+	periph [shape=box, style=filled, color=yellow];
+	fovea [shape=box, style=filled, color=yellow];
+	j1 [label="jay", shape=box, style=filled, color=grey];
+	j2 [label="jay", shape=box, style=filled, color=grey];
+	j3 [label="jay", shape=box, style=filled, color=grey];
+	f1 [label="fft", shape=box, style=filled, color=grey];
+	f2 [label="fft", shape=box, style=filled, color=grey];
+	f3 [label="fft", shape=box, style=filled, color=grey];
+	p1 [label="periph", shape=box, style=filled, color=yellow];
+	p2 [label="periph", shape=box, style=filled, color=yellow];
+	p3 [label="periph", shape=box, style=filled, color=yellow];
+	p4 [label="periph", shape=box, style=filled, color=yellow];
+	p5 [label="periph", shape=box, style=filled, color=yellow];
+	p6 [label="periph", shape=box, style=filled, color=yellow];
+	fo1 [label="fovea", shape=box, style=filled, color=yellow];
+	fo2 [label="fovea", shape=box, style=filled, color=yellow];
+	fo3 [label="fovea", shape=box, style=filled, color=yellow];
+	fo4 [label="fovea", shape=box, style=filled, color=yellow];
+	fo5 [label="fovea", shape=box, style=filled, color=yellow];
+	fo6 [label="fovea", shape=box, style=filled, color=yellow];
 }

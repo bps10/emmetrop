@@ -3,10 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-eschaton:
+eschaton
 ============
 
-an emmetropization model
+*an emmetropization model*
 
 .. warning:: 
    this project is very much under development.

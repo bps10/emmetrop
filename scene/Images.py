@@ -120,14 +120,14 @@ class Images(object):
                     self.Dbase.CreateGroup('Image', GroupName + '/' + name)
                 
                 if self.Dbase.Exists('raw_image', 
-                                     GroupName + '.' + name + '.Image') == False:
+                                GroupName + '.' + name + '.Image') == False:
                         
                     img = imread(path)
                     self.Dbase.AddData2Database('raw_image', img, 
-                                                GroupName + '.' + name + '.Image')
+                                            GroupName + '.' + name + '.Image')
                 
                 if self.Dbase.Exists('grayscale', 
-                                     GroupName + '.' + name + '.Image') == False:
+                                GroupName + '.' + name + '.Image') == False:
                                             
                     if img == None:
                         img = self.Dbase.QueryDatabase(GroupName, 
@@ -146,11 +146,13 @@ class Images(object):
                                                    np.array([path], dtype=str),
                                                    GroupName + '.' + name)
     
-                if self.Dbase.Exists('goodFile', GroupName + '.' + name) == False:
+                if self.Dbase.Exists('goodFile', 
+                                     GroupName + '.' + name) == False:
                     
                     goodFile = self.getGoodFiles(path)
-                    self.Dbase.AddData2Database('goodFile', np.array([goodFile],
-                                                                     dtype=bool),
+                    self.Dbase.AddData2Database('goodFile',
+                                                np.array([goodFile], 
+                                                         dtype=bool),
                                                 GroupName + '.' + name)
                 else:
                     goodFile = self.Dbase.QueryDatabase(GroupName, name, 
@@ -158,7 +160,8 @@ class Images(object):
                                 
                                       
                 # subnode == Amplitude spectrum
-                if self.Dbase.Exists('amplitude', GroupName + '.' + name) == False:
+                if self.Dbase.Exists('amplitude', 
+                                     GroupName + '.' + name) == False:
                     
                     self.Dbase.CreateGroup('amplitude', GroupName + '/' + name)
                  
@@ -183,7 +186,7 @@ class Images(object):
                 else:
                     if goodFile != False or goodFile != 'F': 
                         self.rawAmp.append(self.Dbase.QueryDatabase(GroupName, 
-                                                              name + '.' + 'amplitude', 
+                                                name + '.' + 'amplitude', 
                                                               'raw_amplitude'))
                     else:
                         pass                    
@@ -195,7 +198,7 @@ class Images(object):
                     
                     if amplitude == None:
                         amplitude = self.Dbase.QueryDatabase(GroupName, 
-                                                             name + '.' + 'amplitude',
+                                                    name + '.' + 'amplitude',
                                                              'raw_amplitude')
                     amplitude = sig.Density(amplitude)                        
                     self.Dbase.AddData2Database('amplitude_density', amplitude, 
@@ -209,9 +212,10 @@ class Images(object):
                 # if already exists, query database to get amplitude spectrums here:
                 else:
                     if goodFile:
-                        self.ampSpecs.append(self.Dbase.QueryDatabase(GroupName, 
-                                                              name + '.' + 'amplitude', 
-                                                              'amplitude_density'))
+                        self.ampSpecs.append(
+                                            self.Dbase.QueryDatabase(GroupName, 
+                                                    name + '.' + 'amplitude', 
+                                                    'amplitude_density'))
                     else:
                         pass
                     
@@ -264,8 +268,8 @@ class Images(object):
             AUX_file = sio.loadmat(path[:-4] + '_AUX.mat')
             
         except ValueError:
-            print "No Auxilary files found. Check directory path or download from: \
-            ftp://tofu.psych.upenn.edu/"
+            print "No Auxilary files found. Check directory path or download \
+            from: ftp://tofu.psych.upenn.edu/"
 
         if AUX_file['Image']['warning'][0][0].shape[0] > 0:
             goodFile = False

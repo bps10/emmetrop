@@ -88,12 +88,12 @@ if __name__ == "__main__":
                         help="run all analyses and plots")
     parser.add_argument("-s", "--save", action="store_true",
                         help="save all plots")
-    parser.add_argument("-r", "--rfield", type=str, default = 'FFT',
-                        help="change receptive field used for analysis")
     parser.add_argument("-f", "--fovea", action="store_true",
                         help="include fovea in analyses")
     parser.add_argument("-e", "--eyegrow", action="store_true",
                         help="plot predicted eye growth against age")
+    parser.add_argument("-r", "--rfield", type=str, default = 'FFT',
+                        help="change receptive field used for analysis")
                         
     args = parser.parse_args()
     

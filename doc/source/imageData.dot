@@ -1,0 +1,13 @@
+digraph im {
+
+	imageData -> totalImages;
+	imageData -> ampSpecs;
+	imageData -> ampMean;
+	imageData -> rawAmp;
+	imageData -> powerlaw;
+	imageData -> imagexval;
+
+	imageData [label="image data", shape=box, color=red];
+
+
+}

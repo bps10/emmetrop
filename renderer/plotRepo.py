@@ -14,13 +14,9 @@ class Plotter(SchematicEye):
         self.rec_field = recepitive_field
         self.imageData = imageData
         self.eyeOptics = eyeOptics
-
-        # get ray tracer data: 
-            
-        # this is a bad hack that NEEDS to be fixed. Package into a dict like
-        # other data.
-        SchematicEye.__init__(self)
         
+        self.freqs = self.eyeOptics['freqs']
+
         #options:
         self.RFselect = self.rec_field['selection']        
         self.location = ['periph']
@@ -38,9 +34,9 @@ class Plotter(SchematicEye):
             self.plotMTFfamily(plot_option=2, save_plots=save_plots)
         if 'periph' in plots:
             self.plotPeripheral(save_plots)
-        if 'dog' in plots:
+        if 'plotDoG' in plots:
             self.plotDoG(save_plots)
-        if 'dog' in plots:
+        if 'plotDeconstructed' in plots:
             self.plotDeconstructedRF(save_plots)        
         if 'activity' in plots:
             self.plotActivity(save_plots)
@@ -65,7 +61,7 @@ class Plotter(SchematicEye):
         """
         ENV = os.environ['OS']
         if ENV == 'Windows_NT':
-            self.figPath = 'C:/Users/Brian/Documents/eschaton/Figures'
+            self.figPath = 'C:/Users/Brian/Documents/eschaton/Figures/'
     
     def plotInformation(self, save_plots=False, legend=False):
         """
@@ -147,9 +143,6 @@ class Plotter(SchematicEye):
            
            **Fig 2:** And converted into a probability density and Fourier 
            transformed
-    
-        .. todo:: This functions needs to become more flexible. Should \
-        eventually add more cone models
         
         """
         
@@ -171,7 +164,7 @@ class Plotter(SchematicEye):
                 
                 if save_plots:
                     fig.show()
-                    fig.savefig('../../Figures/ConeRF.png')
+                    fig.savefig(self.figPath + 'ConeRF' + loc + '.png')
                     plt.close()
                 else:
                     plt.show()
@@ -200,7 +193,7 @@ class Plotter(SchematicEye):
                 
                 if save_plots:
                     fig2.show()
-                    fig2.savefig('../../Figures/ConeRF_FFT.png')
+                    fig2.savefig(self.figPath + 'ConeRF_FFT' + loc + '.png')
                     plt.close()
                 else:
                     plt.show()
@@ -254,7 +247,7 @@ class Plotter(SchematicEye):
         
             if save_plots:
                 fig.show()
-                fig.savefig('../../Figures/RecField_JAY.png')
+                fig.savefig(self.figPath + 'RecField_JAY' + loc + '.png')
                 plt.close()
             else:
                 plt.show()
@@ -286,7 +279,7 @@ class Plotter(SchematicEye):
         
             if save_plots:
                 fig2.show()
-                fig2.savefig('../../Figures/FFT_JAY.png')
+                fig2.savefig(self.figPath + 'FFT_JAY' + loc + '.png')
                 plt.close()
             else:
                 plt.show()
@@ -331,7 +324,7 @@ class Plotter(SchematicEye):
         
         if save_plots:
             fig.show()
-            fig.savefig('../../Figures/ampSpec.png')
+            fig.savefig(self.figPath + 'ampSpec.png')
             plt.close()
         else:
             plt.show()
@@ -396,7 +389,8 @@ class Plotter(SchematicEye):
                     'g--', linewidth=2.5, label = 'near focus, near obj')
             ax.plot(self.freqs[:20], self.eyeOptics['object']['16under'][:20,2], 
                     'c--', linewidth=2.5, label = 'underacc, far obj')
-            ax.plot(self.freqs[:20], self.eyeOptics['object']['16in20ft'][:20,2], 
+            ax.plot(self.freqs[:20],
+                    self.eyeOptics['object']['16in20ft'][:20,2], 
                     'b--',linewidth=2.5, label = 'near focus, far obj')
     
         if plot_option ==3:
@@ -423,9 +417,9 @@ class Plotter(SchematicEye):
             
             fig.show()
             if plot_option == 1:
-                fig.savefig('../../Figures/MTFfamilyOnAxis.png')
+                fig.savefig(self.figPath + 'MTFfamilyOnAxis.png')
             if plot_option == 2:
-                fig.savefig('../../Figures/MTFfamily.png')
+                fig.savefig(self.figPath + 'MTFfamily.png')
             plt.close()
         else:
             plt.show()
@@ -446,15 +440,17 @@ class Plotter(SchematicEye):
             
             ax.plot(0,0, 'k', linewidth=2.5, label='diffraction')
             ax.plot(0,0, 'r', linewidth=2.5, label='infinity') 
-            ax.plot(0,0, 'g--', linewidth=2.5, label = 'near focus, near object')
+            ax.plot(0,0, 'g--', linewidth=2.5, 
+                    label = 'near focus, near object')
             ax.plot(0,0, 'c--', linewidth=2.5, label = 'underacc, far object')
-            ax.plot(0,0, 'b--', linewidth=2.5, label = 'near focus, far object')
+            ax.plot(0,0, 'b--', linewidth=2.5,
+                    label = 'near focus, far object')
             ax.legend(loc = 'center')
             plt.axis('off')
             
             if save_plots:
                 fig2.show()
-                fig2.savefig('../../Figures/Legend.png')
+                fig2.savefig(self.figPath + 'Legend.png')
                 plt.close()
             else:
                 plt.show()
@@ -531,7 +527,7 @@ class Plotter(SchematicEye):
         
         if save_plots:
             fig.show()
-            fig.savefig('./Figures/MTFperiphery.png')
+            fig.savefig(self.figPath + 'MTFperiphery.png')
             plt.close()
         else:
             plt.show()
@@ -612,7 +608,7 @@ class Plotter(SchematicEye):
         
         if save_plots:
             fig.show()
-            fig.savefig('./Figures/MTFfamilyMod.png')
+            fig.savefig(self.figPath + 'MTFfamilyMod.png')
             plt.close()
         else:
             plt.show()
@@ -654,9 +650,9 @@ class Plotter(SchematicEye):
        
         if save_plots:
             if Receptive_Field.lower() == 'jay':
-                save_name = '../../Figures/MTFfamilyModAmpJAY.png'
+                save_name = self.figPath + 'MTFfamilyModAmpJAY.png'
             else:
-                save_name = '../../Figures/MTFfamilyModAmp.png'
+                save_name = self.figPath + 'MTFfamilyModAmp.png'
             
             fig2.show()
             fig2.savefig(save_name)     

@@ -3,20 +3,20 @@ Installing
 
 This code is not yet complete.  As such, install files should be used with caution.  This is not a stable release.  Therefore, you are on your own and should consider contacting the author, Brian Schmidt: bps10 at u dot washington dot edu
 
-If you are still interested, you can use::
+If you are still interested, you can clone the repository using::
+
+   git clone https://github.com/bps10/eschaton
+   
+You can build with::
 
    python setup.py build
    [sudo] python setup.py install  
  
-Additionally you can clone the repository using::
 
-   git clone https://github.com/bps10/
 
 
 Dependencies
 ------------
-
-The following dependencies should automatically be installed via ``easy_install`` or ``pip``, provided these programs are installed.
 
 eschaton requires the following python modules to be installed:
 
@@ -33,7 +33,7 @@ eschaton requires the following python modules to be installed:
 * PyTables
 
 
-
+The above dependencies can be automatically installed via ``easy_install`` or ``pip``, provided these programs are installed on the local computer.
 
 License
 -------

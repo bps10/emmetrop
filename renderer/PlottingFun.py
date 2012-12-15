@@ -23,8 +23,6 @@ def histOutline(histIn,binsIn):
     
     :returns: bins and data for plotting a histogram outline.
     
-    .. todo::
-       Attach a before/after example here. Try using matplotlib doc.
       
     """
     stepSize = binsIn[1] - binsIn[0]
@@ -55,11 +53,9 @@ def simpleaxis(ax):
     :returns: altered axes.
     
     .. note::
-       Taken from here: \
-       http://stackoverflow.com/questions/925024/how-can-i-remove-the-top-and-right-axis-in-matplotlib
+       Taken from here: `stackoverflow 
+       <http://stackoverflow.com/questions/925024/how-can-i-remove-the-top-and-right-axis-in-matplotlib>`_
 
-    .. todo::
-       Attach a before/after example here. Try using matplotlib doc.
         
     """
     ax.spines['top'].set_visible(False)
@@ -81,11 +77,6 @@ def TufteAxis(ax, spines, Nticks = None, integer='on'):
     :param integer: plot only integers.
     
     :returns: altered axes.
-    
-    .. warning::
-       Sometimes causes odd behavior. Still a work in progress. \
-       Genearlly speaking if you call this before adding data to a plot you will \
-       be in the clear
        
     .. note::
        * Adapted from a `Matplotlib Example`_

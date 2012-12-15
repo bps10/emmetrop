@@ -99,8 +99,7 @@ class SchematicEye(object):
         """
         return self.dataPackage
         
-    ###  DATA PROCESSING FUNCTIONS ###
-    ##################################
+
     
     def importOSLOfile(self, OSLOfile):
         """Import a text file with MTF output from OSLO.

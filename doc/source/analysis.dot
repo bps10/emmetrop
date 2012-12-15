@@ -1,0 +1,46 @@
+digraph ana {
+
+	schematicEye -> onAxis;
+	schematicEye -> offAxis;
+	schematicEye -> object;
+	schematicEye -> farPeriph;
+	schematicEye -> freqs;
+	
+	onAxis -> a1;
+	onAxis -> a2;
+	onAxis -> a3;
+	onAxis -> a4;
+
+	offAxis -> b1;
+	offAxis -> b2;
+	offAxis -> b3;
+	offAxis -> b4;
+
+	object -> c1
+	object -> c2
+	object -> c3
+
+	farPeriph -> d1;
+	farPeriph -> d2;
+
+	schematicEye [label="schematic eye", shape=box, color=red];
+
+	
+	a1 [label="inf", shape=box, style=filled, color=grey];
+	a2 [label="20ft", shape=box, style=filled, color=grey];
+	a3 [label="1m", shape=box, style=filled, color=grey];
+	a4 [label="16in", shape=box, style=filled, color=grey];
+	
+	b1 [label="inf", shape=box, style=filled, color=grey];
+	b2 [label="20ft", shape=box, style=filled, color=grey];
+	b3 [label="1m", shape=box, style=filled, color=grey];
+	b4 [label="16in", shape=box, style=filled, color=grey];
+
+
+	c1 [label="16inunder", shape=box, style=filled, color=grey];
+	c2 [label="16in16in", shape=box, style=filled, color=grey];
+	c3 [label="16in20ft", shape=box, style=filled, color=grey];
+	
+	d1 [label="20deg", shape=box, style=filled, color=grey];
+	d2 [label="40deg", shape=box, style=filled, color=grey];
+}

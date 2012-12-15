@@ -8,3 +8,7 @@ Scene submodule
    scene_Images.rst
    scene_ImageProcessing.rst
    scene_SignalProcessing.rst
+
+The output of this module is currently a dictionary of data with the following key structure:
+
+.. graphviz:: imageData.dot
