@@ -1,3 +1,4 @@
+from __future__ import division
 import matplotlib.pylab as plt
 import os
 from eye.eyeModel import SchematicEye
@@ -55,6 +56,7 @@ class Plotter(SchematicEye):
            
         """
         pass
+
     
     def findFigDirectory(self):
         """
@@ -62,6 +64,7 @@ class Plotter(SchematicEye):
         ENV = os.environ['OS']
         if ENV == 'Windows_NT':
             self.figPath = 'C:/Users/Brian/Documents/eschaton/Figures/'
+
     
     def plotInformation(self, save_plots=False, legend=False):
         """
