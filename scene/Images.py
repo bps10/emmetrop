@@ -32,15 +32,15 @@ class Images(object):
         
         self.Dbase = db.Database()
         
-        if os.path.isdir('./eschaton'):
-            p = './eschaton'
+        if os.environ['PWD'][:-8] == 'eschaton':
+            p = os.environ['PWD']
         else:
-            p = '.'
-            
+            p = os.environ['PWD'] + '/eschaton'
+        
         try:
             self.Dbase.OpenDatabase(p + '/ImageDatabase.h5')
         except db.DatabaseError:
-            self.Dbase.CreateDatabase('ImageDatabase')
+            self.Dbase.CreateDatabase(p + '/ImageDatabase')
             print 'created new image database'
                 
         self.amp_mean = None
@@ -90,7 +90,7 @@ class Images(object):
             if sys.platform == 'darwin':
                 Directory = ['/Users/brianschmidt/Documents/cd01A/']
                 index = [-6, -1]
-            if sys.platform == 'win32':
+            if sys.platform == 'i686':
                 Directory = ['C:/Data/UPenn_Images/Images/cd01a',
                              'C:/Data/UPenn_Images/Images/cd02a',
                              'C:/Data/UPenn_Images/Images/cd32a',
