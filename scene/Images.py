@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib.pylab import imread
 from scipy import io as sio
 from scipy import optimize
-import os
+import os, sys
 
 from scene import SignalProcessing as sig
 from scene import DataManip as dm
@@ -33,7 +33,7 @@ class Images(object):
         self.Dbase = db.Database()
         
         if os.path.isdir('./eschaton'):
-            p = './eschaton/'
+            p = './eschaton'
         else:
             p = '.'
             
@@ -41,7 +41,8 @@ class Images(object):
             self.Dbase.OpenDatabase(p + '/ImageDatabase.h5')
         except db.DatabaseError:
             self.Dbase.CreateDatabase('ImageDatabase')
-            
+            print 'created new image database'
+                
         self.amp_mean = None
         self.getData()
         
@@ -63,11 +64,7 @@ class Images(object):
                         
         return imageData
                
-    def getData(self, Directory = ['C:/Data/UPenn_Images/Images/cd01a',
-                                   'C:/Data/UPenn_Images/Images/cd02a',
-                                   'C:/Data/UPenn_Images/Images/cd32a',
-                                   'C:/Data/UPenn_Images/Images/cd38a'],
-                                   GroupName = None):
+    def getData(self, Directory = None, GroupName = None):
         """Find data in a database or import it if it does not exist.
          
         :param Directory: list of directories of images to analyze.
@@ -89,13 +86,24 @@ class Images(object):
 
 
         """
-        self.ampSpecs = []      
+        if not Directory:
+            if sys.platform == 'darwin':
+                Directory = ['/Users/brianschmidt/Documents/cd01A/']
+                index = [-6, -1]
+            if sys.platform == 'win32':
+                Directory = ['C:/Data/UPenn_Images/Images/cd01a',
+                             'C:/Data/UPenn_Images/Images/cd02a',
+                             'C:/Data/UPenn_Images/Images/cd32a',
+                             'C:/Data/UPenn_Images/Images/cd38a']
+                index = [-5, 0]
+    
+        self.ampSpecs = []
         self.rawAmp= []
         for group in Directory:
-            GroupName = group[-5:]
+            GroupName = group[index[0]:index[1]]
             print 'GroupName: ', GroupName
     
-            files = dm.getAllFiles(group, suffix='.JPG')
+            files = dm.getAllFiles(group, suffix='.JPG', subdirectories=1)
             if self.Dbase.Exists(GroupName) == False:
                 self.Dbase.CreateGroup(GroupName)
                 
@@ -134,7 +142,7 @@ class Images(object):
                                                     name + '.' + 'Image', 
                                                     'raw_image')   
                                          
-                    imgBW = self.rgb2gray(img)
+                    imgBW = sig.rgb2gray(img)
                     self.Dbase.AddData2Database('grayscale', img, 
                                                    GroupName + '.' + name 
                                                    + '.Image')

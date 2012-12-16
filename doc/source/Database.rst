@@ -5,6 +5,7 @@ Database submodule
    :maxdepth: 2
 
    database_Database.rst
+   database_webDB.rst
 
 
 This module was originally built to process physiology data from Rieke lab mex files.

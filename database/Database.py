@@ -122,10 +122,7 @@ class Database():
                     print '{0} database opened'.format(DatabaseName)
                 
         except IOError:
-            
-            print '{0} does not exist'.format(DatabaseName)
-            raise DatabaseError('{0} database does not exist'.format(
-                                                                DatabaseName))
+            raise DatabaseError('database does not exist')
 
     def QueryDatabase(self, NeuronName, GroupName, DataName):
         """
@@ -228,7 +225,7 @@ class Database():
             self.file.flush()
             
 
-    def OpenMatlabData(self, FileName, Directory):
+    def OpenMatlabData(self, FileName, Directory = None):
         """
         
         Open matlab data. Just a rapper around scipy.io.loadmat
@@ -246,7 +243,7 @@ class Database():
 
         if Directory == None:
             
-            self.NeuronData = loadmat(Directory + '/' + FileName + '.mat' )
+            self.NeuronData = loadmat(FileName + '.mat' )
         
         else:
             
