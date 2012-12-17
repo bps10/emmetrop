@@ -1,11 +1,11 @@
 from __future__ import division
 import matplotlib.pylab as plt
-import sys
-from eye.eyeModel import SchematicEye
+#import sys
 
-from renderer import PlottingFun as pf
+#from eye.eyeModel import SchematicEye
+from eschaton.renderer import PlottingFun as pf
 
-class Plotter(SchematicEye):
+class Plotter(object):
     """A plotting repo
     """
     def __init__(self, Analysis, recepitive_field, imageData, eyeOptics,
@@ -17,14 +17,13 @@ class Plotter(SchematicEye):
         self.eyeOptics = eyeOptics
         
         self.freqs = self.eyeOptics['freqs']
-
+        self.figPath = '../../Figures/'
         #options:
         self.RFselect = self.rec_field['selection']        
         self.location = ['periph']
         if 'diffract fovea' in self.Analysis:
             self.location.append('fovea')
-        # find where to save the plots based on sys architecture:
-        self.findFigDirectory()
+
         
         # plot the appropriate plots, with options:
         if 'amp' in plots:
@@ -57,16 +56,7 @@ class Plotter(SchematicEye):
         """
         pass
 
-    
-    def findFigDirectory(self):
-        """
-        """
 
-        if sys.platform == 'win32':
-            self.figPath = 'C:/Users/Brian/Documents/eschaton/Figures/'
-        if sys.platform == 'darwin':
-            self.figPath = '~/Documents/GDrive/eschaton/Figures/'
-    
     def plotInformation(self, save_plots=False, legend=False):
         """
         :param cones: list of cones in analysis

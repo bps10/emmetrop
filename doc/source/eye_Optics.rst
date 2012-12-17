@@ -1,5 +1,5 @@
 Optics
 =======
 
-.. automodule:: eye.Optics
+.. automodule:: eschaton.eye.Optics
    :members:

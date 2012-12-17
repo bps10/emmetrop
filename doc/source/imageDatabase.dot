@@ -1,0 +1,22 @@
+digraph DB {
+	size="10,10";
+	ImageDB -> Image;
+	ImageDB -> path;
+	ImageDB -> goodFile;
+	ImageDB -> amplitude;
+
+	Image -> raw_image;
+	Image -> grayscale;
+
+
+	amplitude -> raw_amplitude;
+	amplitude -> amplitude_density;
+
+	ImageDB [label="image database", shape=box, color=red];
+
+	raw_image [style=filled, color=grey];
+	grayscale [style=filled, color=grey];
+	raw_amplitude [style=filled, color=grey];
+	amplitude_density [style=filled, color=grey];
+
+}

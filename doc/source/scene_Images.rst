@@ -1,5 +1,5 @@
 Images
 ===================
 
-.. automodule:: scene.Images
+.. automodule:: eschaton.scene.Images
    :members:

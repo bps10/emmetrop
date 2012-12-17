@@ -1,5 +1,5 @@
 Information
 =============
 
-.. automodule:: analysis.Information
+.. automodule:: eschaton.analysis.Information
    :members:

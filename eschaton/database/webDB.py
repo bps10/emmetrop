@@ -19,7 +19,7 @@ def getUPENNimages(album, saveDir = None):
     print ' '    
     images = getAlbumNames(album, saveDir)
     
-    print 'downloading in progress ... '
+    print 'download in progress ... '
     print ' '
     for image in images:
         print image

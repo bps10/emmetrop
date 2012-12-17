@@ -1,5 +1,5 @@
 Signal Processing
 ===================
 
-.. automodule:: scene.SignalProcessing
+.. automodule:: eschaton.scene.SignalProcessing
    :members:

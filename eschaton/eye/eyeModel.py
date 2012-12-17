@@ -2,7 +2,7 @@ import os
 import shlex
 import numpy as np
 
-from scene.DataManip import rad2deg
+from eschaton.scene.DataManip import rad2deg
 
 class SchematicEye(object):
     """
@@ -16,7 +16,7 @@ class SchematicEye(object):
         """
         if not OSLO_directory:
             if os.path.isdir('./eschaton'):
-                p = './eschaton/OSLO_MTF_DATA/'
+                p = './OSLO_MTF_DATA/'
             else:
                 p = './OSLO_MTF_DATA/'
         else:

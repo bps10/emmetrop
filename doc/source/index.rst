@@ -23,7 +23,6 @@ Documentation of source code can be found here:
    cones.rst
    database.rst
    eye.rst
-   gui.rst
    renderer.rst
    scene.rst
    

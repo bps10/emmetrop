@@ -1,5 +1,5 @@
 Database
 ==========
 
-.. automodule:: database.Database
+.. automodule:: eschaton.database.Database
    :members:

@@ -7,15 +7,12 @@ Database submodule
    database_Database.rst
    database_webDB.rst
 
+The current structure of the image database is:
 
-This module was originally built to process physiology data from Rieke lab mex files.
-It will continue to be updated for some time to reflect the current demands.
+.. graphviz:: imageDatabase.dot
 
-Currently adapting it to also display images.
 
-Should read pytables code for inspiration.
-
-Eventually may move some of this onto `AWS <https://aws.amazon.com>`_
+Eventually may move this onto `AWS <https://aws.amazon.com>`_ or google cloud
 
 
 
