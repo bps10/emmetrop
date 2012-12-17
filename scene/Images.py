@@ -32,11 +32,11 @@ class Images(object):
         
         self.Dbase = db.Database()
         
-        if os.environ['PWD'][:-8] == 'eschaton':
-            p = os.environ['PWD']
+        if os.getcwd()[-8:] == 'eschaton':
+            p = os.getcwd()
         else:
-            p = os.environ['PWD'] + '/eschaton'
-        
+            p = os.getcwd() + '/eschaton'
+
         try:
             self.Dbase.OpenDatabase(p + '/ImageDatabase.h5')
         except db.DatabaseError:
@@ -90,12 +90,12 @@ class Images(object):
             if sys.platform == 'darwin':
                 Directory = ['/Users/brianschmidt/Documents/cd01A/']
                 index = [-6, -1]
-            if sys.platform == 'i686':
+            if sys.platform == 'win32':
                 Directory = ['C:/Data/UPenn_Images/Images/cd01a',
                              'C:/Data/UPenn_Images/Images/cd02a',
                              'C:/Data/UPenn_Images/Images/cd32a',
                              'C:/Data/UPenn_Images/Images/cd38a']
-                index = [-5, 0]
+                index = [-5, len(Directory[0])]
     
         self.ampSpecs = []
         self.rawAmp= []

@@ -70,24 +70,25 @@ class SchematicEye(object):
         
         self.dataPackage = {
                             'onAxis': {'diffract': self.INF[:,4],
-                                       'inf': self.INF, 
-                                       '20ft': self.TwentyFt,
-                                       '1m': self.Onemeter,
-                                       '16in': self.SixteenIn},
+                                       'inf': self.INF[:,2], 
+                                       '20ft': self.TwentyFt[:,2],
+                                       '1m': self.Onemeter[:,2],
+                                       '16in': self.SixteenIn[:,2]},
                                    
                             'offAxis': {'diffract': self.INF_offaxis[:,4],
-                                        'inf':self.INF_offaxis,
-                                        '20ft': self.TwentyFt_offaxis,
-                                        '1m': self.TwentyFt_offaxis,
-                                        '16in': self.SixteenIn_offaxis},
+                                        'inf':self.INF_offaxis[:,2],
+                                        '20ft': self.TwentyFt_offaxis[:,2],
+                                        '1m': self.TwentyFt_offaxis[:,2],
+                                        '16in': self.SixteenIn_offaxis[:,2]},
                                         
-                            'object': {'16under': self.Sixteen_UnderAccomm,
-                                '16in16in': self.Sixteen_SixteenObj_Offaxis,
-                                '16in20ft': self.Sixteen_TwentyObj_Offaxis},
+                            'object': {
+                            '16inunder': self.Sixteen_UnderAccomm[:,2],
+                            '16in16in': self.Sixteen_SixteenObj_Offaxis[:,2],
+                            '16in20ft': self.Sixteen_TwentyObj_Offaxis[:,2]},
                                        
                             'farPeriph': {
-                                        '20deg': self.TwentyDegOffAxis_InfFoc,
-                                        '40deg': self.FortyDegOffAxis_InfFoc},
+                                    '20deg': self.TwentyDegOffAxis_InfFoc[:,2],
+                                    '40deg': self.FortyDegOffAxis_InfFoc[:,2]},
                                        
                             'freqs': self.freqs
                             }

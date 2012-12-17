@@ -21,7 +21,7 @@ class Plotter(SchematicEye):
         #options:
         self.RFselect = self.rec_field['selection']        
         self.location = ['periph']
-        if self.rec_field['fovea'] == True:
+        if 'diffract fovea' in self.Analysis:
             self.location.append('fovea')
         # find where to save the plots based on sys architecture:
         self.findFigDirectory()
@@ -62,7 +62,7 @@ class Plotter(SchematicEye):
         """
         """
 
-        if sys.platform == 'i686':
+        if sys.platform == 'win32':
             self.figPath = 'C:/Users/Brian/Documents/eschaton/Figures/'
         if sys.platform == 'darwin':
             self.figPath = '~/Documents/GDrive/eschaton/Figures/'
@@ -369,43 +369,43 @@ class Plotter(SchematicEye):
         pf.TufteAxis(ax, ['left', 'bottom'], [5,5])
     
         ''' on axis plots '''
-        ax.plot(self.freqs, self.eyeOptics['onAxis']['inf'][:,4], 'k', 
+        ax.plot(self.freqs, self.eyeOptics['onAxis']['inf'], 'k', 
                 linewidth = 2.5, label='diffraction ')
-        ax.plot(self.freqs, self.eyeOptics['onAxis']['inf'][:,2], 'r', 
+        ax.plot(self.freqs, self.eyeOptics['onAxis']['inf'], 'r', 
                 linewidth=2.5, label='infinity') 
         
         if plot_option == 1:
-            ax.plot(self.freqs, self.eyeOptics['onAxis']['20ft'][:,2], 'g', 
+            ax.plot(self.freqs, self.eyeOptics['onAxis']['20ft'], 'g', 
                     linewidth=2.5, label='20ft')
-            ax.plot(self.freqs, self.eyeOptics['onAxis']['1m'][:,2], 'b',
+            ax.plot(self.freqs, self.eyeOptics['onAxis']['1m'], 'b',
                     linewidth=2.5, label='1m')
-            ax.plot(self.freqs[:20], self.eyeOptics['onAxis']['16in'][:20,2], 
+            ax.plot(self.freqs[:20], self.eyeOptics['onAxis']['16in'][:20], 
                     'm', linewidth=2.5, label='16in')
     
         ''' plot2 : off axis plots '''
     
         if plot_option == 2:
-            ax.plot(self.freqs, self.eyeOptics['offAxis']['inf'][:,2], 
+            ax.plot(self.freqs, self.eyeOptics['offAxis']['inf'], 
                     'r--', linewidth=2.5)
             
             ax.plot(self.freqs[:60], 
-                    self.eyeOptics['object']['16in16in'][:60,2],
+                    self.eyeOptics['object']['16in16in'][:60],
                     'g--', linewidth=2.5, label = 'near focus, near obj')
-            ax.plot(self.freqs[:20], self.eyeOptics['object']['16under'][:20,2], 
+            ax.plot(self.freqs[:20], self.eyeOptics['object']['16inunder'][:20], 
                     'c--', linewidth=2.5, label = 'underacc, far obj')
             ax.plot(self.freqs[:20],
-                    self.eyeOptics['object']['16in20ft'][:20,2], 
+                    self.eyeOptics['object']['16in20ft'][:20], 
                     'b--',linewidth=2.5, label = 'near focus, far obj')
     
         if plot_option ==3:
-            ax.plot(self.freqs, self.eyeOptics['offAxis']['inf'][:,4],
+            ax.plot(self.freqs, self.eyeOptics['offAxis']['inf'],
                     'k--', linewidth=2.5)
             
-            ax.plot(self.freqs, self.eyeOptics['offAxis']['20ft'][:,2], 'g--', 
+            ax.plot(self.freqs, self.eyeOptics['offAxis']['20ft'], 'g--', 
                     linewidth=2.5)
-            ax.plot(self.freqs, self.eyeOptics['offAxis']['1m'][:,2], 'b--', 
+            ax.plot(self.freqs, self.eyeOptics['offAxis']['1m'], 'b--', 
                     linewidth=2.5)
-            ax.plot(self.freqs[:20], self.eyeOptics['offAxis']['16in'][:20,2],
+            ax.plot(self.freqs[:20], self.eyeOptics['offAxis']['16in'][:20],
                     'm--', linewidth=2.5)
                     
         if legend: 
@@ -504,13 +504,13 @@ class Plotter(SchematicEye):
         ax.plot(self.freqs[:], FourtyDeg, 'b--',label='40 deg', linewidth=2.5)
         
         #OSLO ray trace data:
-        ax.plot(self.freqs[:], self.eyeOptics['onAxis']['inf'][:,2], 
+        ax.plot(self.freqs[:], self.eyeOptics['onAxis']['inf'], 
                 'm-', label='fovea', linewidth=2.5)
-        ax.plot(self.freqs[:], self.eyeOptics['offAxis']['inf'][:,2],
+        ax.plot(self.freqs[:], self.eyeOptics['offAxis']['inf'],
                 'r-', label='10 deg', linewidth=2.5)        
-        ax.plot(self.freqs[:], self.eyeOptics['farPeriph']['20deg'][:,2], 
+        ax.plot(self.freqs[:], self.eyeOptics['farPeriph']['20deg'], 
                 'g-', label='20 deg', linewidth=2.5)
-        ax.plot(self.freqs[:30], self.eyeOptics['farPeriph']['40deg'][:30,2], 
+        ax.plot(self.freqs[:30], self.eyeOptics['farPeriph']['40deg'][:30], 
                 'b-', label='40 deg', linewidth=2.5)
                 
         if legend: 

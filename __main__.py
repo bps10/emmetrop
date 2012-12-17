@@ -10,13 +10,6 @@ def main(args):
        
     """
     
-    
-        
-    if args.fovea:
-        inc_fovea = True
-    else:
-        inc_fovea = False
-       
     if args.save:
         save_plots = True
     else:
@@ -35,7 +28,7 @@ def main(args):
     if args.mtf or args.verbose:
         plot_args.append('mtf')
         
-    if args.periph or args.verbose:
+    if args.periphPlot or args.verbose:
         plot_args.append('periph')        
     
     if args.accomm or args.verbose:
@@ -55,9 +48,20 @@ def main(args):
     
     if args.info or args.verbose:
         plot_args.append('info')
+    
+    analysis_args = []
+    
+    if args.fovea or args.verbose:
+        analysis_args.append('fovea')
+    if args.objectSet or args.verbose:
+        analysis_args.append('objectSet')
+    if args.farPeriph or args.verbose:
+        analysis_args.append('farPeriph')
         
-    Eye = SchematicEyeAnalysis(RF_opt = Receptive_Field, plot_args=plot_args, 
-                               save_arg = save_plots, fovea = inc_fovea)
+    Eye = SchematicEyeAnalysis(RF_opt = Receptive_Field, 
+                               analysis_args = analysis_args,
+                               plot_args=plot_args, 
+                               save_arg = save_plots)
     
     if args.eyegrow:
         from analysis import Eye_Grow as eg
@@ -80,7 +84,7 @@ if __name__ == "__main__":
                          help="display DoG receptive field")
     parser.add_argument("-y", "--activity", action="store_true",
                         help="display activity plots")
-    parser.add_argument("-p", "--periph", action="store_true", 
+    parser.add_argument("-t", "--periphPlot", action="store_true", 
                         help="display peripheral mtf plots")
     parser.add_argument("-i", "--info", action="store_true",
                         help="display information plot")
@@ -88,8 +92,14 @@ if __name__ == "__main__":
                         help="run all analyses and plots")
     parser.add_argument("-s", "--save", action="store_true",
                         help="save all plots")
+                        
     parser.add_argument("-f", "--fovea", action="store_true",
                         help="include fovea in analyses")
+    parser.add_argument('-o', "--objectSet", action="store_true",
+                        help="include object set in analyses")
+    parser.add_argument('-p', "--farPeriph", action="store_true",
+                        help="include far periphery in analyses")
+                        
     parser.add_argument("-e", "--eyegrow", action="store_true",
                         help="plot predicted eye growth against age")
     parser.add_argument("-r", "--rfield", type=str, default = 'FFT',

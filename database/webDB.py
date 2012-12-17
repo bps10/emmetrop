@@ -70,3 +70,18 @@ def parseUpennFile(album, saveDir):
             partitioning = False
     
     return names        
+    
+if __name__ == '__main__':
+    
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    
+    parser.add_argument("-g", "--group", type=str, default='cd01A',
+                        help="indicate what directory to download")
+    parser.add_argument("-d", "--dir", type=str, default='.',
+                        help="indicate where to save files")
+    
+    args = parser.parse_args()
+    getUPENNimages(args.group)
+    
