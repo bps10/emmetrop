@@ -32,8 +32,13 @@ class Images(object):
         
         self.Dbase = db.Database()
         
+        if os.path.basename(os.getcwd()) == 'eschaton':
+            p = ''
+        else:
+            p = './eschaton/'
+        
         try:
-            self.Dbase.OpenDatabase('./eschaton/ImageDatabase.h5')
+            self.Dbase.OpenDatabase(p + 'ImageDatabase.h5')
         except db.DatabaseError:
             self.Dbase.CreateDatabase('ImageDatabase')
             print 'created new image database'
