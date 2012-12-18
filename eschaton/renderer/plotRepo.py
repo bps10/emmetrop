@@ -1,8 +1,6 @@
 from __future__ import division
 import matplotlib.pylab as plt
-#import sys
 
-#from eye.eyeModel import SchematicEye
 from eschaton.renderer import PlottingFun as pf
 
 class Plotter(object):
@@ -474,7 +472,7 @@ class Plotter(object):
            **Fig 1:** A family of MTF curves from experimental data (dotted) 
            and schematic eye.        
         """
-        from eye.Optics import MTF
+        from eschaton.eye.Optics import MTF
         
         Fovea = MTF(self.freqs[:], 0)
         TenDeg = MTF(self.freqs[:], 10)

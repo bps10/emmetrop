@@ -33,7 +33,7 @@ class Images(object):
         self.Dbase = db.Database()
         
         try:
-            self.Dbase.OpenDatabase('ImageDatabase.h5')
+            self.Dbase.OpenDatabase('./eschaton/ImageDatabase.h5')
         except db.DatabaseError:
             self.Dbase.CreateDatabase('ImageDatabase')
             print 'created new image database'
@@ -90,7 +90,8 @@ class Images(object):
                              'C:/Data/UPenn_Images/Images/cd02A',
                              'C:/Data/UPenn_Images/Images/cd32A',
                              'C:/Data/UPenn_Images/Images/cd38A',
-                             'C:/Data/UPenn_Images/Images/cd41A']
+                             'C:/Data/UPenn_Images/Images/cd41A',
+                             'C:/Data/UPenn_Images/Images/cd58A']
                 index = [-5, len(Directory[0])]
     
         self.ampSpecs = []

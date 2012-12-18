@@ -16,9 +16,9 @@ class SchematicEye(object):
         """
         if not OSLO_directory:
             if os.path.isdir('./eschaton'):
-                p = './OSLO_MTF_DATA/'
+                p = './eschaton/OSLO_MTF_DATA/'
             else:
-                p = './OSLO_MTF_DATA/'
+                p = './eschaton/OSLO_MTF_DATA/'
         else:
             p = OSLO_directory
         self.loadOSLOData(p)

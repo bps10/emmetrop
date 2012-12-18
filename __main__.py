@@ -1,4 +1,4 @@
-from analysis.NeitzModel import SchematicEyeAnalysis
+from eschaton.analysis.NeitzModel import SchematicEyeAnalysis
 import argparse
 
 
