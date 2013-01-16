@@ -18,8 +18,6 @@ class Images(object):
     .. todo::
        * create a cython wrapper around c++ implementation. \
        or write own ray tracer
-       * use webkits to download images from web.
-       * add help to Qt
        
     """
     
@@ -93,6 +91,7 @@ class Images(object):
             if sys.platform == 'win32':
                 Directory = ['C:/Data/UPenn_Images/Images/cd01A',
                              'C:/Data/UPenn_Images/Images/cd02A',
+                             'C:/Data/UPenn_Images/Images/cd06A',
                              'C:/Data/UPenn_Images/Images/cd32A',
                              'C:/Data/UPenn_Images/Images/cd38A',
                              'C:/Data/UPenn_Images/Images/cd41A',
@@ -219,7 +218,7 @@ class Images(object):
                         self.ampSpecs.append(amplitude)
                     else:
                         pass
-                # if already exists, query database to get amplitude spectrums here:
+                # if already exists, query database to get amplitude spectrums:
                 else:
                     if goodFile:
                         self.ampSpecs.append(

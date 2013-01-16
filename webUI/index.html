@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+@import url('slide.css');
+
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  position: relative;
+  width: 960px;
+}
+
+.axis text {
+  font: 20px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.bar {
+  fill: steelblue;
+  fill-opacity: .9;
+}
+
+.line {
+    fill: none;
+    stroke: black;
+    stroke-width: 1.5px;
+}
+
+.line2 {
+    fill: none;
+    stroke: black;
+    stroke-width: 1.5px;
+}
+
+label {
+  position: absolute;
+  top: 90px;
+  right: 10px;
+}
+
+
+
+
+button#runButton {
+    left: 60px;
+    position: absolute;
+    font-size: 18px;
+    top: 500px;
+    width: 80px;
+}
+
+
+#axis1label {
+    position: absolute;
+    top: 240px;
+    left: 690px;
+    font-size: 22px;
+}
+
+#axis2label {
+    position: absolute;
+    top: 540px;
+    left: 680px;
+    font-size: 22px;
+}
+
+ 
+</style>
+
+<script type="text/javascript"
+  src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+
+<body>
+    <h2 class="slideTitle"> experimental setup</h2>
+
+</body>
+<script>
+var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+var x = d3.scale.linear()
+    .range([0, height]);
+    
+var y = d3.scale.linear()
+    .range([100, 0]);
+    
+var x2 = d3.scale.log()
+    .range([0, height]);
+    
+var y2 = d3.scale.linear()
+    .range([150, 0]);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .ticks(5)
+    .orient("bottom");
+
+var xAxis2 = d3.svg.axis()
+    .scale(x2)
+    .ticks(5)
+    .orient("bottom");
+
+var yAxis2 = d3.svg.axis()
+    .scale(y2)
+    .ticks(5)
+    .orient("left");
+
+var randomNum = d3.random.normal(0, 1.5);
+
+function spikeGen() {
+    var trace = [0, 0, 0, 0, 0, 0, 10, 22, 23, 20, 10, 0, -4, -7, -3, -3, -2,
+                 -2, -1, 0, 0, 0, 0, 0, 0, 0];
+    var data = [];
+    
+    for (var i=0; i < trace.length; i++) {
+        data.push({"x": 2* i / 100.0, "y": trace[i] + randomNum() });
+    };
+    return data;
+};
+
+var sigmoid = function(k, x) {
+    var R_m = 24;
+    return (R_m * ( 1 - Math.pow(Math.E,(-k*x))));
+};
+
+
+var line = d3.svg.line()
+.x(function(d) { return x(d.x); })
+.y(function(d) { return y(d.y); });
+
+var line2 = d3.svg.line()
+.x(function(d) { return x(d.x); })
+.y(function(d) { return y(d.y); });
+
+var data = spikeGen(), data2 = [];   
+    
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    x.domain(d3.extent(data, function(d) { return d.x; }));
+    y.domain([-10,30]);
+
+    x2.domain([Math.pow(10,2),Math.pow(10,6.6)]);
+    y2.domain([0,25]);
+    
+    
+    svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(500,100)")
+    .call(xAxis)
+    
+    d3.select("body").append("text")
+    .attr("id", "axis1label")
+    .text("time (s)");
+
+    svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(500,400)")
+    .call(xAxis2)
+    
+    d3.select("body").append("text")
+    .attr("id", "axis2label")
+    .text("flash photon density");
+
+    svg.append("g")
+    .attr("class", "y axis")
+    .attr("transform", "translate(490,235)")
+    .call(yAxis2)
+    .append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 6)
+    .attr("dy", ".71em")
+    .style("text-anchor", "end")
+    .text("pA");
+    
+
+    d3.select("body")
+        .append("button")
+        .attr("id", "runButton")
+        .attr("value", true)
+        .text("run");
+
+
+                  
+
+    (function() {
+     
+     svg.selectAll(".light")
+     .data([1])
+     .enter().append("circle")
+     .attr("class", "light")
+     .attr("cx", 60)
+     .attr("cy", 300)
+     .attr("r", 40);
+     
+     d3.select("#runButton").on("click", function() {
+                                
+		var j = 0, n = 0, color = ["#00ff80", "#ff0000"],
+		photons = [Math.pow(10,2),Math.pow(10,2.5),
+		Math.pow(10,3), Math.pow(10,3.5), Math.pow(10,4), 
+		Math.pow(10,4.5), Math.pow(10,5),
+		Math.pow(10,5.5), Math.pow(10,6)];
+
+
+
+		function draw() {
+			n = n < 9 ? n : 0;
+			col = j % 2.0 == 0 ? color[0] : color[1];
+			k = j % 2.0 == 0 ? 2.77*Math.pow(10,-4) : 3.01*Math.pow(10,-5);
+
+			svg.selectAll(".select").remove();
+			svg.select(".line").remove();
+		
+			svg.selectAll(".select")
+			 .data([1])
+			 .enter().append("circle")
+			 .attr("class", "select")
+			 .attr("cx", 60)
+			 .attr("cy", 300)
+			 .attr("r", 40)
+			 .style("stroke-width", 3)
+			 .style("fill", col) 
+			 .style("opacity", 1)
+			 .transition()
+			 .duration(1000)
+			 .style("opacity", 0.001);
+		
+			data = spikeGen();
+			//maxD = d3.max(data);
+			console.log(sigmoid(k, photons[n]) + randomNum());
+			data2.push({"x": photons[n], 
+						"y": sigmoid(k, photons[n]) + randomNum() } );
+
+			svg.append("path")
+			.datum(data)
+			.attr("transform", "translate(500, -10)")
+			.attr("class", "line")
+			.attr("d", line);
+			
+			
+			svg.selectAll(".dot")
+				  .data(data2)
+				.enter().append("circle")
+				  .attr("class", "dot")
+				  .attr("r", 3.5)
+				  .attr("transform", "translate(500,235)")
+				  .attr("cx", function(d) { return x2(d.x); })
+				  .attr("cy", function(d) { return y2(d.y); })
+				  .style("fill", col);
+
+			if (j % 2 == 0) {n++;}
+		
+			setTimeout(function(){
+				j++; if (j < 1000) { draw(); } },750);
+		
+		
+		};
+		draw()
+			 });
+     })();
+    
+    
+    
+        </script>
+
+</html>
+

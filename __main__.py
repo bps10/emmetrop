@@ -3,11 +3,8 @@ import argparse
 
 
 def main(args):
-    """Runs main sequence of analysis and generates plots in default mode
-    
-    .. todo::
-       * Get user input to control plotting options.
-       
+    """Runs main sequence of analysis and generates plots. This is for 
+    command line control.
     """
     
     if args.save:
@@ -57,18 +54,20 @@ def main(args):
         analysis_args.append('objectSet')
     if args.farPeriph or args.verbose:
         analysis_args.append('farPeriph')
-        
-    Eye = SchematicEyeAnalysis(RF_opt = Receptive_Field, 
-                               analysis_args = analysis_args,
-                               plot_args=plot_args, 
-                               save_arg = save_plots)
     
+    if not args.eyegrow:    
+        Eye = SchematicEyeAnalysis(RF_opt = Receptive_Field, 
+                                   analysis_args = analysis_args,
+                                   plot_args=plot_args, 
+                                   save_arg = save_plots)
+        return Eye
+        
     if args.eyegrow:
-        from analysis import Eye_Grow as eg
+        from eschaton.analysis import Eye_Grow as eg
         eg.main()
 
     
-    return Eye
+    
 
 
 if __name__ == "__main__": 
@@ -79,7 +78,7 @@ if __name__ == "__main__":
     parser.add_argument("-m", "--mtf", action="store_true", 
                         help="display MTF family plots")
     parser.add_argument("-a", "--amp", action="store_true",
-                        help="plot amplitude spectrum")
+                        help="display amplitude spectrum plot")
     parser.add_argument("-d", "--dog", action="store_true", 
                          help="display DoG receptive field")
     parser.add_argument("-y", "--activity", action="store_true",
@@ -88,10 +87,6 @@ if __name__ == "__main__":
                         help="display peripheral mtf plots")
     parser.add_argument("-i", "--info", action="store_true",
                         help="display information plot")
-    parser.add_argument("-v", "--verbose", action="store_true",
-                        help="run all analyses and plots")
-    parser.add_argument("-s", "--save", action="store_true",
-                        help="save all plots")
                         
     parser.add_argument("-f", "--fovea", action="store_true",
                         help="include fovea in analyses")
@@ -100,6 +95,11 @@ if __name__ == "__main__":
     parser.add_argument('-p', "--farPeriph", action="store_true",
                         help="include far periphery in analyses")
                         
+    parser.add_argument("-v", "--verbose", action="store_true",
+                        help="run all analyses and plots")
+    parser.add_argument("-s", "--save", action="store_true",
+                        help="save all plots")
+                                                
     parser.add_argument("-e", "--eyegrow", action="store_true",
                         help="plot predicted eye growth against age")
     parser.add_argument("-r", "--rfield", type=str, default = 'FFT',

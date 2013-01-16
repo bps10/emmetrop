@@ -6,6 +6,9 @@ import os
 baseURL = 'ftp://tofu.psych.upenn.edu/fulldb/'
 
 def getUPENNimages(album, saveDir = None):
+    """
+    """
+    
     if not saveDir:
         saveDir = album
     
@@ -35,6 +38,8 @@ def getUPENNimages(album, saveDir = None):
     print 'download to directory, {0}, complete'.format(saveDir)
     
 def getAlbumNames(album, saveDir):
+    """
+    """
     albumURL = baseURL + album
     
     urllib.urlretrieve(albumURL, saveDir + '/' + album + '.txt')

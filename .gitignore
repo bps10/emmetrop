@@ -44,3 +44,6 @@ nosetests.xml
 *.ai
 *.eps
 
+# Spyder
+*.spyderproject
+*.spyderworkspace
