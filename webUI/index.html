@@ -14,7 +14,7 @@
 	}
 
 	.axis text {
-	  font: 20px sans-serif;
+	  font: 16px sans-serif;
 	}
 
 	.axis path,
@@ -41,42 +41,27 @@
 		stroke-width: 1.5px;
 	}
 
-	label {
-	  position: absolute;
-	  top: 90px;
-	  right: 10px;
-	} 
 
 	button#runButton {
-		left: 60px;
+		left: 180px;
 		position: absolute;
 		font-size: 18px;
-		top: 500px;
-		width: 80px;
+		top: 1280px;
+		width: 100px;
 	}
 
+    #schematicEye {
+        position: absolute;
+        left: 160px;
+        top: 135px;
+    }
 
-	#axis1label {
-		position: absolute;
-		top: 290px;
-		left: 710px;
-		font-size: 22px;
-	}
+    #baboon {
+        position: absolute;
+        left: 10px;
+        top: 220px;
+    }
 
-	#axis2label {
-		position: absolute;
-		top: 540px;
-		left: 680px;
-		font-size: 22px;
-	}
-
-	#axis3label {
-		position: absolute;
-		top: 840px;
-		left: 71 0px;
-		font-size: 22px;
-		}
-	
 	</style>
 </head>
 
@@ -86,39 +71,86 @@
 <script src="http://d3js.org/d3.v3.min.js"></script>
 
 <body>
-    <h2 class="slideTitle"> experimental setup</h2>
+    <h2 class="slideTitle"> the neitz model </h2>
 
 </body>
 <script>
-var margin = {top: 20, right: 20, bottom: 30, left: 40},
-    width = 960 - margin.left - margin.right,
-    height = 800 - margin.top - margin.bottom;
 
-var x = d3.scale.linear()
-    .range([0, 450]);
+////////////////////////////
+// locations:plots        //
+//   5:image    1:plot1   //
+//   6:plot5    2:plot2   //
+//   7:plot6    3:plot3   //
+//   8:button   4:plot4   //
+////////////////////////////
+
+
+// dimensions //
+var margin = {top: 70, right: 20, bottom: 30, left: 40},
+    width = 960 - margin.left - margin.right,
+    height = 1500 - margin.top - margin.bottom,
+    xaxisWidth = 350, yaxisWidth = 250;
+
+// images //
+d3.select("body").append("img")
+    .attr("id","schematicEye")
+    .attr("src","./static/images/SchematicEye.jpg")
+    .attr("height", "260")
+    .attr("width", "280");
+
+d3.select("body").append("img")
+    .attr("id","baboon")
+    .attr("src","./static/images/baboon.jpg")
+    .attr("height", "100")
+    .attr("width", "150");
+
+
+// scales //
+var x1 = d3.scale.linear()
+    .range([0, xaxisWidth]);
     
-var y = d3.scale.linear()
-    .range([150, 0]);
+var y1 = d3.scale.linear()
+    .range([yaxisWidth, 0]);
     
 var x2 = d3.scale.log()
-    .range([0, 450]);
+    .range([0, xaxisWidth]);
     
 var y2 = d3.scale.linear()
-    .range([150, 0]);
+    .range([yaxisWidth, 0]);
 
 var x3 = d3.scale.log()
-    .range([0, 450]);
+    .range([0, xaxisWidth]);
     
 var y3 = d3.scale.linear()
-    .range([150, 0]);
+    .range([yaxisWidth, 0]);
+
+var x4 = d3.scale.log()
+    .range([0, xaxisWidth]);
+    
+var y4 = d3.scale.linear()
+    .range([yaxisWidth, 0]);
 	
+var x5 = d3.scale.log()
+    .range([0, xaxisWidth]);
+    
+var y5 = d3.scale.linear()
+    .range([yaxisWidth, 0]);
+
+var x6 = d3.scale.linear()
+    .range([0, xaxisWidth]);
+    
+var y6 = d3.scale.linear()
+    .range([yaxisWidth, 0]);
+
+
+// axes handles //	
 var xAxis = d3.svg.axis()
-    .scale(x)
+    .scale(x1)
     .ticks(5)
     .orient("bottom");
 
 var yAxis = d3.svg.axis()
-    .scale(y)
+    .scale(y1)
     .ticks(5)
     .orient("left");
 	
@@ -132,7 +164,6 @@ var yAxis2 = d3.svg.axis()
     .ticks(5)
     .orient("left");
 
-	
 var xAxis3 = d3.svg.axis()
     .scale(x3)
     .ticks(5)
@@ -142,7 +173,38 @@ var yAxis3 = d3.svg.axis()
     .scale(y3)
     .ticks(5)
     .orient("left");
-	
+
+var xAxis4 = d3.svg.axis()
+    .scale(x4)
+    .ticks(5)
+    .orient("bottom");
+
+var yAxis4 = d3.svg.axis()
+    .scale(y4)
+    .ticks(5)
+    .orient("left");
+
+var xAxis5 = d3.svg.axis()
+    .scale(x5)
+    .ticks(5)
+    .orient("bottom");
+
+var yAxis5 = d3.svg.axis()
+    .scale(y5)
+    .ticks(5)
+    .orient("left");
+
+var xAxis6 = d3.svg.axis()
+    .scale(x6)
+    .ticks(5)
+    .orient("bottom");
+
+var yAxis6 = d3.svg.axis()
+    .scale(y6)
+    .ticks(5)
+    .orient("left");	
+
+
 var randomNum = d3.random.normal(0, 1.5);
 
 function spikeGen() {
@@ -163,8 +225,8 @@ var sigmoid = function(k, x) {
 
 
 var line = d3.svg.line()
-.x(function(d) { return x(d.x); })
-.y(function(d) { return y(d.y); });
+.x(function(d) { return x1(d.x); })
+.y(function(d) { return y1(d.y); });
 
 
 var data = spikeGen(), data2 = [];   
@@ -175,91 +237,174 @@ var svg = d3.select("body").append("svg")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    x.domain(d3.extent(data, function(d) { return d.x; }));
-    y.domain([-10,30]);
+    x1.domain(d3.extent(data, function(d) { return d.x; }));
+    y1.domain([-10,30]);
 
     x2.domain([Math.pow(10,2),Math.pow(10,6.6)]);
     y2.domain([0,25]);
 
     x3.domain([Math.pow(10,2),Math.pow(10,6.6)]);
     y3.domain([0,25]);    
+
+    x4.domain([Math.pow(10,2),Math.pow(10,6.6)]);
+    y4.domain([0,25]); 
+
+    x5.domain([Math.pow(10,2),Math.pow(10,6.6)]);
+    y5.domain([0,25]); 
+
+    x6.domain([-15,15]);
+    y6.domain([-0.3,1]); 
+    
+    // x,y axes //	
     
     svg.append("g")
     .attr("class", "x axis")
-    .attr("transform", "translate(500,150)")
+    .attr("transform", "translate(450,250)")
     .call(xAxis)
+    .append("text")
+    .attr("y", 50)
+    .attr("x", 75)
+    .style("text-anchor", "beginning")
+    .text("spatial frequency (cycles/deg)");
     
-    d3.select("body").append("text")
-    .attr("id", "axis1label")
-    .text("time (s)");
 
-	svg.append("g")
+    svg.append("g")
     .attr("class", "y axis")
-    .attr("transform", "translate(490,-10)")
+    .attr("transform", "translate(440,-10)")
     .call(yAxis)
     .append("text")
     .attr("transform", "rotate(-90)")
     .attr("y", 6)
     .attr("dy", ".71em")
     .style("text-anchor", "end")
-    .text("pA");
+    .text("density");
 	
 	
     svg.append("g")
     .attr("class", "x axis")
-    .attr("transform", "translate(500,400)")
-    .call(xAxis2)
+    .attr("transform", "translate(450,600)")
+    .call(xAxis2)    
+    .append("text")
+    .attr("y", 50)
+    .attr("x", 75)
+    .style("text-anchor", "beginning")
+    .text("spatial frequency (cycles/deg)");
     
-    d3.select("body").append("text")
-    .attr("id", "axis2label")
-    .text("flash photon density");
 
     svg.append("g")
     .attr("class", "y axis")
-    .attr("transform", "translate(490,240)")
+    .attr("transform", "translate(440,340)")
     .call(yAxis2)
     .append("text")
     .attr("transform", "rotate(-90)")
     .attr("y", 6)
     .attr("dy", ".71em")
     .style("text-anchor", "end")
-    .text("pA");
+    .text("density");
     
 
     svg.append("g")
     .attr("class", "x axis")
-    .attr("transform", "translate(500,700)")
+    .attr("transform", "translate(450,950)")
     .call(xAxis3)
+    .append("text")
+    .attr("y", 50)
+    .attr("x", 75)
+    .style("text-anchor", "beginning")
+    .text("spatial frequency (cycles/deg)");
     
-    d3.select("body").append("text")
-    .attr("id", "axis3label")
-    .text("time (s)");
 
-	svg.append("g")
+    svg.append("g")
     .attr("class", "y axis")
-    .attr("transform", "translate(490,540)")
+    .attr("transform", "translate(440,690)")
     .call(yAxis3)
     .append("text")
     .attr("transform", "rotate(-90)")
     .attr("y", 6)
     .attr("dy", ".71em")
     .style("text-anchor", "end")
-    .text("pA");
+    .text("density");
 	
 	
+    svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(450,1300)")
+    .call(xAxis4)    
+    .append("text")
+    .attr("y", 50)
+    .attr("x", 75)
+    .style("text-anchor", "beginning")
+    .text("spatial frequency (cycles/degree)");
+    
+
+    svg.append("g")
+    .attr("class", "y axis")
+    .attr("transform", "translate(440,1040)")
+    .call(yAxis4)
+    .append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 6)
+    .attr("dy", ".71em")
+    .style("text-anchor", "end")
+    .text("density");
+
+    svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(30,600)")
+    .call(xAxis5)    
+    .append("text")
+    .attr("y", 50)
+    .attr("x", 65)
+    .style("text-anchor", "beginning")
+    .text("spatial frequency (cycles/degree)");
+    
+
+    svg.append("g")
+    .attr("class", "y axis")
+    .attr("transform", "translate(20,340)")
+    .call(yAxis5)
+    .append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 6)
+    .attr("dy", ".71em")
+    .style("text-anchor", "end")
+    .text("density");
+
+    // loc7, fig6 //	
+    svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(30,950)")
+    .call(xAxis6)    
+    .append("text")
+    .attr("y", 50)
+    .attr("x", 90)
+    .style("text-anchor", "beginning")
+    .text("distance (arcmin)");
+    
+
+    svg.append("g")
+    .attr("class", "y axis")
+    .attr("transform", "translate(20,690)")
+    .call(yAxis6)
+    .append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 6)
+    .attr("dy", ".71em")
+    .style("text-anchor", "end")
+    .text("amplitude");
 	
-	
-	
+
+    // loc8, button //	
     d3.select("body")
         .append("button")
         .attr("id", "runButton")
         .attr("value", true)
-        .text("run");
+        .text("update");
 
 
                   
 
-    (function() {
+   (function() {
      
      
      d3.select("#runButton").on("click", function() {
@@ -283,11 +428,11 @@ var svg = d3.select("body").append("svg")
 			data = spikeGen();
 			console.log(sigmoid(k, photons[n]) + randomNum());
 			data2.push({"x": photons[n], 
-						"y": sigmoid(k, photons[n]) + randomNum() } );
+					"y": sigmoid(k, photons[n]) + randomNum() } );
 
 			svg.append("path")
 			.datum(data)
-			.attr("transform", "translate(500, -10)")
+			.attr("transform", "translate(450, -10)")
 			.attr("class", "line")
 			.attr("d", line);
 			
@@ -297,7 +442,7 @@ var svg = d3.select("body").append("svg")
 				.enter().append("circle")
 				  .attr("class", "dot")
 				  .attr("r", 3.5)
-				  .attr("transform", "translate(500,240)")
+				  .attr("transform", "translate(450,290)")
 				  .attr("cx", function(d) { return x2(d.x); })
 				  .attr("cy", function(d) { return y2(d.y); })
 				  .style("fill", col);
@@ -309,8 +454,8 @@ var svg = d3.select("body").append("svg")
 		
 		
 		};
-		draw()
-			 });
+	draw()
+	 });
      })();
     
     
