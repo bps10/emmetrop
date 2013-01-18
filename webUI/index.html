@@ -44,16 +44,19 @@
 	.inputholder {
 		position: absolute;
 		left: 100px;
-		top: 1300px;
+		top: 1220px;
 		font-size: 16px;
+		border: 4px groove #aaa;
+		border-layout:fixed;
+		padding: 20px;
 		}
 		
-	button#runButton {
-		left: 180px;
-		position: absolute;
-		font-size: 18px;
-		top: 1400px;
+	button#runButton {		
+		position: absolute;		
+		top: 1420px;
 		width: 100px;
+		left: 100px;
+		font-size: 18px;
 	}
 
     #schematicEye {
@@ -400,19 +403,26 @@ var svg = d3.select("body").append("svg")
     .text("amplitude");
 	
 
-    // loc8, button //	
-
+    // loc8, options //	
+	d3.select("svg").append("text")
+		 .attr("position", "absolute")
+		 .attr("x","100")
+		 .attr("y", "1130")
+		 .attr("font-size","18px")
+		 .attr("font-weight","bold")
+		 .text("options:");
+		 
     d3.select("body")
 		.append("div")
 		 .attr("class","inputholder")
 		.append("input")
 		 .attr("id", "coneInput")
 		 .attr("type", "range")
-		 .attr("min",0.1)
-		 .attr("max", 6)
-		 .attr("step", 0.1)
-		 .attr("value", 2);
-
+		 .attr("min",1)
+		 .attr("max", 9)
+		 .attr("step", 1)
+		 .attr("value", 2.0);
+	d3.select(".inputholder").append("br");
     d3.select(".inputholder").append("span")
 	  .attr("id", "cone_text")
 	  .style("color", "black")
@@ -420,16 +430,26 @@ var svg = d3.select("body").append("svg")
 	  .append("span")
 	  .attr("id", "cone_val")
 	  .style("color", "lack")
-	  .text(2 + " arcmin");
+	  .text(2.0 + " arcmin");
     d3.select(".inputholder").append("br");
+	d3.select(".inputholder").append("br");
 	
-/*	
-    d3.select("body")
-        .append("button")
-        .attr("id", "runButton")
-        .attr("value", true)
-        .text("update");
-*/		
+    d3.select(".inputholder")
+		.append("text")
+		.text("select optical state")
+		.append("br");
+	d3.select(".inputholder")
+        .append("select")
+		.append("option")
+        .attr("value", "another")
+		.text("another");
+	d3.select(".inputholder").append("br");
+	d3.select(".inputholder")
+        .append("select")
+		.append("option")
+        .attr("value", "another")
+		.text("another");
+		
     d3.select("body")
         .append("button")
         .attr("id", "runButton")
@@ -439,13 +459,15 @@ var svg = d3.select("body").append("svg")
 
 	d3.select("#coneInput").on("change", changeCone);
 
+	var format = d3.format("g",3);
+	
 	function changeCone() {
 		d3.select("#cone_val").remove();
 			  
 		d3.select("#cone_text").append("span")
 		 .attr("id", "cone_val")
 		 .style("color", "black")
-		 .text(this.value + " arcmin");
+		 .text(format(this.value) + " arcmin");
 
 	};
 
