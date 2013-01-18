@@ -41,12 +41,18 @@
 		stroke-width: 1.5px;
 	}
 
-
+	.inputholder {
+		position: absolute;
+		left: 100px;
+		top: 1300px;
+		font-size: 16px;
+		}
+		
 	button#runButton {
 		left: 180px;
 		position: absolute;
 		font-size: 18px;
-		top: 1280px;
+		top: 1400px;
 		width: 100px;
 	}
 
@@ -277,7 +283,7 @@ var svg = d3.select("body").append("svg")
     .attr("y", 6)
     .attr("dy", ".71em")
     .style("text-anchor", "end")
-    .text("density");
+    .text("modulation");
 	
 	
     svg.append("g")
@@ -377,7 +383,7 @@ var svg = d3.select("body").append("svg")
     .call(xAxis6)    
     .append("text")
     .attr("y", 50)
-    .attr("x", 90)
+    .attr("x", 115)
     .style("text-anchor", "beginning")
     .text("distance (arcmin)");
     
@@ -395,15 +401,55 @@ var svg = d3.select("body").append("svg")
 	
 
     // loc8, button //	
+
+    d3.select("body")
+		.append("div")
+		 .attr("class","inputholder")
+		.append("input")
+		 .attr("id", "coneInput")
+		 .attr("type", "range")
+		 .attr("min",0.1)
+		 .attr("max", 6)
+		 .attr("step", 0.1)
+		 .attr("value", 2);
+
+    d3.select(".inputholder").append("span")
+	  .attr("id", "cone_text")
+	  .style("color", "black")
+	  .text("cone spacing: ")
+	  .append("span")
+	  .attr("id", "cone_val")
+	  .style("color", "lack")
+	  .text(2 + " arcmin");
+    d3.select(".inputholder").append("br");
+	
+/*	
     d3.select("body")
         .append("button")
         .attr("id", "runButton")
         .attr("value", true)
         .text("update");
-
-
+*/		
+    d3.select("body")
+        .append("button")
+        .attr("id", "runButton")
+        .attr("value", true)
+        .text("update");
                   
 
+	d3.select("#coneInput").on("change", changeCone);
+
+	function changeCone() {
+		d3.select("#cone_val").remove();
+			  
+		d3.select("#cone_text").append("span")
+		 .attr("id", "cone_val")
+		 .style("color", "black")
+		 .text(this.value + " arcmin");
+
+	};
+
+		  
    (function() {
      
      
@@ -442,7 +488,7 @@ var svg = d3.select("body").append("svg")
 				.enter().append("circle")
 				  .attr("class", "dot")
 				  .attr("r", 3.5)
-				  .attr("transform", "translate(450,290)")
+				  .attr("transform", "translate(450,340)")
 				  .attr("cx", function(d) { return x2(d.x); })
 				  .attr("cy", function(d) { return y2(d.y); })
 				  .style("fill", col);
