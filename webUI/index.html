@@ -19,14 +19,21 @@
 
 	.axis path,
 	.axis line {
-	  fill: none;
-	  stroke: #000;
-	  shape-rendering: crispEdges;
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
 	}
-
+        
+    div.textArea {
+        width: 800px;
+        position: relative;
+        left: 50px;
+        font-size: 16px;
+    }
+        
 	.bar {
-	  fill: steelblue;
-	  fill-opacity: .9;
+        fill: steelblue;
+        fill-opacity: .9;
 	}
 
 	.line {
@@ -61,14 +68,19 @@
 
     #schematicEye {
         position: absolute;
-        left: 160px;
+        left: 180px;
         top: 135px;
     }
 
     #baboon {
         position: absolute;
-        left: 10px;
-        top: 220px;
+        left: 30px;
+        top: 190px;
+    }
+
+    #test {
+        position: absolute;
+        top: 1440px;
     }
 
 	</style>
@@ -80,9 +92,14 @@
 <script src="http://d3js.org/d3.v3.min.js"></script>
 
 <body>
-    <h2 class="slideTitle"> the neitz model </h2>
-
-</body>
+    <h2 class="title"> the neitz model </h2>
+    
+    <select id='test'>
+    {% for optic in opticDict %}
+        <option> {{optic}} </option>
+    {% endfor %}
+    </select>
+    
 <script>
 
 ////////////////////////////
@@ -96,7 +113,7 @@
 
 // dimensions //
 var margin = {top: 70, right: 20, bottom: 30, left: 40},
-    width = 960 - margin.left - margin.right,
+    width = 900 - margin.left - margin.right,
     height = 1500 - margin.top - margin.bottom,
     xaxisWidth = 350, yaxisWidth = 250;
 
@@ -104,8 +121,8 @@ var margin = {top: 70, right: 20, bottom: 30, left: 40},
 d3.select("body").append("img")
     .attr("id","schematicEye")
     .attr("src","./static/images/SchematicEye.jpg")
-    .attr("height", "260")
-    .attr("width", "280");
+    .attr("height", "200")
+    .attr("width", "215");
 
 d3.select("body").append("img")
     .attr("id","baboon")
@@ -415,6 +432,18 @@ var svg = d3.select("body").append("svg")
     d3.select("body")
 		.append("div")
 		 .attr("class","inputholder")
+    .append("span")
+    .attr("id", "cone_text")
+    .style("color", "black")
+    .text("cone spacing: ")
+    .append("span")
+    .attr("id", "cone_val")
+    .style("color", "lack")
+    .text(2.0 + " arcmin");
+    
+    d3.select(".inputholder").append("br");
+    
+    d3.select(".inputholder")
 		.append("input")
 		 .attr("id", "coneInput")
 		 .attr("type", "range")
@@ -422,28 +451,22 @@ var svg = d3.select("body").append("svg")
 		 .attr("max", 9)
 		 .attr("step", 1)
 		 .attr("value", 2.0);
-	d3.select(".inputholder").append("br");
-    d3.select(".inputholder").append("span")
-	  .attr("id", "cone_text")
-	  .style("color", "black")
-	  .text("cone spacing: ")
-	  .append("span")
-	  .attr("id", "cone_val")
-	  .style("color", "lack")
-	  .text(2.0 + " arcmin");
+    
     d3.select(".inputholder").append("br");
 	d3.select(".inputholder").append("br");
 	
     d3.select(".inputholder")
 		.append("text")
-		.text("select optical state")
+		.text("select optical state:")
 		.append("br");
+    
 	d3.select(".inputholder")
         .append("select")
 		.append("option")
         .attr("value", "another")
 		.text("another");
 	d3.select(".inputholder").append("br");
+    
 	d3.select(".inputholder")
         .append("select")
 		.append("option")
@@ -529,6 +552,20 @@ var svg = d3.select("body").append("svg")
     
     
         </script>
-
+    <div class="textArea">
+        <h1 align=center> _______ </h1>
+        
+        
+        <h2 align=center>instructions</h2>
+        <p> Try playing around with the options above.</p>
+        
+        
+        <h1 align=center> _______ </h1>
+        <h2 align=center> explanation of the model</h2>
+        
+        <p> For a longer description see this <a href="http://staff.washington.edu/bps10/"> page</a>.</p>
+        <p> See the <a href="http://staff.washington.edu/bps10/">documentation</a> for more information on the API.  The source code can be viewed or downloaded from <a href="http://github.com/bps10/eschaton/"> github</a>.</p>
+    </div>
+</body>
 </html>
 
