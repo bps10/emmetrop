@@ -2,7 +2,7 @@ import os
 import shlex
 import numpy as np
 
-from eschaton.scene.DataManip import rad2deg
+from .. scene.DataManip import rad2deg
 
 class SchematicEye(object):
     """

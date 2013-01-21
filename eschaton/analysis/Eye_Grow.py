@@ -5,8 +5,8 @@ from matplotlib.lines import Line2D
 import matplotlib.animation as animation
 
 #eschaton imports
-from eschaton.renderer import PlottingFun as pf
-from eschaton.scene import DataManip as dm
+from .. renderer import PlottingFun as pf
+from .. scene import DataManip as dm
 
 ## 1. Figure out relationship between spring constant and number of nodes.
 

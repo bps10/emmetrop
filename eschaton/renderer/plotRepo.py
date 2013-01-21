@@ -1,7 +1,7 @@
 from __future__ import division
 import matplotlib.pylab as plt
 
-from eschaton.renderer import PlottingFun as pf
+from .. renderer import PlottingFun as pf
 
 class Plotter(object):
     """A plotting repo

@@ -1,6 +1,6 @@
 import numpy as np
 
-from eschaton.scene import DataManip as dm
+from .. scene import DataManip as dm
 
 
         

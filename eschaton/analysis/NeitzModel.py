@@ -2,12 +2,12 @@ from __future__ import division
 import numpy as np
 
 # eschaton imports:
-from eschaton.cones.dogRFields import ConeReceptiveFields
-from eschaton.eye.eyeModel import SchematicEye
-from eschaton.scene.Images import Images
+from .. cones.dogRFields import ConeReceptiveFields
+from .. eye.eyeModel import SchematicEye
+from .. scene.Images import Images
 
-from eschaton.analysis import Information as info
-from eschaton.renderer import plotRepo as pr
+from .. analysis import Information as info
+from .. renderer import plotRepo as pr
 
 class SchematicEyeAnalysis(object):
     """This class is designed to estimate the response of a linear 

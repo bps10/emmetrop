@@ -4,9 +4,9 @@ from scipy import io as sio
 from scipy import optimize
 import os, sys
 
-from eschaton.scene import SignalProcessing as sig
-from eschaton.scene import DataManip as dm
-from eschaton.database import Database as db
+from .. scene import SignalProcessing as sig
+from .. scene import DataManip as dm
+from .. database import Database as db
 
 
 class Images(object):
