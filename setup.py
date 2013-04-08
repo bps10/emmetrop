@@ -3,7 +3,7 @@ import sys, os
 
 version = '0.1'
 
-setup(name='eschaton',
+setup(name='emmetrop',
       version=version,
       description="A biological analysis of a schematic eye and natural images",
       long_description=""" """,

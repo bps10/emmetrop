@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-eschaton
+emmetrop
 ============
 
 *an emmetropization model*
@@ -47,4 +47,4 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-.. _GitHub: https://github.com/bps10/eschaton
+.. _GitHub: https://github.com/bps10/emmetrop

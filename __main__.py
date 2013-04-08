@@ -1,4 +1,4 @@
-from eschaton.analysis.NeitzModel import SchematicEyeAnalysis
+from emmetrop.analysis.NeitzModel import SchematicEyeAnalysis
 import argparse
 
 
@@ -63,7 +63,7 @@ def main(args):
         return Eye
         
     if args.eyegrow:
-        from eschaton.analysis import Eye_Grow as eg
+        from emmetrop.analysis import Eye_Grow as eg
         eg.main()
 
     
