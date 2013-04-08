@@ -1,8 +1,6 @@
 import numpy as np
 
 from emmetrop.scene import DataManip as dm
-
-
         
 
 def RemoveMean(image):

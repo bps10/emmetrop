@@ -9,6 +9,7 @@ from emmetrop.scene.Images import Images
 from emmetrop.analysis import Information as info
 from emmetrop.renderer import plotRepo as pr
 
+
 class SchematicEyeAnalysis(object):
     """This class is designed to estimate the response of a linear 
     photoreceptor to an amplitude spectrum derived from natural images.
