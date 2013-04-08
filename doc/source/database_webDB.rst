@@ -1,5 +1,5 @@
 Web Database
 ==============
 
-.. automodule:: eschaton.database.webDB
+.. automodule:: emmetrop.database.webDB
    :members: 

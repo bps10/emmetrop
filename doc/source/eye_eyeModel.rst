@@ -1,5 +1,5 @@
 Eye
 ==============
 
-.. automodule:: eschaton.eye.eyeModel
+.. automodule:: emmetrop.eye.eyeModel
    :members:

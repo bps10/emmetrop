@@ -5,7 +5,7 @@ This code is not yet complete.  As such, install files should be used with cauti
 
 If you are still interested, you can clone the repository using::
 
-   git clone https://github.com/bps10/eschaton
+   git clone https://github.com/bps10/emmetrop
    
 You can build with::
 
@@ -18,7 +18,7 @@ You can build with::
 Dependencies
 ------------
 
-eschaton requires the following python modules to be installed:
+emmetrop requires the following python modules to be installed:
 
 * Python 2.5/2.6/2.7
 

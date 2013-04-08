@@ -4,5 +4,5 @@ Plotting Fun
 This is for making our plots look pretty.
 
 
-.. automodule:: eschaton.renderer.PlottingFun
+.. automodule:: emmetrop.renderer.PlottingFun
    :members:

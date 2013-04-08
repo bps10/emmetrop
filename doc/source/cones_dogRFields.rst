@@ -1,5 +1,5 @@
 Difference of Gaussian
 =======================
 
-.. automodule:: eschaton.cones.dogRFields
+.. automodule:: emmetrop.cones.dogRFields
    :members:

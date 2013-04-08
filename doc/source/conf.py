@@ -55,7 +55,7 @@ master_doc = 'index'
 todo_include_todos = True
 
 # General information about the project.
-project = u'eschaton'
+project = u'emmetrop'
 copyright = u'2012, Brian P. Schmidt, Maureen Neitz & Jay Neitz'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -179,7 +179,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'eschaton_doc'
+htmlhelp_basename = 'emmetrop_doc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -198,7 +198,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'eschaton.tex', u'eschaton Documentation',
+  ('index', 'emmetrop.tex', u'emmetrop Documentation',
    u'Brian Schmidt', 'howto'),
 ]
 
@@ -228,7 +228,7 @@ latex_logo = 'logo.png'
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'eschaton', u'eschaton Documentation',
+    ('index', 'emmetrop', u'emmetrop Documentation',
      [u'Brian Schmidt'], 1)
 ]
 
@@ -242,8 +242,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'eschaton', u'eschaton Documentation',
-   u'Brian Schmidt', 'eschaton', 'One line description of project.',
+  ('index', 'emmetrop', u'emmetrop Documentation',
+   u'Brian Schmidt', 'emmetrop', 'One line description of project.',
    'Miscellaneous'),
 ]
 

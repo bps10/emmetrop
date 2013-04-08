@@ -1,5 +1,5 @@
 Neitz Model
 ============
 
-.. automodule:: eschaton.analysis.NeitzModel
+.. automodule:: emmetrop.analysis.NeitzModel
    :members:

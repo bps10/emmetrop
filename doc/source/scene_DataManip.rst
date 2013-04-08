@@ -1,5 +1,5 @@
 Data manipulation
 ===================
 
-.. automodule:: eschaton.scene.DataManip
+.. automodule:: emmetrop.scene.DataManip
    :members:

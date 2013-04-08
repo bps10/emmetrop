@@ -1,5 +1,5 @@
 Plot repo
 =========
 
-.. automodule:: eschaton.renderer.plotRepo
+.. automodule:: emmetrop.renderer.plotRepo
    :members:
