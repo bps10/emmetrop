@@ -17,12 +17,12 @@ class ConeReceptiveFields(object):
                  location = None):
         """
         """
-        if len(freqs) != len(cone_spacing):
-            raise ValueError("Sorry, length of location must match \
-            cone_spacing")
         if not location:
             location = ['periph', 'fovea']
             
+        if len(location) != len(cone_spacing):
+            raise ValueError("Sorry, length of location must match \
+            cone_spacing")            
         self.genReceptiveFields(freqs, cone_spacing, location)
             
     def genReceptiveFields(self, freqs, cone_spacing, location):
@@ -44,13 +44,7 @@ class ConeReceptiveFields(object):
         FFT_RF = {}
         RF_SPLINE = {}
         RField = {}
-    
-        RF_DOG = findSpacing(Xvals, cone_spacing)
-        FFT_RF = Fourier(RF_DOG, N)
-        length = np.floor(FFT_RF.shape[0] / 2.) + 1
-        RField = normRField(freqs, Xvals[length:] * 60,
-                                 FFT_RF[length:])
-
+        
         for i, loc in enumerate(location):
             
             RF_DOG[loc] = findSpacing(Xvals, cone_spacing[i])
