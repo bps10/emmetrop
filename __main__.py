@@ -56,10 +56,10 @@ def main(args):
         analysis_args.append('farPeriph')
     
     if not args.eyegrow:    
-        Eye = SchematicEyeAnalysis(RF_opt = Receptive_Field, 
-                                   analysis_args = analysis_args,
+        Eye = SchematicEyeAnalysis(RF_opt=Receptive_Field, 
+                                   analysis_args=analysis_args,
                                    plot_args=plot_args, 
-                                   save_arg = save_plots)
+                                   save_arg=save_plots)
         return Eye
         
     if args.eyegrow:
