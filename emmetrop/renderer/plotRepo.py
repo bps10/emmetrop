@@ -15,7 +15,8 @@ class Plotter(object):
         self.eyeOptics = eyeOptics
         
         self.freqs = self.eyeOptics['freqs']
-        self.figPath = '../../Figures/'
+        self.figPath = '../../../bps10.github.com/presentations/static/\
+figures/myopiaModel/'
         #options:
         self.RFselect = self.rec_field['selection']        
         self.location = ['periph']
@@ -357,7 +358,7 @@ class Plotter(object):
         pf.TufteAxis(ax, ['left', 'bottom'], [5,5])
     
         ''' on axis plots '''
-        ax.plot(self.freqs, self.eyeOptics['onAxis']['inf'], 'k', 
+        ax.plot(self.freqs, self.eyeOptics['onAxis']['diffract'], 'k', 
                 linewidth = 2.5, label='diffraction ')
         ax.plot(self.freqs, self.eyeOptics['onAxis']['inf'], 'r', 
                 linewidth=2.5, label='infinity') 
