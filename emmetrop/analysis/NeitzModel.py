@@ -243,8 +243,6 @@ class SchematicEyeAnalysis(object):
             print '------------'
             for key in self.Analysis:
                 print key, ': ', self.Analysis[key]['info']
-            
-
 
 
 if __name__ == "__main__":

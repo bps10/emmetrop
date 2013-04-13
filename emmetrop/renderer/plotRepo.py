@@ -54,8 +54,7 @@ figures/myopiaModel/'
            
         """
         pass
-
-
+        
     def plotInformation(self, save_plots=False, legend=False):
         """
         :param cones: list of cones in analysis
@@ -653,3 +652,34 @@ figures/myopiaModel/'
             
         else:
             plt.show()
+
+
+def accommodation():
+    '''Use Anderson et al. 2009 measurement of accommodation as a function\
+    of age.
+    '''
+    return lambda x: 1.93 - 0.07 * x
+    
+    
+def plotAccommodation():
+    """
+    """    
+    import numpy as np
+    fig = plt.figure(figsize=(8,6))
+    ax = fig.add_subplot(111)
+    pf.AxisFormat()
+    pf.TufteAxis(ax, ['left', 'bottom'], [5,5])    
+    x = np.arange(5, 20, 1)
+    y = accommodation()
+    ax.plot(x, y(x), 'k', linewidth=2.5)    
+    ax.set_ylabel('accommodative lag (D)')
+    ax.set_xlabel('age')
+    ax.set_title('4.80D demand')    
+    ax.text(0.85, 0.95, 
+        ('y = 1.93 - 0.07x'), 
+        fontsize=18, 
+        horizontalalignment='center',
+        verticalalignment='top',
+        transform=ax.transAxes)
+    plt.tight_layout()
+    plt.show()
