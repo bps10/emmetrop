@@ -26,7 +26,7 @@ figures/myopiaModel/'
         
         # plot the appropriate plots, with options:
         if 'amp' in plots:
-            self.plotAmpSpec(save_plots)
+            self.plotAmpSpec(brownian_motion=True, save_plots=save_plots)
         if 'mtf' in plots:
             self.plotMTFfamily(save_plots)
         if 'accomm' in plots:
@@ -277,7 +277,7 @@ figures/myopiaModel/'
                 plt.show()
             
             
-    def plotAmpSpec(self, save_plots = False):
+    def plotAmpSpec(self, brownian_motion=True, save_plots=False):
         """Plot the amplitude spec of image.
     
         :param save_plots: decide whether to save plots (True) or not (False)
@@ -306,7 +306,20 @@ figures/myopiaModel/'
      
         ax.loglog(self.imageData['imagexval'], plaw, 
                   'k', linewidth = 2.5)
-        
+                  
+        if brownian_motion:
+            from emmetrop.eye.movement import brownian_motion
+            import numpy as np
+            temp = np.arange(1, 50)
+            spat = self.imageData['imagexval']
+            movement_filter = brownian_motion(spat, temp) / 46.0 
+            #movement_filter = movement_filter / np.sum(movement_filter)
+            ax.loglog(self.imageData['imagexval'], movement_filter, 
+                      'g', linewidth = 2.5)           
+            powerlaw = plaw * movement_filter
+            ax.loglog(self.imageData['imagexval'], powerlaw, 
+                      'k', linewidth = 2.5)            
+                      
         ax.text(1, 10**-2.4, r'$\frac{1}{\mathit{f}}$', size = 35)
     
         plt.xlabel('spatial frequency (cycles / deg)')
@@ -446,10 +459,7 @@ figures/myopiaModel/'
                 plt.close()
             else:
                 plt.show()
-    
-    
-    
-    
+        
     def plotPeripheral(self, save_plots=False, legend=False):
         """
         Plot peripheral MTF with a comparison to Navarro et al 1993 or 

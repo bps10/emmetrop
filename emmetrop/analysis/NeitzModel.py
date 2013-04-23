@@ -109,7 +109,7 @@ class SchematicEyeAnalysis(object):
             self.Analysis[key]['line'] = line
         
         
-    def ComputeConeActivity(self, Receptive_Field):
+    def ComputeConeActivity(self, Receptive_Field, brownian_motion=True):
         """Compute the estimated activity of a cone photoreceptor.
         
         :param Receptive_Field: a handle to the spline fitted receptive field.
@@ -134,8 +134,16 @@ class SchematicEyeAnalysis(object):
             
         self.ImageData['fitLaw'] = self.ImageData['powerlaw'](
                                                  self.EyeOptics['freqs'][1:])
-        powerlaw = self.ImageData['fitLaw']
-        
+
+        powerlaw = self.ImageData['fitLaw']        
+        if brownian_motion:
+            from emmetrop.eye.movement import brownian_motion
+            temp = np.arange(1, 100)
+            spat = self.EyeOptics['freqs'][1:]
+            movement_filter = brownian_motion(spat, temp)
+            powerlaw *= movement_filter
+            #powerlaw = powerlaw / sum(powerlaw)
+            
         for key in self.Analysis:
             ind = self.Analysis[key]['ind']
             LocKey = self.Analysis[key]['params'][0]
@@ -147,11 +155,6 @@ class SchematicEyeAnalysis(object):
             self.Analysis[key]['retina'] = (self.Analysis[key]['preCone'] *
                                         Rec_Field[RfKey][ind[0]-1:ind[1]-1])
             self.Analysis[key]['freqs'] =self.EyeOptics['freqs'][ind[0]:ind[1]]
-            
-   
-
-        
-
 
                   
     def TotalActivity(self, print_opt = True):
