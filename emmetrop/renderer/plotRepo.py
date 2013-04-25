@@ -383,51 +383,64 @@ figures/myopiaModel/'
         pf.TufteAxis(ax, ['left', 'bottom'], [5,5])
     
         ''' on axis plots '''
-        ax.plot(self.freqs, self.eyeOptics['onAxis']['diffract'], 'k', 
+        ax.semilogx(self.freqs, 
+                  sig.decibels(self.eyeOptics['onAxis']['diffract']), 'k', 
                 linewidth = 2.5, label='diffraction ')
-        ax.plot(self.freqs, self.eyeOptics['onAxis']['inf'], 'r', 
+        ax.semilogx(self.freqs, self.eyeOptics['onAxis']['inf'], 'r', 
                 linewidth=2.5, label='infinity') 
         
         if plot_option == 1:
-            ax.plot(self.freqs, self.eyeOptics['onAxis']['20ft'], 'g', 
+            ax.semilogx(self.freqs, 
+                      sig.decibels(self.eyeOptics['onAxis']['20ft']), 'g', 
                     linewidth=2.5, label='20ft')
-            ax.plot(self.freqs, self.eyeOptics['onAxis']['1m'], 'b',
+            ax.semilogx(self.freqs, 
+                      sig.decibels(self.eyeOptics['onAxis']['1m']), 'b',
                     linewidth=2.5, label='1m')
-            ax.plot(self.freqs[:20], self.eyeOptics['onAxis']['16in'][:20], 
+            ax.semilogx(self.freqs[:20], 
+                      sig.decibels(self.eyeOptics['onAxis']['16in'][:20]), 
                     'm', linewidth=2.5, label='16in')
     
         ''' plot2 : off axis plots '''
     
         if plot_option == 2:
-            ax.plot(self.freqs, self.eyeOptics['offAxis']['inf'], 
+            ax.semilogx(self.freqs,
+                      sig.decibels(self.eyeOptics['offAxis']['inf']), 
                     'r--', linewidth=2.5)
             
-            ax.plot(self.freqs[:60], 
-                    self.eyeOptics['object']['16in16in'][:60],
+            ax.semilogx(self.freqs[:60], 
+                    sig.decibels(self.eyeOptics['object']['16in16in'][:60]),
                     'g--', linewidth=2.5, label = 'near focus, near obj')
-            ax.plot(self.freqs[:20], self.eyeOptics['object']['16inunder'][:20], 
+            ax.semilogx(self.freqs[:20], 
+                      sig.decibels(self.eyeOptics['object']['16inunder'][:20]), 
                     'c--', linewidth=2.5, label = 'underacc, far obj')
-            ax.plot(self.freqs[:20],
-                    self.eyeOptics['object']['16in20ft'][:20], 
+            ax.semilogx(self.freqs[:20],
+                    sig.decibels(self.eyeOptics['object']['16in20ft'][:20]), 
                     'b--',linewidth=2.5, label = 'near focus, far obj')
     
         if plot_option ==3:
-            ax.plot(self.freqs, self.eyeOptics['offAxis']['inf'],
+            ax.semilogx(self.freqs, 
+                      sig.decibels(self.eyeOptics['offAxis']['inf']),
                     'k--', linewidth=2.5)
             
-            ax.plot(self.freqs, self.eyeOptics['offAxis']['20ft'], 'g--', 
+            ax.semilogx(self.freqs, 
+                      sig.decibels(self.eyeOptics['offAxis']['20ft']), 'g--', 
                     linewidth=2.5)
-            ax.plot(self.freqs, self.eyeOptics['offAxis']['1m'], 'b--', 
+            ax.semilogx(self.freqs, 
+                      sig.decibels(self.eyeOptics['offAxis']['1m']), 'b--', 
                     linewidth=2.5)
-            ax.plot(self.freqs[:20], self.eyeOptics['offAxis']['16in'][:20],
+            ax.semilogx(self.freqs[:20], 
+                      sig.decibels(self.eyeOptics['offAxis']['16in'][:20]),
                     'm--', linewidth=2.5)
                     
         if legend: 
             ax.legend(loc='upper right')#title='object, retina')
         
-        
+
+        plt.ylim([-15, 1])
+        plt.xlim([self.freqs[1], 100])
+            
         plt.xlabel('spatial frequency (cycles / deg)')
-        plt.ylabel('modulation')
+        plt.ylabel('contrast sensitivity (dB)')
         
         plt.tight_layout()
         
@@ -472,7 +485,7 @@ figures/myopiaModel/'
                 plt.close()
             else:
                 plt.show()
-        
+            
     def plotPeripheral(self, save_plots=False, legend=False):
         """
         Plot peripheral MTF with a comparison to Navarro et al 1993 or 
@@ -536,7 +549,7 @@ figures/myopiaModel/'
         #plt.xlim([self.freqs[1], 100])
         
         plt.xlabel('spatial frequency (cycles / deg)')
-        plt.ylabel('modulation')
+        plt.ylabel('contrast sensitivity')
         
         plt.tight_layout()
         
@@ -678,34 +691,3 @@ figures/myopiaModel/'
             
         else:
             plt.show()
-
-
-def accommodation():
-    '''Use Anderson et al. 2009 measurement of accommodation as a function\
-    of age.
-    '''
-    return lambda x: 1.93 - 0.07 * x
-    
-    
-def plotAccommodation():
-    """
-    """    
-    import numpy as np
-    fig = plt.figure(figsize=(8,6))
-    ax = fig.add_subplot(111)
-    pf.AxisFormat()
-    pf.TufteAxis(ax, ['left', 'bottom'], [5,5])    
-    x = np.arange(5, 20, 1)
-    y = accommodation()
-    ax.plot(x, y(x), 'k', linewidth=2.5)    
-    ax.set_ylabel('accommodative lag (D)')
-    ax.set_xlabel('age')
-    ax.set_title('4.80D demand')    
-    ax.text(0.85, 0.95, 
-        ('y = 1.93 - 0.07x'), 
-        fontsize=18, 
-        horizontalalignment='center',
-        verticalalignment='top',
-        transform=ax.transAxes)
-    plt.tight_layout()
-    plt.show()
