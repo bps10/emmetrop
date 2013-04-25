@@ -138,7 +138,7 @@ class SchematicEyeAnalysis(object):
         powerlaw = self.ImageData['fitLaw']        
         if brownian_motion:
             from emmetrop.eye.movement import brownian_motion
-            temp = np.arange(1, 100)
+            temp = np.arange(1, 80)
             spat = self.EyeOptics['freqs'][1:]
             movement_filter = brownian_motion(spat, temp)
             powerlaw *= movement_filter

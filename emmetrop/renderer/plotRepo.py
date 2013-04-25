@@ -1,7 +1,9 @@
 from __future__ import division
 import matplotlib.pylab as plt
+import numpy as np
 
 from emmetrop.renderer import PlottingFun as pf
+from emmetrop.scene import SignalProcessing as sig
 
 class Plotter(object):
     """A plotting repo
@@ -164,22 +166,26 @@ figures/myopiaModel/'
                 fig2 = plt.figure(figsize=(8,6))
                 ax = fig2.add_subplot(111)
                 pf.AxisFormat()
-                pf.TufteAxis(ax, ['left', 'bottom'])
+                pf.TufteAxis(ax, ['left', 'bottom'], [5, 5])
                 
                 length = self.rec_field['length']
                 
-                ax.loglog(self.rec_field['xvals'][length:] * 60, 
-                    self.rec_field['coneResponse'][self.RFselect][loc][length:], 
+                normFFT = (self.rec_field[
+                            'coneResponse'][self.RFselect][loc][length:] /
+                            np.max(self.rec_field[
+                            'coneResponse'][self.RFselect][loc][length:]))
+                ax.semilogx(self.rec_field['xvals'][length:] * 60, 
+                          sig.decibels(normFFT), 
                             'k', linewidth=2.5)
                 
             
                 ax.get_xaxis().tick_bottom()
                 ax.get_yaxis().tick_left()
             
-                plt.ylim([10**-4, 10**-1])
+                plt.ylim([-40, 0])
                 plt.xlim([self.freqs[1], 100])
                 plt.xlabel('spatial frequency (cycles / deg)')
-                plt.ylabel('density')
+                plt.ylabel('contrast sensitivity (dB)')
                 
                 plt.tight_layout()
                 
@@ -256,7 +262,7 @@ figures/myopiaModel/'
             pf.TufteAxis(ax, ['left', 'bottom'])
             
             length = self.rec_field['length']
-            ax.loglog(self.rec_field['xvals'][length:] * 60,
+            ax.semilogx(self.rec_field['xvals'][length:] * 60,
                       self.rec_field['coneResponse']['jay'][loc][:], 
                         'k-', linewidth = 2.5)
             
@@ -264,7 +270,7 @@ figures/myopiaModel/'
             plt.xlim([self.freqs[1], 100])
             
             plt.xlabel('spatial frequency (cycles / deg)')
-            plt.ylabel('density')      
+            plt.ylabel('contrast sensitivity (dB)')      
             
             plt.tight_layout()
             
@@ -293,37 +299,44 @@ figures/myopiaModel/'
            **Fig 1:** An amplitude spectrum of a series of images.
            
         """
-        
-        plaw = self.imageData['powerlaw'](self.imageData['imagexval'])
-            
+
         fig = plt.figure(figsize=(8,6))
         ax = fig.add_subplot(111)
         pf.AxisFormat()
-        pf.TufteAxis(ax, ['left', 'bottom'])
-    
-        ax.loglog(self.imageData['imagexval'], self.imageData['ampMean'],
-                    'r.', markersize = 10, markeredgewidth = 0)
-     
-        ax.loglog(self.imageData['imagexval'], plaw, 
-                  'k', linewidth = 2.5)
-                  
+        pf.TufteAxis(ax, ['left', 'bottom'], [5, 3])
+        
+        plaw = self.imageData['powerlaw'](self.imageData['imagexval'][10:300])
         if brownian_motion:
             from emmetrop.eye.movement import brownian_motion
-            import numpy as np
-            temp = np.arange(1, 50)
-            spat = self.imageData['imagexval']
-            movement_filter = brownian_motion(spat, temp) / 46.0 
-            #movement_filter = movement_filter / np.sum(movement_filter)
-            ax.loglog(self.imageData['imagexval'], movement_filter, 
-                      'g', linewidth = 2.5)           
-            powerlaw = plaw * movement_filter
-            ax.loglog(self.imageData['imagexval'], powerlaw, 
-                      'k', linewidth = 2.5)            
-                      
-        ax.text(1, 10**-2.4, r'$\frac{1}{\mathit{f}}$', size = 35)
+            
+            temp = np.arange(1, 80, 1)
+            spat = self.imageData['imagexval'][10:300]
+            movement_filter = brownian_motion(spat, temp)
+            #ax.semilogx(self.imageData['imagexval'][10:300], movement_filter, 
+            #          'g', linewidth = 2.5)           
+            whiteStim = plaw * movement_filter
+            whiteStim = sig.decibels(whiteStim)
+            ax.semilogx(self.imageData['imagexval'][10:300], whiteStim, 
+                      'k', linewidth = 2.5)     
+ 
+        plaw = sig.decibels(plaw)
+        
+
     
+        ax.semilogx(self.imageData['imagexval'][10:300], 
+                    self.imageData['decibels'][10:300],
+                    'r.', markersize = 10, markeredgewidth = 0)
+     
+        ax.semilogx(self.imageData['imagexval'][10:300],
+                    plaw, 
+                  'k', linewidth = 2.5)
+                  
+        ax.set_xlim([0.45, 15])
+                      
+        #ax.text(1, 10**-2.4, r'$\frac{1}{\mathit{f}}$', size = 35)
+
         plt.xlabel('spatial frequency (cycles / deg)')
-        plt.ylabel('density')
+        plt.ylabel('spectral density (dB)')
         
         plt.tight_layout()
         
@@ -582,11 +595,13 @@ figures/myopiaModel/'
         ax = fig.add_subplot(111)
 
         pf.AxisFormat()
-        pf.TufteAxis(ax, ['left', 'bottom'])
+        pf.TufteAxis(ax, ['left', 'bottom'], [5, 5])
 
         for key in self.Analysis:
-            ax.loglog(self.Analysis[key]['freqs'],
-                      self.Analysis[key]['preCone'],
+            contrast = (self.Analysis[key]['preCone'] / 
+                    np.max(self.Analysis[key]['preCone']))
+
+            ax.semilogx(self.Analysis[key]['freqs'], sig.decibels(contrast),
                       self.Analysis[key]['line'],
                       linewidth=2.5, label=key)
         
@@ -598,13 +613,13 @@ figures/myopiaModel/'
         
         mi, ma = plt.ylim()
         
-        ax.text(15, 10**-4.0, r'$\frac{1}{\mathit{f}}$', size = 35)
+        #ax.text(15, 10**-4.0, r'$\frac{1}{\mathit{f}}$', size = 35)
         
-        plt.ylim([10**-8, 10**-3])
+        plt.ylim([-40, 0])
         plt.xlim([self.freqs[1], 100])
         
         plt.xlabel('spatial frequency (cycles / deg)')
-        plt.ylabel('density')
+        plt.ylabel('contrast sensitivity (dB)')
         
         plt.tight_layout()
         
@@ -627,11 +642,12 @@ figures/myopiaModel/'
             ax = fig.add_subplot(111)
             
         pf.AxisFormat()
-        pf.TufteAxis(ax, ['left', 'bottom'])
+        pf.TufteAxis(ax, ['left', 'bottom'], [5, 5])
 
         for key in self.Analysis:
-            ax.loglog(self.Analysis[key]['freqs'],
-                      self.Analysis[key]['retina'],
+            contrast = (self.Analysis[key]['retina'] / 
+                    np.max(self.Analysis[key]['retina']))
+            ax.semilogx(self.Analysis[key]['freqs'], sig.decibels(contrast),
                       self.Analysis[key]['line'],
                       linewidth=2.5, label=key)                
         
@@ -640,13 +656,13 @@ figures/myopiaModel/'
         
         mi, ma = plt.ylim()
 
-        ax.text(12, 10**-5.0, r'$\frac{1}{\mathit{f}}$', size = 35)
+        #ax.text(12, 10**-5.0, r'$\frac{1}{\mathit{f}}$', size = 35)
         
-        plt.ylim([10**-8, 10**-3.75])
+        plt.ylim([-40, 0])
         plt.xlim([self.freqs[1], 100])
         
         plt.xlabel('spatial frequency (cycles / deg)')
-        plt.ylabel('density')
+        plt.ylabel('contrast sensitivity (dB)')
         
         plt.tight_layout()
        

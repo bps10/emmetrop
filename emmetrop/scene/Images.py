@@ -43,9 +43,11 @@ class Images(object):
                 
         self.amp_mean = None
         self.getData()
-        
-        self.imagexval = np.arange(1,self.amp_mean.shape[0] + 1) / 46.0
-        self.PowerLaw(self.imagexval, self.amp_mean)
+        # multiply by 2 to correct for only taking half of spectrum
+        # 46 pixels / degree as reported in Garrigan et al.
+        self.imagexval = np.arange(1,self.amp_mean.shape[0] + 1) / 46.0 * 2.0
+        self.powerlaw = self._PowerLaw(self.imagexval[10:300], 
+                                       self.amp_mean[10:300] ** 2.0)
 
     def returnImageData(self):
         """
@@ -53,9 +55,10 @@ class Images(object):
         
         imageData =     {
                         'totalImages': len(self.ampSpecs),
-                        'ampSpecs': self.ampSpecs,
-                        'ampMean': self.amp_mean,
+                        #'ampSpecs': self.ampSpecs,
                         'rawAmp': self.rawAmp,
+                        'ampMean': self.amp_mean ** 2.0, # make it power
+                        'decibels': sig.decibels(self.amp_mean ** 2.0),
                         'powerlaw': self.powerlaw,
                         'imagexval': self.imagexval
                         }
@@ -289,7 +292,7 @@ class Images(object):
 
 
     
-    def PowerLaw(self, xdata, ydata):
+    def _PowerLaw(self, xdata, ydata):
         """Create an array according to a power law for plotting.
         
         :param xdata: x values at which to fit a power law.
@@ -324,13 +327,9 @@ class Images(object):
         out = optimize.leastsq(errfunc, pinit,
                                args=(logx, logy), full_output=1)
         pfinal = out[0]
-        
-        #print pfinal
-        #print covar
-        
-        index = pfinal[1]
-        amp = 10.0**pfinal[0]
-        self.powerlaw = lambda x,: amp * (x**index)
-    
- 
 
+        print pfinal[0], pfinal[1]
+        index = pfinal[1]
+        print '1/f alpha', index
+        amp = 10.0**pfinal[0]
+        return lambda x,: amp * (x**index)

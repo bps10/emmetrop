@@ -20,6 +20,11 @@ def RemoveMean(image):
     out = image - mu
     
     return out
+
+def decibels(x):
+    '''
+    '''
+    return 10.0 * np.log10(x)
     
 def Density(dat):
     """Compute the density of a power spectrum.
