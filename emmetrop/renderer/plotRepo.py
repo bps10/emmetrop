@@ -24,7 +24,8 @@ figures/myopiaModel/'
         self.location = ['periph']
         if 'diffract fovea' in self.Analysis:
             self.location.append('fovea')
-
+        
+        self.min_dB = -20
         
         # plot the appropriate plots, with options:
         if 'amp' in plots:
@@ -182,7 +183,7 @@ figures/myopiaModel/'
                 ax.get_xaxis().tick_bottom()
                 ax.get_yaxis().tick_left()
             
-                plt.ylim([-40, 0])
+                plt.ylim([self.min_dB, 0])
                 plt.xlim([self.freqs[1], 100])
                 plt.xlabel('spatial frequency (cycles / deg)')
                 plt.ylabel('contrast sensitivity (dB)')
@@ -263,10 +264,10 @@ figures/myopiaModel/'
             
             length = self.rec_field['length']
             ax.semilogx(self.rec_field['xvals'][length:] * 60,
-                      self.rec_field['coneResponse']['jay'][loc][:], 
+                sig.decibels(self.rec_field['coneResponse']['jay'][loc][:]), 
                         'k-', linewidth = 2.5)
             
-            plt.ylim([10**-4, 10**-1])
+            plt.ylim([self.min_dB, 0])
             plt.xlim([self.freqs[1], 100])
             
             plt.xlabel('spatial frequency (cycles / deg)')
@@ -407,14 +408,14 @@ figures/myopiaModel/'
                       sig.decibels(self.eyeOptics['offAxis']['inf']), 
                     'r--', linewidth=2.5)
             
-            ax.semilogx(self.freqs[:60], 
-                    sig.decibels(self.eyeOptics['object']['16in16in'][:60]),
+            ax.semilogx(self.freqs[1:60], 
+                    sig.decibels(self.eyeOptics['object']['16in16in'][1:60]),
                     'g--', linewidth=2.5, label = 'near focus, near obj')
-            ax.semilogx(self.freqs[:20], 
-                      sig.decibels(self.eyeOptics['object']['16inunder'][:20]), 
+            ax.semilogx(self.freqs[1:8], 
+                      sig.decibels(self.eyeOptics['object']['16inunder'][1:8]), 
                     'c--', linewidth=2.5, label = 'underacc, far obj')
-            ax.semilogx(self.freqs[:20],
-                    sig.decibels(self.eyeOptics['object']['16in20ft'][:20]), 
+            ax.semilogx(self.freqs[1:8],
+                    sig.decibels(self.eyeOptics['object']['16in20ft'][1:8]), 
                     'b--',linewidth=2.5, label = 'near focus, far obj')
     
         if plot_option ==3:
@@ -436,7 +437,7 @@ figures/myopiaModel/'
             ax.legend(loc='upper right')#title='object, retina')
         
 
-        plt.ylim([-15, 1])
+        plt.ylim([self.min_dB, 1])
         plt.xlim([self.freqs[1], 100])
             
         plt.xlabel('spatial frequency (cycles / deg)')
@@ -624,11 +625,11 @@ figures/myopiaModel/'
         ax.get_xaxis().tick_bottom()
         ax.get_yaxis().tick_left()
         
-        mi, ma = plt.ylim()
+        #mi, ma = plt.ylim()
         
         #ax.text(15, 10**-4.0, r'$\frac{1}{\mathit{f}}$', size = 35)
         
-        plt.ylim([-40, 0])
+        plt.ylim([self.min_dB, 0])
         plt.xlim([self.freqs[1], 100])
         
         plt.xlabel('spatial frequency (cycles / deg)')
@@ -671,7 +672,7 @@ figures/myopiaModel/'
 
         #ax.text(12, 10**-5.0, r'$\frac{1}{\mathit{f}}$', size = 35)
         
-        plt.ylim([-40, 0])
+        plt.ylim([self.min_dB, 0])
         plt.xlim([self.freqs[1], 100])
         
         plt.xlabel('spatial frequency (cycles / deg)')
