@@ -1,0 +1,3 @@
+[submodule "SchematicEye"]
+	path = SchematicEye
+	url = git://github.com/bps10/SchematicEye.git

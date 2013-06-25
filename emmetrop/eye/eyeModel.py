@@ -6,7 +6,7 @@ import numpy as np
 def rad2deg(radians):
     """convert radians to degrees
     """
-    return radians*180.0/np.pi
+    return radians * 180.0 / np.pi
 
 
 class SchematicEye(object):
