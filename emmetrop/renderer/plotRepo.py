@@ -7,16 +7,21 @@ from emmetrop.scene import SignalProcessing as sig
 
 class Plotter(object):
     """A plotting repo
+
+    .. todo::
+       Add self.ext to allow user to save as png or svg.
     """
-    def __init__(self, Analysis, recepitive_field, imageData, eyeOptics,
+    def __init__(self, mtf, freqs, Analysis, recepitive_field, imageData, eyeOptics,
                  plots, save_plots, legend):
+
+        self.mtf = mtf
         # import our dictionaries of data:
         self.Analysis = Analysis
         self.rec_field = recepitive_field
         self.imageData = imageData
         self.eyeOptics = eyeOptics
         
-        self.freqs = self.eyeOptics['freqs']
+        self.freqs = freqs
         self.figPath = '../../../bps10.github.com/presentations/static/\
 figures/myopiaModel/'
         #options:
@@ -384,6 +389,7 @@ figures/myopiaModel/'
         pf.TufteAxis(ax, ['left', 'bottom'], [5,5])
     
         ''' on axis plots '''
+        '''
         ax.semilogx(self.freqs, 
                   sig.decibels(self.eyeOptics['onAxis']['diffract']), 'k', 
                 linewidth = 2.5, label='diffraction ')
@@ -400,9 +406,9 @@ figures/myopiaModel/'
             ax.semilogx(self.freqs[:20], 
                       sig.decibels(self.eyeOptics['onAxis']['16in'][:20]), 
                     'm', linewidth=2.5, label='16in')
-    
+        '''
         ''' plot2 : off axis plots '''
-    
+        '''
         if plot_option == 2:
             ax.semilogx(self.freqs,
                       sig.decibels(self.eyeOptics['offAxis']['inf']), 
@@ -435,9 +441,12 @@ figures/myopiaModel/'
                     
         if legend: 
             ax.legend(loc='upper right')#title='object, retina')
-        
+        '''
+        ax.plot( 
+                  self.mtf, 'g--', 
+                linewidth=2.5)
 
-        plt.ylim([self.min_dB, 1])
+        #plt.ylim([self.min_dB, 1])
         plt.xlim([self.freqs[1], 100])
             
         plt.xlabel('spatial frequency (cycles / deg)')

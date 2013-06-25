@@ -64,7 +64,27 @@ def simpleaxis(ax):
     ax.get_yaxis().tick_left()
 
 
+def invert(ax, fig, bk_color='k'):
+    '''
+    '''
+    fig.set_facecolor(bk_color)
+    ax.patch.set_facecolor(bk_color)
+    for i, s in enumerate(ax.lines):
+        if (ax.lines[i].get_color() == 'k' or 
+            ax.lines[i].get_color() == (0.0, 0.0, 0.0)):                      
+            ax.lines[i].set_color('w')
+    plt.rcParams['text.color'] = 'w'
+    ax.spines['bottom'].set_color('w')
+    ax.spines['left'].set_color('w')
+    ax.tick_params(axis='x', colors='w')
+    ax.tick_params(axis='y', colors='w')
+    ax.yaxis.label.set_color('w')
+    ax.xaxis.label.set_color('w')
+
+
 def centerAxes(ax):
+    '''
+    '''
     ax.spines['left'].set_position('zero')
     ax.spines['right'].set_color('none')
     ax.spines['bottom'].set_position('zero')
@@ -210,7 +230,8 @@ def SciNoteAxis(gca_handle,spines):
 
 
 
-def AxisFormat(FONTSIZE = 22, TickSize = 10, TickDirection = 'out'):
+def AxisFormat(FONTSIZE=22, TickSize=10, TickDirection='out',
+                linewidth=2, markersize=8):
     """
 
     Format axes to standard design.
@@ -259,8 +280,11 @@ def AxisFormat(FONTSIZE = 22, TickSize = 10, TickDirection = 'out'):
     legend = {'frameon': False}
     ticks = {'direction': TickDirection, 'major.size': TickSize,
              'minor.size': TickSize - 2}
+    lines = {"linewidth": linewidth, "markeredgewidth": 0,
+            "markersize": markersize}
 
     plt.rc('font', **font)
     plt.rc('legend', **legend)
     plt.rc('xtick', **ticks)
     plt.rc('ytick', **ticks)
+    plt.rc('lines', **lines)

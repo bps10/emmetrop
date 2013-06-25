@@ -2,7 +2,7 @@ from __future__ import division
 import numpy as np
 
 # emmetrop imports:
-from emmetrop.cones.dogRFields import ConeReceptiveFields
+from emmetrop.cones.dogRFields import genReceptiveFields
 from emmetrop.eye.eyeModel import SchematicEye
 from emmetrop.scene.Images import Images
 
@@ -30,37 +30,57 @@ class SchematicEyeAnalysis(object):
        * better plotting options.
     """
     
-    def __init__(self, RF_opt, analysis_args, plot_args, save_arg):
+    def __init__(self, RF_opt, analysis_args, plot_args, save_arg,
+                Use_OSLO=False):
         """
         
         """
-        
+        self.freqs = np.arange(0.0005, 0.2001, 0.0005) * 200
         # get ray tracer data:
-        self.EyeOptics = SchematicEye().returnOSLOdata()
-        
+        if Use_OSLO:
+            self.EyeOptics = SchematicEye().returnOSLOdata()
+        else:
+            self.EyeOptics = SchematicEye()
+
         # get image data stuff:
         self.ImageData = Images().returnImageData()
         
         # receptive field stuff:        
-        self.rec_field = ConeReceptiveFields(
-                            self.EyeOptics['freqs']).returnReceptiveField()
+        self.rec_field = genReceptiveFields(self.freqs, 2)
         
         # append user options:
         self.rec_field['selection'] = RF_opt.lower()
         
         # analysis stuff:
-        self.NeitzModel(analysis_args, RF_opt)
+        if Use_OSLO:
+            self.NeitzModel_OSLO(analysis_args, RF_opt)
+        else:
+            self.NeitzModel_OSLO(analysis_args, RF_opt)
         
         # send to renderer module for plotting:
-        pr.Plotter(self.Analysis, self.rec_field, self.ImageData, 
+        pr.Plotter(self.MTF, self.freqs, self.Analysis, self.rec_field, self.ImageData, 
                    self.EyeOptics, plot_args, save_arg, legend = False)
 
     def NeitzModel(self, analysis_args, RF_opt):
+        '''This function organizes the entire operation...
+        '''
+        self.Analysis = {}
+
+        if 'objectSet' in analysis_args:
+            for dist in range(0, 10):
+                intensity = self.EyeOptics.traceEye(object_distance, 
+                                    off_axis, pupil_size, diopters)
+                mtf = self.EyeOptics.genMTF(intensity)
+                
+                #self.Analysis[dist] = 
+
+
+    def NeitzModel_OSLO(self, analysis_args, RF_opt):
         """This function organizes the entire operation...
         """
         self.Analysis = {}
         
-        end = len(self.EyeOptics['offAxis']['diffract'])
+        end = 399 #len(self.EyeOptics['offAxis']['diffract'])
 
         # Periph
         self.Analysis['diffract periph'] = {'ind': [1,end,60],
@@ -90,9 +110,9 @@ class SchematicEyeAnalysis(object):
 
         self.addLineStyle()
         # run it all:
-        self.ComputeConeActivity(RF_opt)       
+        self.ComputeConeActivity(RF_opt)      
         self.TotalActivity()
-        self.estimateInfo(RF_opt)        
+        #self.estimateInfo(RF_opt)        
 
     def addLineStyle(self):
         """Add line style for use with plots
@@ -107,7 +127,6 @@ class SchematicEyeAnalysis(object):
             line = axis[self.Analysis[key]['params'][1]]
             line += state[self.Analysis[key]['params'][0]]
             self.Analysis[key]['line'] = line
-        
         
     def ComputeConeActivity(self, Receptive_Field, brownian_motion=True):
         """Compute the estimated activity of a cone photoreceptor.
@@ -124,7 +143,7 @@ class SchematicEyeAnalysis(object):
             print 'Used Jay receptive field'
             
         elif Receptive_Field.lower() == 'fft':
-            Rec_Field = self.rec_field['RField']['fft']
+            Rec_Field = self.rec_field['fft']
             print 'Used FFT receptive field'
             
         else :
@@ -133,13 +152,17 @@ class SchematicEyeAnalysis(object):
             print 'receptive field not understood, see options. Using FFT.'            
             
         self.ImageData['fitLaw'] = self.ImageData['powerlaw'](
-                                                 self.EyeOptics['freqs'][1:])
+                                                 self.freqs[1:])
+
+        intensity = self.EyeOptics.traceEye(1000000, 2, 4, 0)
+        mtf, freqs = self.EyeOptics.genMTF(intensity)
+        self.MTF = mtf
 
         powerlaw = self.ImageData['fitLaw']        
         if brownian_motion:
             from emmetrop.eye.movement import brownian_motion
             temp = np.arange(1, 80)
-            spat = self.EyeOptics['freqs'][1:]
+            spat = self.freqs[1:]
             movement_filter = brownian_motion(spat, temp)
             powerlaw *= movement_filter
             #powerlaw = powerlaw / sum(powerlaw)
@@ -150,11 +173,19 @@ class SchematicEyeAnalysis(object):
             OptKey = self.Analysis[key]['params'][1]
             RfKey = self.Analysis[key]['params'][2]
             
-            self.Analysis[key]['preCone'] = (powerlaw[ind[0]-1:ind[1]-1]*
-                                self.EyeOptics[LocKey][OptKey][ind[0]:ind[1]])
+            #ntensity = self.EyeOptics.traceEye(1000000, 0, 4, 0)
+            #mtf, freqs = self.EyeOptics.genMTF(intensity)
+            #self.MTF = mtf
+
+            self.Analysis[key]['preCone'] = (powerlaw[ind[0] - 1:ind[1] - 1] *
+                                mtf[ind[0]:ind[1]])
+                                #self.EyeOptics[LocKey][OptKey][ind[0]:ind[1]])
+
             self.Analysis[key]['retina'] = (self.Analysis[key]['preCone'] *
-                                        Rec_Field[RfKey][ind[0]-1:ind[1]-1])
-            self.Analysis[key]['freqs'] =self.EyeOptics['freqs'][ind[0]:ind[1]]
+                                        Rec_Field[ind[0] - 1:ind[1] - 1])
+
+            self.Analysis[key]['freqs'] = freqs
+            #self.Analysis[key]['freqs'] = self.EyeOptics['freqs'][ind[0]:ind[1]]
 
                   
     def TotalActivity(self, print_opt = True):
