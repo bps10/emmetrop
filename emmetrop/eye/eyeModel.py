@@ -96,9 +96,13 @@ class SchematicEye(object):
 
         # normalize MTF
         MTF = temp / np.max(temp)
+
+        return MTF
+
+    def getFreqs(self):
         # temporary for now
         freqs = np.arange(0, len(MTF))
-        return MTF, freqs
+        return freqs
 
     def getAxialLength(self):
         """Find the axial length in mm of the optical system used to generate 

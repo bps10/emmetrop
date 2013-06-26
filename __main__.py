@@ -11,31 +11,16 @@ def main(args):
         save_plots = True
     else:
         save_plots = False
-
-    if args.rfield.lower() == 'jay':
-        Receptive_Field = "Jay"
-    elif args.rfield.lower() == 'fft':
-        Receptive_Field = "FFT"
-    else: 
-        raise('Sorry, receptive field entered not supported: Jay or FFT')
         
 
     plot_args = []
 
     if args.mtf or args.verbose:
-        plot_args.append('mtf')
-        
-    if args.periphPlot or args.verbose:
-        plot_args.append('periph')        
+        plot_args.append('mtf')   
     
     if args.accomm or args.verbose:
         plot_args.append('accomm')
         
-    if args.dog or args.verbose:
-        if Receptive_Field.lower() == 'fft':
-            plot_args.append('plotDoG')
-        elif Receptive_Field.lower() == 'jay':
-            plot_args.append('plotDeconstructed')
                 
     if args.amp or args.verbose:
         plot_args.append('amp')
@@ -48,16 +33,15 @@ def main(args):
     
     analysis_args = []
     
-    if args.fovea or args.verbose:
-        analysis_args.append('fovea')
-    if args.objectSet or args.verbose:
-        analysis_args.append('objectSet')
-    if args.farPeriph or args.verbose:
-        analysis_args.append('farPeriph')
+    if args.distance:
+        analysis_args.append('distance')
+    if args.focus:
+        analysis_args.append('focus')
+    if args.off_axis or args.verbose:
+        analysis_args.append('off_axis')
     
     if not args.eyegrow:    
-        Eye = SchematicEyeAnalysis(RF_opt=Receptive_Field, 
-                                   analysis_args=analysis_args,
+        Eye = SchematicEyeAnalysis(analysis_args=analysis_args,
                                    plot_args=plot_args, 
                                    save_arg=save_plots)
         return Eye
@@ -79,20 +63,18 @@ if __name__ == "__main__":
                         help="display MTF family plots")
     parser.add_argument("-a", "--amp", action="store_true",
                         help="display amplitude spectrum plot")
-    parser.add_argument("-d", "--dog", action="store_true", 
+    parser.add_argument("-r", "--dog", action="store_true", 
                          help="display DoG receptive field")
     parser.add_argument("-y", "--activity", action="store_true",
                         help="display activity plots")
-    parser.add_argument("-t", "--periphPlot", action="store_true", 
-                        help="display peripheral mtf plots")
     parser.add_argument("-i", "--info", action="store_true",
                         help="display information plot")
                         
-    parser.add_argument("-f", "--fovea", action="store_true",
+    parser.add_argument("-d", "--distance", action="store_true",
                         help="include fovea in analyses")
-    parser.add_argument('-o', "--objectSet", action="store_true",
+    parser.add_argument('-f', "--focus", action="store_true",
                         help="include object set in analyses")
-    parser.add_argument('-p', "--farPeriph", action="store_true",
+    parser.add_argument('-o', "--off_axis", action="store_true",
                         help="include far periphery in analyses")
                         
     parser.add_argument("-v", "--verbose", action="store_true",
@@ -102,8 +84,6 @@ if __name__ == "__main__":
                                                 
     parser.add_argument("-e", "--eyegrow", action="store_true",
                         help="plot predicted eye growth against age")
-    parser.add_argument("-r", "--rfield", type=str, default = 'FFT',
-                        help="change receptive field used for analysis")
                         
     args = parser.parse_args()
     

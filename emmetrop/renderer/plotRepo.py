@@ -11,21 +11,18 @@ class Plotter(object):
     .. todo::
        Add self.ext to allow user to save as png or svg.
     """
-    def __init__(self, mtf, freqs, Analysis, recepitive_field, imageData, eyeOptics,
+    def __init__(self, freqs, Analysis, recepitive_field, imageData,
                  plots, save_plots, legend):
 
-        self.mtf = mtf
         # import our dictionaries of data:
         self.Analysis = Analysis
         self.rec_field = recepitive_field
         self.imageData = imageData
-        self.eyeOptics = eyeOptics
         
         self.freqs = freqs
         self.figPath = '../../../bps10.github.com/presentations/static/\
 figures/myopiaModel/'
-        #options:
-        self.RFselect = self.rec_field['selection']        
+        #options:      
         self.location = ['periph']
         if 'diffract fovea' in self.Analysis:
             self.location.append('fovea')
@@ -38,9 +35,7 @@ figures/myopiaModel/'
         if 'mtf' in plots:
             self.plotMTFfamily(save_plots)
         if 'accomm' in plots:
-            self.plotMTFfamily(plot_option=2, save_plots=save_plots)
-        if 'periph' in plots:
-            self.plotPeripheral(save_plots)
+            self.plotMTFfamily(save_plots=save_plots)
         if 'plotDoG' in plots:
             self.plotDoG(save_plots)
         if 'plotDeconstructed' in plots:
@@ -126,7 +121,9 @@ figures/myopiaModel/'
         :returns: * Plot1: difference of gaussians receptive field \n
                   * Plot2: FFT spectrum of plot 1.
                 
-    
+        .. todo::
+           Get an analytical function from Curcio to find cone spacing
+           as a function of eccentricity.
             
         .. figure:: ../../Figures/ConeRF.png 
            :height: 300px
@@ -147,60 +144,59 @@ figures/myopiaModel/'
         """
         
         for loc in self.location:
-            if self.RFselect == 'fft':
-                fig = plt.figure(figsize=(8,6))
-                ax = fig.add_subplot(111)
+            fig = plt.figure(figsize=(8,6))
+            ax = fig.add_subplot(111)
+        
+            pf.AxisFormat()
+            pf.TufteAxis(ax, ['left', 'bottom'], [5,5])
             
-                pf.AxisFormat()
-                pf.TufteAxis(ax, ['left', 'bottom'], [5,5])
-                
-                ax.plot(self.rec_field['xvals'], self.rec_field['dog'][loc], 
+            ax.plot(self.rec_field['xvals'], self.rec_field['dog'][loc], 
+                    'k', linewidth=2.5)
+        
+            plt.xlabel('distance (arcmin)')
+            plt.ylabel('amplitude')
+            
+            plt.tight_layout()
+            
+            if save_plots:
+                fig.show()
+                fig.savefig(self.figPath + 'ConeRF' + loc + '.png')
+                plt.close()
+            else:
+                plt.show()
+            
+            fig2 = plt.figure(figsize=(8,6))
+            ax = fig2.add_subplot(111)
+            pf.AxisFormat()
+            pf.TufteAxis(ax, ['left', 'bottom'], [5, 5])
+            
+            length = self.rec_field['length']
+            
+            normFFT = (self.rec_field[
+                        'coneResponse'][loc][length:] /
+                        np.max(self.rec_field[
+                        'coneResponse'][loc][length:]))
+            ax.semilogx(self.rec_field['xvals'][length:] * 60, 
+                      sig.decibels(normFFT), 
                         'k', linewidth=2.5)
             
-                plt.xlabel('distance (arcmin)')
-                plt.ylabel('amplitude')
-                
-                plt.tight_layout()
-                
-                if save_plots:
-                    fig.show()
-                    fig.savefig(self.figPath + 'ConeRF' + loc + '.png')
-                    plt.close()
-                else:
-                    plt.show()
-                
-                fig2 = plt.figure(figsize=(8,6))
-                ax = fig2.add_subplot(111)
-                pf.AxisFormat()
-                pf.TufteAxis(ax, ['left', 'bottom'], [5, 5])
-                
-                length = self.rec_field['length']
-                
-                normFFT = (self.rec_field[
-                            'coneResponse'][self.RFselect][loc][length:] /
-                            np.max(self.rec_field[
-                            'coneResponse'][self.RFselect][loc][length:]))
-                ax.semilogx(self.rec_field['xvals'][length:] * 60, 
-                          sig.decibels(normFFT), 
-                            'k', linewidth=2.5)
-                
+        
+            ax.get_xaxis().tick_bottom()
+            ax.get_yaxis().tick_left()
+        
+            plt.ylim([self.min_dB, 0])
+            plt.xlim([self.freqs[1], 100])
+            plt.xlabel('spatial frequency (cycles / deg)')
+            plt.ylabel('contrast sensitivity (dB)')
             
-                ax.get_xaxis().tick_bottom()
-                ax.get_yaxis().tick_left()
+            plt.tight_layout()
             
-                plt.ylim([self.min_dB, 0])
-                plt.xlim([self.freqs[1], 100])
-                plt.xlabel('spatial frequency (cycles / deg)')
-                plt.ylabel('contrast sensitivity (dB)')
-                
-                plt.tight_layout()
-                
-                if save_plots:
-                    fig2.show()
-                    fig2.savefig(self.figPath + 'ConeRF_FFT' + loc + '.png')
-                    plt.close()
-                else:
-                    plt.show()
+            if save_plots:
+                fig2.show()
+                fig2.savefig(self.figPath + 'ConeRF_FFT' + loc + '.png')
+                plt.close()
+            else:
+                plt.show()
     
             
     def plotDeconstructedRF(self, save_plots):
@@ -354,15 +350,11 @@ figures/myopiaModel/'
             plt.show()
     
     
-    def plotMTFfamily(self, save_plots = False, plot_option = 1, 
-                       legend = False, legend_fig=False):    
+    def plotMTFfamily(self, save_plots = False, legend = False):    
         """Plot a family of MTF curves derived from a schematic eye.
         
         :param save_plots: decide whether to save plots (True) or not (False).
         :type save_plots: bool
-        :param plot_option: decide what to plot,
-                        1 = on axis
-                        2 = off axis
         :param legend: turn legend on (True) or off (False). Default = True. \n
         :type legend: bool
         
@@ -387,67 +379,18 @@ figures/myopiaModel/'
         ax = fig.add_subplot(111)
         pf.AxisFormat()
         pf.TufteAxis(ax, ['left', 'bottom'], [5,5])
-    
-        ''' on axis plots '''
-        '''
-        ax.semilogx(self.freqs, 
-                  sig.decibels(self.eyeOptics['onAxis']['diffract']), 'k', 
-                linewidth = 2.5, label='diffraction ')
-        ax.semilogx(self.freqs, self.eyeOptics['onAxis']['inf'], 'r', 
-                linewidth=2.5, label='infinity') 
         
-        if plot_option == 1:
-            ax.semilogx(self.freqs, 
-                      sig.decibels(self.eyeOptics['onAxis']['20ft']), 'g', 
-                    linewidth=2.5, label='20ft')
-            ax.semilogx(self.freqs, 
-                      sig.decibels(self.eyeOptics['onAxis']['1m']), 'b',
-                    linewidth=2.5, label='1m')
-            ax.semilogx(self.freqs[:20], 
-                      sig.decibels(self.eyeOptics['onAxis']['16in'][:20]), 
-                    'm', linewidth=2.5, label='16in')
-        '''
-        ''' plot2 : off axis plots '''
-        '''
-        if plot_option == 2:
-            ax.semilogx(self.freqs,
-                      sig.decibels(self.eyeOptics['offAxis']['inf']), 
-                    'r--', linewidth=2.5)
-            
-            ax.semilogx(self.freqs[1:60], 
-                    sig.decibels(self.eyeOptics['object']['16in16in'][1:60]),
-                    'g--', linewidth=2.5, label = 'near focus, near obj')
-            ax.semilogx(self.freqs[1:8], 
-                      sig.decibels(self.eyeOptics['object']['16inunder'][1:8]), 
-                    'c--', linewidth=2.5, label = 'underacc, far obj')
-            ax.semilogx(self.freqs[1:8],
-                    sig.decibels(self.eyeOptics['object']['16in20ft'][1:8]), 
-                    'b--',linewidth=2.5, label = 'near focus, far obj')
-    
-        if plot_option ==3:
-            ax.semilogx(self.freqs, 
-                      sig.decibels(self.eyeOptics['offAxis']['inf']),
-                    'k--', linewidth=2.5)
-            
-            ax.semilogx(self.freqs, 
-                      sig.decibels(self.eyeOptics['offAxis']['20ft']), 'g--', 
-                    linewidth=2.5)
-            ax.semilogx(self.freqs, 
-                      sig.decibels(self.eyeOptics['offAxis']['1m']), 'b--', 
-                    linewidth=2.5)
-            ax.semilogx(self.freqs[:20], 
-                      sig.decibels(self.eyeOptics['offAxis']['16in'][:20]),
-                    'm--', linewidth=2.5)
-                    
+        for key in self.Analysis:
+            mtf = self.Analysis[key]['mtf']
+            ax.plot(self.freqs, mtf,
+                      self.Analysis[key]['line'],
+                      linewidth=2.5)
+        
         if legend: 
             ax.legend(loc='upper right')#title='object, retina')
-        '''
-        ax.plot( 
-                  self.mtf, 'g--', 
-                linewidth=2.5)
 
         #plt.ylim([self.min_dB, 1])
-        plt.xlim([self.freqs[1], 100])
+        plt.xlim([0, 60])
             
         plt.xlabel('spatial frequency (cycles / deg)')
         plt.ylabel('contrast sensitivity (dB)')
@@ -464,37 +407,6 @@ figures/myopiaModel/'
             plt.close()
         else:
             plt.show()
-            
-        """ Legend figure """
-        if legend_fig:
-            if save_plots:
-                fig2 = plt.figure(figsize=(8,6))
-                ax = fig2.add_subplot(111)
-            else:
-                fig = plt.figure(figsize=(8,6))
-                ax = fig.add_subplot(111)
-                
-            font = {'weight' : 'norm', 'size'  : 32}
-            legend = {'frameon' : False}
-            plt.rc('font', **font)
-            
-            
-            ax.plot(0,0, 'k', linewidth=2.5, label='diffraction')
-            ax.plot(0,0, 'r', linewidth=2.5, label='infinity') 
-            ax.plot(0,0, 'g--', linewidth=2.5, 
-                    label = 'near focus, near object')
-            ax.plot(0,0, 'c--', linewidth=2.5, label = 'underacc, far object')
-            ax.plot(0,0, 'b--', linewidth=2.5,
-                    label = 'near focus, far object')
-            ax.legend(loc = 'center')
-            plt.axis('off')
-            
-            if save_plots:
-                fig2.show()
-                fig2.savefig(self.figPath + 'Legend.png')
-                plt.close()
-            else:
-                plt.show()
             
     def plotPeripheral(self, save_plots=False, legend=False):
         """
@@ -624,7 +536,7 @@ figures/myopiaModel/'
             contrast = (self.Analysis[key]['preCone'] / 
                     np.max(self.Analysis[key]['preCone']))
 
-            ax.semilogx(self.Analysis[key]['freqs'], sig.decibels(contrast),
+            ax.semilogx(self.freqs[0:100], sig.decibels(contrast),
                       self.Analysis[key]['line'],
                       linewidth=2.5, label=key)
         
@@ -639,7 +551,7 @@ figures/myopiaModel/'
         #ax.text(15, 10**-4.0, r'$\frac{1}{\mathit{f}}$', size = 35)
         
         plt.ylim([self.min_dB, 0])
-        plt.xlim([self.freqs[1], 100])
+        plt.xlim([0, 60])
         
         plt.xlabel('spatial frequency (cycles / deg)')
         plt.ylabel('contrast sensitivity (dB)')
@@ -670,7 +582,7 @@ figures/myopiaModel/'
         for key in self.Analysis:
             contrast = (self.Analysis[key]['retina'] / 
                     np.max(self.Analysis[key]['retina']))
-            ax.semilogx(self.Analysis[key]['freqs'], sig.decibels(contrast),
+            ax.semilogx(self.freqs[0:100], sig.decibels(contrast),
                       self.Analysis[key]['line'],
                       linewidth=2.5, label=key)                
         
@@ -682,7 +594,7 @@ figures/myopiaModel/'
         #ax.text(12, 10**-5.0, r'$\frac{1}{\mathit{f}}$', size = 35)
         
         plt.ylim([self.min_dB, 0])
-        plt.xlim([self.freqs[1], 100])
+        plt.xlim([0, 60])
         
         plt.xlabel('spatial frequency (cycles / deg)')
         plt.ylabel('contrast sensitivity (dB)')
