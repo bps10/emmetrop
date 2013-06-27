@@ -50,7 +50,7 @@ class SchematicEyeAnalysis(object):
         self.NeitzModel(analysis_args)
         
         # send to renderer module for plotting:
-        pr.Plotter(self.freqs, self.diffract, self.Analysis, self.rec_field, 
+        pr.Plotter(analysis_args, self.diffract, self.Analysis, self.rec_field, 
                     self.ImageData, plot_args, save_arg, legend = False)
 
     def genMeta(self):
@@ -81,7 +81,7 @@ class SchematicEyeAnalysis(object):
         if 'distance' in analysis_args:
             dist_range = 10 ** (np.arange(5, 23) / 3.0)
         else:
-            dist_range = np.array([1e7])
+            dist_range = np.array([1e8])
 
         if 'focus' in analysis_args:
             focus_range = np.arange(0, 2, 0.1)
@@ -166,6 +166,7 @@ class SchematicEyeAnalysis(object):
                                         Rec_Field[ind[0]:ind[1]])
         # compute the diffraction limited case seperately
         self.diffract = {}
+        self.diffract['freqs'] = self.freqs
         self.diffract['mtf'] = diffraction(self._meta['mm/deg'], 
                             self._meta['samples'], self._meta['pupil_size'],
                             self._meta['eye_length'])
@@ -187,8 +188,8 @@ class SchematicEyeAnalysis(object):
         """
         diffraction_total = np.sum(self.diffract['retina'])
         for key in self.Analysis:
-            self.Analysis[key]['total'] = np.sum(self.Analysis[key]['retina'])
-            self.Analysis[key]['percent'] = (self.Analysis[key]['total'] /
+            total = np.sum(self.Analysis[key]['retina'])
+            self.Analysis[key]['percent'] = (total /
                                     diffraction_total)
 
         if print_opt:

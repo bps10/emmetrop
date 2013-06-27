@@ -11,8 +11,8 @@ class Plotter(object):
     .. todo::
        Add self.ext to allow user to save as png or svg.
     """
-    def __init__(self, freqs, diff, Analysis, recepitive_field, imageData,
-                 plots, save_plots, legend):
+    def __init__(self, analysis_args, diff, Analysis, recepitive_field, 
+                imageData, plots, save_plots, legend):
 
         # import our dictionaries of data:
         self.Analysis = Analysis
@@ -20,9 +20,9 @@ class Plotter(object):
         self.imageData = imageData
         self.diffract = diff
         
-        self.freqs = freqs
-        self.figPath = '../../../bps10.github.com/presentations/static/\
-figures/myopiaModel/'
+        self.freqs = diff['freqs']
+        foo = '../../../bps10.github.com/presentations/static/'
+        self.figPath = foo + 'figures/myopiaModel/'
         #options:      
         self.location = ['periph']
         if 'diffract fovea' in self.Analysis:
@@ -44,15 +44,18 @@ figures/myopiaModel/'
         if 'info' in plots:
             self.plotInformation(save_plots, legend)
         if 'seriesPlot' in plots:
-            self.plotSeries(save_plots)
+            self.plotSeries(analysis_args, save_plots)
 
-    def plotSeries(self, save_plots=False):
+    def plotSeries(self, analysis_args, save_plots=False):
         '''
         '''
         from mpl_toolkits.mplot3d import Axes3D
+
+        #for analysis in analysis_args:
+
         fig = plt.figure(figsize=(8,6))
         ax = fig.add_subplot(111, projection='3d')     
-        #pf.AxisFormat()
+        pf.AxisFormat()
 
         keys = 0
         for key in self.Analysis: keys += 1
@@ -63,12 +66,40 @@ figures/myopiaModel/'
         i = 0
         for key in self.Analysis:
             X[:, key] = self.freqs[:50]
-            Y[:, key] = np.ones(50) * i
+            Y[:, key] = np.ones(50) * i 
             Z[:, key] = self.Analysis[key]['mtf'][:50]
             i += 2
 
         ax.plot_wireframe(X, Y, Z)
+        ax.set_xlabel('cycles/degree')
+        ax.set_ylabel('degrees')
+        plt.show()
 
+        ## Retina plot ##
+        #################
+
+        fig = plt.figure(figsize=(8,6))
+        ax = fig.add_subplot(111, projection='3d')     
+        pf.AxisFormat()
+
+        keys = 0
+        for key in self.Analysis: keys += 1
+        samples = len(self.Analysis[0]['mtf'])
+        X = np.zeros((50, keys))
+        Y = np.zeros((50, keys))
+        Z = np.zeros((50, keys))
+        i = 0
+        for key in self.Analysis:
+            X[:, key] = self.freqs[:50]
+            Y[:, key] = np.ones(50) * i 
+            contrast = (self.Analysis[key]['retina'][:50] / 
+                    np.max(self.Analysis[key]['retina'][:50]))
+            Z[:, key] = sig.decibels(contrast)
+            i += 2
+
+        ax.plot_wireframe(X, Y, Z)
+        ax.set_xlabel('cycles/degree')
+        ax.set_ylabel('degrees')
         plt.show()
 
         
@@ -374,19 +405,19 @@ figures/myopiaModel/'
         
         #OSLO ray trace data:
         eye = e()
-        intensity = eye.traceEye(100000, 0, 4, 0)
+        intensity = eye.traceEye(1e8, 0, 4, 0)
         mtf = eye.genMTF(intensity)
         ax.plot(self.freqs, mtf, 'm-', label='fovea')
 
-        intensity = eye.traceEye(100000, 10, 4, 0)
+        intensity = eye.traceEye(1e8, 10, 4, 0)
         mtf = eye.genMTF(intensity)
         ax.plot(self.freqs, mtf, 'r-', label='10 deg')  
 
-        intensity = eye.traceEye(100000, 20, 4, 0)
+        intensity = eye.traceEye(1e8, 20, 4, 0)
         mtf = eye.genMTF(intensity)      
         ax.plot(self.freqs, mtf, 'g-', label='20 deg')
 
-        intensity = eye.traceEye(100000, 40, 4, 0)
+        intensity = eye.traceEye(1e8, 40, 4, 0)
         mtf = eye.genMTF(intensity)
         ax.plot(self.freqs, mtf, 'b-', label='40 deg')
                 

@@ -35,7 +35,7 @@ class SchematicEye(object):
             self.loadOSLOData(p)
 
 
-    def traceEye(self, object_distance=100000, off_axis=0, pupil_size=4, diopters=0):
+    def traceEye(self, object_distance=1000000, off_axis=0, pupil_size=4, diopters=0):
         '''
         '''
 

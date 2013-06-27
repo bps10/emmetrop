@@ -5,5 +5,6 @@
 all: cython
 
 cython: SchematicEye/eye SchematicEye/eye.so
-	cd SchematicEye
-	make python
+	cd SchematicEye/ && make python && \
+	echo "leaving SchematicEye" &&\
+	cd ../

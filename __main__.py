@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from emmetrop.analysis.NeitzModel import SchematicEyeAnalysis
 import argparse
 
@@ -23,15 +24,18 @@ def main(args):
       
     if args.activity or args.verbose:
         plot_args.append('activity')
-    
-    if args.info or args.verbose:
-        plot_args.append('info')
 
     if args.comp or args.verbose:
         plot_args.append('comp')
 
     if args.dog or args.verbose:
         plot_args.append('plotDoG')
+
+    if args.info:
+        plot_args.append('info')
+
+    if args.series:
+        plot_args.append('seriesPlot')
     
     analysis_args = []
     
@@ -40,7 +44,6 @@ def main(args):
     if args.focus:
         analysis_args.append('focus')
     if args.off_axis or args.verbose:
-        plot_args.append('seriesPlot')
         analysis_args.append('off_axis')
     
     if not args.eyegrow:    
@@ -72,6 +75,8 @@ if __name__ == "__main__":
                         help="display information plot")
     parser.add_argument("-c", "--comp", action="store_true",
                         help="display comparison plot with Williams et al.")
+    parser.add_argument("-q", "--series", action="store_true",
+                        help="display wireframe series plot.")   
                         
     parser.add_argument("-d", "--distance", action="store_true",
                         help="include fovea in analyses")
