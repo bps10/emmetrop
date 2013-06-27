@@ -140,7 +140,6 @@ def findSpacing(Xvals, cone_spacing=2.0):
     dist = findDist(Xvals, dog)
     i = 0
 
-    print abs(cone_spacing - dist)
     if dist < cone_spacing:
         while dist < cone_spacing:
             SD += 0.05
@@ -163,7 +162,6 @@ def findSpacing(Xvals, cone_spacing=2.0):
 def findDist(Xvals, dog):
 
     mins = (np.diff(np.sign(np.diff(dog))) > 0).nonzero()[0] + 1
-    print Xvals[mins[1]], Xvals[mins[0]]
     dist = Xvals[mins[1]] - Xvals[mins[0]]
     return dist
 

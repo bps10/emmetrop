@@ -3,12 +3,12 @@ import numpy as np
 
 # emmetrop imports:
 from emmetrop.cones.dogRFields import genReceptiveFields
-from emmetrop.eye.eyeModel import SchematicEye
+from emmetrop.eye.eyeModel import SchematicEye, diffraction
 from emmetrop.scene.Images import Images
 from emmetrop.scene.DataManip import rad2deg
 from emmetrop.analysis import Information as info
 from emmetrop.renderer import plotRepo as pr
-
+from emmetrop.eye.movement import brownian_motion
 
 class SchematicEyeAnalysis(object):
     """This class is designed to estimate the response of a linear 
@@ -50,23 +50,25 @@ class SchematicEyeAnalysis(object):
         self.NeitzModel(analysis_args)
         
         # send to renderer module for plotting:
-        pr.Plotter(self.freqs, self.Analysis, self.rec_field, self.ImageData, 
-                    plot_args, save_arg, legend = False)
+        pr.Plotter(self.freqs, self.diffract, self.Analysis, self.rec_field, 
+                    self.ImageData, plot_args, save_arg, legend = False)
 
     def genMeta(self):
         '''Just temporary.
         '''
         # get from ray tracer eventually
         self._meta = {}
-        self._meta['retImg'] = 2 #np.max(self.xvals) # size of image in mm 
-        self._meta['eye_length_'] = 24.2
-        radians = np.tan(self._meta['retImg'] / self._meta['eye_length_'])
+        self._meta['samples'] = 399
+        self._meta['retImg'] = 0.2 #np.max(self.xvals) # size of image in mm 
+        self._meta['eye_length'] = 24.2
+        self._meta['pupil_size'] = 4
+        radians = 2 * np.arctan(self._meta['retImg'] / (2 * self._meta['eye_length']))
         self._meta['deg'] = rad2deg(radians)
-        self._meta['mm/deg'] = self._meta['deg'] / self._meta['retImg']
+        self._meta['mm/deg'] = self._meta['retImg'] / self._meta['deg']
 
         #self.xvals = np.arange(0.0005, 0.2, 0.0005)
-        cycles = (np.arange(0, 399)) / 2
-        self.freqs = cycles * self._meta['mm/deg'] 
+        cycles = np.arange(0, self._meta['samples']) / 2
+        self.freqs = (cycles / self._meta['retImg']) * self._meta['mm/deg'] 
 
     def NeitzModel(self, analysis_args):
         '''This function organizes the entire operation.
@@ -102,33 +104,29 @@ class SchematicEyeAnalysis(object):
                 for axis in axis_range:
                     for pupil in pupil_range:
 
-                        self.Analysis[j] =  {
-                                            'dist': dist,
-                                            'focus': focus,
-                                            'off_axis': axis,
-                                            'pupil_size': pupil, 
-                                            'line': self.addLineStyle(),
-                                            }
+                        self.Analysis[j] = {
+                            'dist': dist,
+                            'focus': focus,
+                            'off_axis': axis,
+                            'pupil_size': pupil, 
+                            'line': self.addLineStyle(dist, focus, axis, pupil), }
                         j += 1
         
         self.ComputeConeActivity()      
         self.TotalActivity()
         self.estimateInfo()
 
-    def addLineStyle(self):
+    def addLineStyle(self, dist, focus, axis, pupil):
         """Add line style for use with plots
         """
-        axis = {'diffract': 'k', 'inf': 'r', '16in20ft': 'b', 
-                '16in16in': 'g', '16inunder':'c', '20deg':'m', '40deg':'m'}
-        state = {'onAxis': '-', 'offAxis': '--', 'object': '--',
-                 'farPeriph': '-.'}
-            
-        #line = axis[self.Analysis[key]['params'][1]]
-        #line += state[self.Analysis[key]['params'][0]]
-        line = 'k-'
+        r = focus / 2
+        g = np.log10(dist) / (22 / 3)
+        b = axis / 20
+        rgb = [r, g, b]
+        line = {'style': '-', 'color': rgb}
         return line
         
-    def ComputeConeActivity(self, brownian_motion=True):
+    def ComputeConeActivity(self, _brownian=True):
         """Compute the estimated activity of a cone photoreceptor.
         
         :param Receptive_Field: a handle to the spline fitted receptive field.
@@ -142,15 +140,13 @@ class SchematicEyeAnalysis(object):
             
         self.ImageData['fitLaw'] = self.ImageData['powerlaw'](
                                                  self.freqs[1:])
-
         powerlaw = self.ImageData['fitLaw']
-        if brownian_motion:
-            from emmetrop.eye.movement import brownian_motion
+
+        if _brownian:    
             temp = np.arange(1, 80)
             spat = self.freqs[1:]
             movement_filter = brownian_motion(spat, temp)
             powerlaw *= movement_filter
-            #powerlaw = powerlaw / sum(powerlaw)
             
         for key in self.Analysis:
             ind = [0, 100] 
@@ -168,8 +164,17 @@ class SchematicEyeAnalysis(object):
 
             self.Analysis[key]['retina'] = (self.Analysis[key]['preCone'] *
                                         Rec_Field[ind[0]:ind[1]])
+        # compute the diffraction limited case seperately
+        self.diffract = {}
+        self.diffract['mtf'] = diffraction(self._meta['mm/deg'], 
+                            self._meta['samples'], self._meta['pupil_size'],
+                            self._meta['eye_length'])
+        self.diffract['preCone'] =  (powerlaw[ind[0]:ind[1]] * 
+                self.diffract['mtf'][ind[0]:ind[1]])
+        self.diffract['retina'] = (self.diffract['preCone'] *
+                                        Rec_Field[ind[0]:ind[1]])
                   
-    def TotalActivity(self, print_opt = False):
+    def TotalActivity(self, print_opt=True):
         """Compute the estimated activity in a photoreceptor.
         
         :param self: no params yet.
@@ -180,18 +185,19 @@ class SchematicEyeAnalysis(object):
            Completely hard coded right now.  Would like to change that.
         
         """
-        
+        diffraction_total = np.sum(self.diffract['retina'])
         for key in self.Analysis:
             self.Analysis[key]['total'] = np.sum(self.Analysis[key]['retina'])
-            #self.Analysis[key]['percent'] = (self.Analysis[key]['total'] /
-            #                        self.Analysis['diffract periph']['total'])
+            self.Analysis[key]['percent'] = (self.Analysis[key]['total'] /
+                                    diffraction_total)
 
         if print_opt:
             print ' '
             print 'Total activity (proportion of diffraction)'
             print '-------------------------------------------'
             for key in self.Analysis:
-                print key, ': ', self.Analysis[key]['percent']
+                print key, ': ', self.Analysis[key]['percent'] #, '  '
+                    #np.log10(self.Analysis[key]['percent'])
 
 
         
@@ -232,9 +238,7 @@ class SchematicEyeAnalysis(object):
            :width: 400px
            :align: center   
            
-        """ 
-
-        
+        """        
         total_images = self.ImageData['totalImages']        
 
         for key in self.Analysis:
@@ -251,7 +255,6 @@ class SchematicEyeAnalysis(object):
                                             self.Analysis[key]['cones'])      
                 self.Analysis[key]['info'] += fooInfo / total_images
 
-
         if print_opt == True:
             print ' '
             print 'Information'
@@ -261,4 +264,5 @@ class SchematicEyeAnalysis(object):
 
 
 if __name__ == "__main__":
+
     eye = SchematicEyeAnalysis()

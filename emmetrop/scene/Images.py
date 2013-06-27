@@ -105,7 +105,6 @@ class Images(object):
         self.rawAmp= []
         for group in Directory:
             GroupName = group[index[0]:index[1]]
-            print 'GroupName: ', GroupName
     
             files = dm.getAllFiles(group, suffix='.JPG', subdirectories=1)
             if self.Dbase.Exists(GroupName) == False:
@@ -200,9 +199,7 @@ class Images(object):
                         self.rawAmp.append(self.Dbase.QueryDatabase(GroupName, 
                                                 name + '.' + 'amplitude', 
                                                               'raw_amplitude'))
-                    else:
-                        pass                    
-                
+
                 # then amplitude density
                 if self.Dbase.Exists('amplitude_density', 
                                         GroupName + '.' + name + 
@@ -219,8 +216,7 @@ class Images(object):
                                                    
                     if goodFile != False or goodFile != 'F': 
                         self.ampSpecs.append(amplitude)
-                    else:
-                        pass
+
                 # if already exists, query database to get amplitude spectrums:
                 else:
                     if goodFile:
@@ -228,8 +224,6 @@ class Images(object):
                                             self.Dbase.QueryDatabase(GroupName, 
                                                     name + '.' + 'amplitude', 
                                                     'amplitude_density'))
-                    else:
-                        pass
                     
             self.Dbase.file.flush()
         self.Dbase.CloseDatabase()
@@ -328,8 +322,7 @@ class Images(object):
                                args=(logx, logy), full_output=1)
         pfinal = out[0]
 
-        print pfinal[0], pfinal[1]
         index = pfinal[1]
         print '1/f alpha', index
         amp = 10.0**pfinal[0]
-        return lambda x,: amp * (x**index)
+        return lambda x,: amp * (x ** index)

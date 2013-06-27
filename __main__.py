@@ -18,10 +18,6 @@ def main(args):
     if args.mtf or args.verbose:
         plot_args.append('mtf')   
     
-    if args.accomm or args.verbose:
-        plot_args.append('accomm')
-        
-                
     if args.amp or args.verbose:
         plot_args.append('amp')
       
@@ -30,6 +26,12 @@ def main(args):
     
     if args.info or args.verbose:
         plot_args.append('info')
+
+    if args.comp or args.verbose:
+        plot_args.append('comp')
+
+    if args.dog or args.verbose:
+        plot_args.append('plotDoG')
     
     analysis_args = []
     
@@ -38,6 +40,7 @@ def main(args):
     if args.focus:
         analysis_args.append('focus')
     if args.off_axis or args.verbose:
+        plot_args.append('seriesPlot')
         analysis_args.append('off_axis')
     
     if not args.eyegrow:    
@@ -57,8 +60,6 @@ def main(args):
 if __name__ == "__main__": 
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("-c", "--accomm", action="store_true",
-                        help="display accommodation MTF plots")
     parser.add_argument("-m", "--mtf", action="store_true", 
                         help="display MTF family plots")
     parser.add_argument("-a", "--amp", action="store_true",
@@ -69,6 +70,8 @@ if __name__ == "__main__":
                         help="display activity plots")
     parser.add_argument("-i", "--info", action="store_true",
                         help="display information plot")
+    parser.add_argument("-c", "--comp", action="store_true",
+                        help="display comparison plot with Williams et al.")
                         
     parser.add_argument("-d", "--distance", action="store_true",
                         help="include fovea in analyses")

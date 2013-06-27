@@ -51,7 +51,7 @@ class SchematicEye(object):
         '''
         xvals = np.arange(0.0005, 0.2001, 0.0005)
         PSF = np.zeros(samples)
-        PSFtotal = np.zeros(samples * 2)
+        PSFtotal = np.zeros((samples * 2) + 1)
 
         # we have an integral, therefore take the deriv to get rays / bin
         deriv = np.zeros((samples))
@@ -75,7 +75,7 @@ class SchematicEye(object):
         PSF = PSF / np.sum(PSF)
 
         PSFtotal[1:samples + 1] = PSF[::-1]
-        PSFtotal[samples + 1:] = PSF[1:]
+        PSFtotal[samples:-1] = PSF
 
 
         return PSFtotal
@@ -86,16 +86,16 @@ class SchematicEye(object):
         samples = len(intensity)
         PSF = self._genPSF(intensity, samples)
 
+        # normalize MTF
+        PSF = PSF / np.sum(PSF)
+
         MTF = np.zeros(samples)
         # do the FFT, take only right half
         temp = np.abs(np.fft.fftshift(np.fft.fft(PSF)))
-        temp = temp[samples:]
+        temp = temp[samples:-1]
 
         # make sure we only get real part
-        temp = np.real(temp)
-
-        # normalize MTF
-        MTF = temp / np.max(temp)
+        MTF = np.real(temp)
 
         return MTF
 
@@ -115,90 +115,6 @@ class SchematicEye(object):
            Find axial length dynamically. Call getAxialLength function.
         """
         return 24.0
-
-    ### DEPRECIATED OSLO FUNCTIONS ###
-
-    def loadOSLOData(self,p):
-        """Load data from OSLO
-        
-        This is currently a very static function.
-        
-        :param p: directory path. Passed from init function.
-        :type p: path
-        
-        """
-        
-        self.INF = self.importOSLOfile(p + 
-                                'ONaxisMTFinfFocusNavarrow1999.txt')
-        self.TwentyFt = self.importOSLOfile(p +
-                                'ONaxisMTF20ftFocusNavarrow1999.txt')
-        self.Onemeter = self.importOSLOfile(p + 
-                                'ONaxisMTF1mFocusNavarrow1999.txt')
-        self.SixteenIn = self.importOSLOfile(p + 
-                                'ONaxisMTF16inFocusNavarrow1999.txt')
-        
-        self.INF_offaxis = self.importOSLOfile(p + 
-                                'OFFaxisMTFinfFocusNavarrow1999.txt')
-        self.TwentyFt_offaxis = self.importOSLOfile(p + 
-                                'OFFaxisMTF20ftFocusNavarrow1999.txt')
-        self.Onemeter_offaxis = self.importOSLOfile(p +
-                                'OFFaxisMTF1mFocusNavarrow1999.txt')
-        self.SixteenIn_offaxis = self.importOSLOfile(p + 
-                                'OFFaxisMTF16inFocusNavarrow1999.txt')
-        
-        self.Sixteen_UnderAccomm = self.importOSLOfile(p +
-                            'OFFaxisMTF16inUnderAccom20ftObjNavarrow1999.txt')
-        self.Sixteen_SixteenObj_Offaxis = self.importOSLOfile(p +
-                                'OFFaxisMTF16inFocus16inObjNavarrow1999.txt')        
-        self.Sixteen_TwentyObj_Offaxis = self.importOSLOfile(p + 
-                                'OFFaxisMTF16inFocus20ftObjNavarrow1999.txt')
-    
-        self.TwentyDegOffAxis_InfFoc = self.importOSLOfile(p + 
-                                '20degOFFaxisMTFinfFocusNavarrow1999.txt')
-        self.FortyDegOffAxis_InfFoc = self.importOSLOfile(p + 
-                                '40degOFFaxisMTFinfFocusNavarrow1999.txt')       
- 
-        ## convert mm to rad (1mm image/24mm axial length)
-        self.freqs = self.INF[:,1] / rad2deg(1.0/self.getAxialLength())
-        
-        
-        self.dataPackage = {
-                            'onAxis': {'diffract': self.INF[:,4],
-                                       'inf': self.INF[:,2], 
-                                       '20ft': self.TwentyFt[:,2],
-                                       '1m': self.Onemeter[:,2],
-                                       '16in': self.SixteenIn[:,2]
-                                       },
-                                   
-                            'offAxis': {'diffract': self.INF_offaxis[:,4],
-                                        'inf':self.INF_offaxis[:,2],
-                                        '20ft': self.TwentyFt_offaxis[:,2],
-                                        '1m': self.TwentyFt_offaxis[:,2],
-                                        '16in': self.SixteenIn_offaxis[:,2]
-                                        },
-                                        
-                            'object': {
-                            '16inunder': self.Sixteen_UnderAccomm[:,2],
-                            '16in16in': self.Sixteen_SixteenObj_Offaxis[:,2],
-                            '16in20ft': self.Sixteen_TwentyObj_Offaxis[:,2]
-                            },
-                                       
-                            'farPeriph': {
-                                    '20deg': self.TwentyDegOffAxis_InfFoc[:,2],
-                                    '40deg': self.FortyDegOffAxis_InfFoc[:,2]
-                                    },
-                                       
-                            'freqs': self.freqs
-                            }
-
-
-    def returnOSLOdata(self):
-        """
-        Return a dictionary of imported transfer functions from OSLO.
-        """
-        return self.dataPackage
-        
-
     
     def importOSLOfile(self, OSLOfile):
         """Import a text file with MTF output from OSLO.
@@ -248,7 +164,7 @@ class SchematicEye(object):
         
         return MTF        
 
-def diffraction(deg, samples, pupil_size_mm, focal_len, ref_index=1.55, wavelength=550.0):
+def diffraction(deg, samples, pupil_size_mm, focal_len, ref_index=1.336, wavelength=640.0):
     '''See Appendix B of "Light, the Retinal Image and Photoreceptors"
     Packer & Williams.
 
@@ -263,7 +179,7 @@ def diffraction(deg, samples, pupil_size_mm, focal_len, ref_index=1.55, waveleng
     dif = (2.0 / np.pi) * (np.arccos(s / s_0) - 
             (s / s_0) * np.sqrt(1.0 - (s / s_0) ** 2.0))
 
-    return dif, s
+    return dif
 
 def NumericalAperature(n, theta=None, D=None, focal_len=None):
     '''
