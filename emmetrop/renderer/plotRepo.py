@@ -51,56 +51,59 @@ class Plotter(object):
         '''
         from mpl_toolkits.mplot3d import Axes3D
 
-        #for analysis in analysis_args:
+        for analysis in analysis_args:
+            ylabel = (analysis.replace('dist', '$log_{10}$ (mm)')
+                        .replace('off_axis', 'angle (deg)')
+                        .replace('pupil_size', 'pupil size (mm)')
+                        .replace('focus', 'lens (D)'))
 
-        fig = plt.figure(figsize=(8,6))
-        ax = fig.add_subplot(111, projection='3d')     
-        pf.AxisFormat()
+            fig = plt.figure(figsize=(8,6))
+            ax = fig.add_subplot(111, projection='3d')     
+            pf.AxisFormat()
 
-        keys = 0
-        for key in self.Analysis: keys += 1
-        samples = len(self.Analysis[0]['mtf'])
-        X = np.zeros((50, keys))
-        Y = np.zeros((50, keys))
-        Z = np.zeros((50, keys))
-        i = 0
-        for key in self.Analysis:
-            X[:, key] = self.freqs[:50]
-            Y[:, key] = np.ones(50) * i 
-            Z[:, key] = self.Analysis[key]['mtf'][:50]
-            i += 2
+            keys = 0
+            for key in self.Analysis: keys += 1
+            samples = len(self.Analysis[0]['mtf'])
+            X = np.zeros((50, keys))
+            Y = np.zeros((50, keys))
+            Z = np.zeros((50, keys))
 
-        ax.plot_wireframe(X, Y, Z)
-        ax.set_xlabel('cycles/degree')
-        ax.set_ylabel('degrees')
-        plt.show()
+            for key in self.Analysis:
+                X[:, key] = self.freqs[:50]
+                if analysis == 'dist':
+                    Y[:, key] = np.ones(50) * np.log10(self.Analysis[key]['dist'])
+                else:
+                    Y[:, key] = np.ones(50) * self.Analysis[key][analysis]
+                Z[:, key] = self.Analysis[key]['mtf'][:50]
 
-        ## Retina plot ##
-        #################
+            ax.plot_wireframe(X, Y, Z)
+            ax.set_xlabel('cycles/degree')
+            ax.set_ylabel(ylabel)
+            plt.tight_layout()
+            plt.show()
 
-        fig = plt.figure(figsize=(8,6))
-        ax = fig.add_subplot(111, projection='3d')     
-        pf.AxisFormat()
+            ## Retina plot ##
+            #################
 
-        keys = 0
-        for key in self.Analysis: keys += 1
-        samples = len(self.Analysis[0]['mtf'])
-        X = np.zeros((50, keys))
-        Y = np.zeros((50, keys))
-        Z = np.zeros((50, keys))
-        i = 0
-        for key in self.Analysis:
-            X[:, key] = self.freqs[:50]
-            Y[:, key] = np.ones(50) * i 
-            contrast = (self.Analysis[key]['retina'][:50] / 
-                    np.max(self.Analysis[key]['retina'][:50]))
-            Z[:, key] = sig.decibels(contrast)
-            i += 2
+            fig = plt.figure(figsize=(8,6))
+            ax = fig.add_subplot(111, projection='3d')     
+            pf.AxisFormat()
 
-        ax.plot_wireframe(X, Y, Z)
-        ax.set_xlabel('cycles/degree')
-        ax.set_ylabel('degrees')
-        plt.show()
+            for key in self.Analysis:
+                X[:, key] = self.freqs[:50]
+                if analysis == 'dist':
+                    Y[:, key] = np.ones(50) * np.log10(self.Analysis[key]['dist'])
+                else:
+                    Y[:, key] = np.ones(50) * self.Analysis[key][analysis]
+                contrast = (self.Analysis[key]['retina'][:50] / 
+                        np.max(self.Analysis[key]['retina'][:50]))
+                Z[:, key] = sig.decibels(contrast)
+
+            ax.plot_wireframe(X, Y, Z)
+            ax.set_xlabel('cycles/degree')
+            ax.set_ylabel(ylabel)
+            plt.tight_layout()
+            plt.show()
 
         
     def plotInformation(self, save_plots=False, legend=False):
@@ -384,7 +387,7 @@ class Plotter(object):
            and schematic eye.        
         """
         from emmetrop.eye.Optics import MTF
-        from emmetrop.eye.eyeModel import SchematicEye as e
+        from emmetrop.eye.eyeModel import traceEye, genMTF
         
         Fovea = MTF(self.freqs, 0)
         TenDeg = MTF(self.freqs, 10)
@@ -398,31 +401,29 @@ class Plotter(object):
         pf.TufteAxis(ax, ['left', 'bottom'], [5,5])
         
         #Navarro et al 1993 analytical func:
-        ax.plot(self.freqs, Fovea, 'm--', label='fovea', linewidth=2.5)
-        ax.plot(self.freqs, TenDeg, 'r--', label='10 deg', linewidth=2.5)
-        ax.plot(self.freqs, TwentyDeg, 'g--', label='20 deg', linewidth=2.5)
-        ax.plot(self.freqs, FourtyDeg, 'b--',label='40 deg', linewidth=2.5)
+        ax.plot(self.freqs, Fovea, 'm--')
+        ax.plot(self.freqs, TenDeg, 'r--')
+        ax.plot(self.freqs, TwentyDeg, 'g--')
+        #ax.plot(self.freqs, FourtyDeg, 'b--')
         
         #OSLO ray trace data:
-        eye = e()
-        intensity = eye.traceEye(1e8, 0, 4, 0)
-        mtf = eye.genMTF(intensity)
+        intensity = traceEye(1e8, 0, 3, 0)
+        mtf = genMTF(intensity)
         ax.plot(self.freqs, mtf, 'm-', label='fovea')
 
-        intensity = eye.traceEye(1e8, 10, 4, 0)
-        mtf = eye.genMTF(intensity)
+        intensity = traceEye(1e8, 10, 3, 0)
+        mtf = genMTF(intensity)
         ax.plot(self.freqs, mtf, 'r-', label='10 deg')  
 
-        intensity = eye.traceEye(1e8, 20, 4, 0)
-        mtf = eye.genMTF(intensity)      
+        intensity = traceEye(1e8, 20, 3, 0)
+        mtf = genMTF(intensity)      
         ax.plot(self.freqs, mtf, 'g-', label='20 deg')
 
-        intensity = eye.traceEye(1e8, 40, 4, 0)
-        mtf = eye.genMTF(intensity)
-        ax.plot(self.freqs, mtf, 'b-', label='40 deg')
+        intensity = traceEye(1e8, 40, 3, 0)
+        mtf = genMTF(intensity)
+        #ax.plot(self.freqs, mtf, 'b-', label='40 deg')
                 
-        if legend: 
-            ax.legend(loc='lower left')#,title='object dist, retinal location')
+        ax.legend(loc='upper right')#,title='object dist, retinal location')
         
         ax.get_xaxis().tick_bottom()
         ax.get_yaxis().tick_left()

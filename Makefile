@@ -5,6 +5,7 @@
 all: cython
 
 cython: SchematicEye/eye SchematicEye/eye.so
-	cd SchematicEye/ && make python && \
+	cd SchematicEye/ && git pull origin master && \
+	make python && \
 	echo "leaving SchematicEye" &&\
 	cd ../

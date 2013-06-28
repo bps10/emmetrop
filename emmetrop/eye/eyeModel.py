@@ -34,71 +34,6 @@ class SchematicEye(object):
                 p = OSLO_directory
             self.loadOSLOData(p)
 
-
-    def traceEye(self, object_distance=1000000, off_axis=0, pupil_size=4, diopters=0):
-        '''
-        '''
-
-        intensity = eye.py_eye(object_distance, off_axis, pupil_size, diopters)
-
-        return intensity
-
-    def _genPSF(self, intensity, samples):
-        '''
-
-        .. todo::
-           Need to unhard code xvals and samples (work with C++ - return stuct?)
-        '''
-        xvals = np.arange(0.0005, 0.2001, 0.0005)
-        PSF = np.zeros(samples)
-        PSFtotal = np.zeros((samples * 2) + 1)
-
-        # we have an integral, therefore take the deriv to get rays / bin
-        deriv = np.zeros((samples))
-        deriv[0] = intensity[0]
-        deriv[1:] = intensity[1:] - intensity[0:-1]
-
-        for i in range(0, samples - 1):
-
-            # account for increasing size of area
-            radius0 = xvals[i]
-            radius1 = xvals[i + 1]
-
-            # subtract inner and outer circle area to get sliver of interest
-            area = (np.pi * radius1 ** 2.0) - (np.pi * radius0 ** 2.0)
-
-            # deriv = amount in each circle; then divide by area
-            PSF[i] = deriv[i]  / area 
-
-        # normalize so that each PSF has same integral of 1.
-
-        PSF = PSF / np.sum(PSF)
-
-        PSFtotal[1:samples + 1] = PSF[::-1]
-        PSFtotal[samples:-1] = PSF
-
-
-        return PSFtotal
-
-    def genMTF(self, intensity):
-        '''
-        '''
-        samples = len(intensity)
-        PSF = self._genPSF(intensity, samples)
-
-        # normalize MTF
-        PSF = PSF / np.sum(PSF)
-
-        MTF = np.zeros(samples)
-        # do the FFT, take only right half
-        temp = np.abs(np.fft.fftshift(np.fft.fft(PSF)))
-        temp = temp[samples:-1]
-
-        # make sure we only get real part
-        MTF = np.real(temp)
-
-        return MTF
-
     def getFreqs(self):
         # temporary for now
         freqs = np.arange(0, len(MTF))
@@ -163,6 +98,69 @@ class SchematicEye(object):
         MTF = np.array(MTF)
         
         return MTF        
+
+def traceEye(object_distance=1e8, off_axis=0, pupil_size=3, diopters=0):
+    '''
+    '''
+
+    intensity = eye.py_eye(object_distance, off_axis, pupil_size, diopters)
+
+    return intensity
+
+def genPSF(intensity, xvals):
+    '''
+
+    '''
+    samples = len(xvals)
+    PSF = np.zeros(samples)
+    PSFtotal = np.zeros((samples * 2) + 1)
+
+    # we have an integral, therefore take the deriv to get rays / bin
+    deriv = np.zeros((samples))
+    deriv[0] = intensity[0]
+    deriv[1:] = intensity[1:] - intensity[0:-1]
+
+    for i in range(0, samples - 1):
+
+        # account for increasing size of area
+        radius0 = xvals[i]
+        radius1 = xvals[i + 1]
+
+        # subtract inner and outer circle area to get sliver of interest
+        area = (np.pi * radius1 ** 2.0) - (np.pi * radius0 ** 2.0)
+
+        # deriv = amount in each circle; then divide by area
+        PSF[i] = deriv[i]  / area 
+
+    # normalize so that each PSF has same integral of 1.
+
+    PSF = PSF / np.sum(PSF)
+
+    PSFtotal[1:samples + 1] = PSF[::-1]
+    PSFtotal[samples:-1] = PSF
+
+    return PSFtotal
+
+
+def genMTF(intensity):
+    '''
+    '''
+    xvals = np.arange(0.0005, 0.2000, 0.0005)
+    PSFtotal = genPSF(intensity, xvals)
+    samples = len(PSFtotal)
+    MTF = np.zeros(np.floor(samples / 2) - 1)
+
+    # make sure PSF is normalized
+    normPSF = PSFtotal / np.sum(PSFtotal)
+
+    # do the FFT, take only right half
+    temp = np.abs(np.fft.fftshift(np.fft.fft(normPSF)))
+    temp = temp[np.floor(samples / 2):-1]
+
+    # make sure we only get real part
+    MTF = np.real(temp)
+
+    return MTF
 
 def diffraction(deg, samples, pupil_size_mm, focal_len, ref_index=1.336, wavelength=640.0):
     '''See Appendix B of "Light, the Retinal Image and Photoreceptors"

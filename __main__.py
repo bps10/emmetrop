@@ -40,7 +40,7 @@ def main(args):
     analysis_args = []
     
     if args.distance:
-        analysis_args.append('distance')
+        analysis_args.append('dist')
     if args.focus:
         analysis_args.append('focus')
     if args.off_axis or args.verbose:

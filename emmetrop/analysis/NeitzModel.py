@@ -3,7 +3,7 @@ import numpy as np
 
 # emmetrop imports:
 from emmetrop.cones.dogRFields import genReceptiveFields
-from emmetrop.eye.eyeModel import SchematicEye, diffraction
+from emmetrop.eye.eyeModel import traceEye, diffraction, genMTF
 from emmetrop.scene.Images import Images
 from emmetrop.scene.DataManip import rad2deg
 from emmetrop.analysis import Information as info
@@ -34,9 +34,6 @@ class SchematicEyeAnalysis(object):
         """
         
         """
-        # get ray tracer data:
-        self.EyeOptics = SchematicEye()
-
         # get meta data:
         self.genMeta()
 
@@ -59,8 +56,8 @@ class SchematicEyeAnalysis(object):
         # get from ray tracer eventually
         self._meta = {}
         self._meta['samples'] = 399
-        self._meta['retImg'] = 0.2 #np.max(self.xvals) # size of image in mm 
-        self._meta['eye_length'] = 24.2
+        self._meta['retImg'] = 0.1995 #np.max(self.xvals) # size of image in mm 
+        self._meta['eye_length'] = 23.92
         self._meta['pupil_size'] = 4
         radians = 2 * np.arctan(self._meta['retImg'] / (2 * self._meta['eye_length']))
         self._meta['deg'] = rad2deg(radians)
@@ -78,13 +75,13 @@ class SchematicEyeAnalysis(object):
         '''
         self.Analysis = {}
 
-        if 'distance' in analysis_args:
-            dist_range = 10 ** (np.arange(5, 23) / 3.0)
+        if 'dist' in analysis_args:
+            dist_range = 10 ** (np.arange(5, 26) / 3.0)
         else:
             dist_range = np.array([1e8])
 
         if 'focus' in analysis_args:
-            focus_range = np.arange(0, 2, 0.1)
+            focus_range = np.arange(0, 8.5, 0.5)
         else: 
             focus_range = np.array([0])
 
@@ -96,7 +93,7 @@ class SchematicEyeAnalysis(object):
         if 'pupil_size' in analysis_args:
             pupil_range = np.arange(2, 9, 1)
         else:
-            pupil_range = np.array([4])
+            pupil_range = np.array([3])
 
         j = 0
         for dist in dist_range:
@@ -120,7 +117,7 @@ class SchematicEyeAnalysis(object):
         """Add line style for use with plots
         """
         r = focus / 2
-        g = np.log10(dist) / (22 / 3)
+        g = np.log10(dist) / (25 / 3)
         b = axis / 20
         rgb = [r, g, b]
         line = {'style': '-', 'color': rgb}
@@ -131,10 +128,6 @@ class SchematicEyeAnalysis(object):
         
         :param Receptive_Field: a handle to the spline fitted receptive field.
         :type Receptive_Field: function handle.
-        
-        .. note:: 
-           very preliminary. Completely hard coded.
-        
         """
         Rec_Field = self.rec_field['fft']  
             
@@ -152,12 +145,12 @@ class SchematicEyeAnalysis(object):
             ind = [0, 100] 
 
             # generate MTFs for each condition:
-            intensity = self.EyeOptics.traceEye(
-                                    self.Analysis[key]['dist'], 
-                                    self.Analysis[key]['off_axis'], 
-                                    self.Analysis[key]['pupil_size'], 
-                                    self.Analysis[key]['focus'])
-            self.Analysis[key]['mtf'] = self.EyeOptics.genMTF(intensity)
+            intensity = traceEye(
+                                self.Analysis[key]['dist'], 
+                                self.Analysis[key]['off_axis'], 
+                                self.Analysis[key]['pupil_size'], 
+                                self.Analysis[key]['focus'])
+            self.Analysis[key]['mtf'] = genMTF(intensity)
 
             self.Analysis[key]['preCone'] = (powerlaw[ind[0]:ind[1]] * 
                 self.Analysis[key]['mtf'][ind[0]:ind[1]])
@@ -197,8 +190,10 @@ class SchematicEyeAnalysis(object):
             print 'Total activity (proportion of diffraction)'
             print '-------------------------------------------'
             for key in self.Analysis:
-                print key, ': ', self.Analysis[key]['percent'] #, '  '
-                    #np.log10(self.Analysis[key]['percent'])
+                print (key, self.Analysis[key]['dist'],
+                    self.Analysis[key]['focus'],
+                    self.Analysis[key]['off_axis'],
+                    self.Analysis[key]['percent'])
 
 
         
