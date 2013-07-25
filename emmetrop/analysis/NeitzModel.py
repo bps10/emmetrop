@@ -59,7 +59,7 @@ class SchematicEyeAnalysis(object):
         self._meta['retImg'] = 0.1995 #np.max(self.xvals) # size of image in mm 
         self._meta['eye_length'] = 23.92
         self._meta['pupil_size'] = 4
-        radians = 2 * np.arctan(self._meta['retImg'] / (2 * self._meta['eye_length']))
+        radians = 2 * np.arctan(self._meta['retImg'] / (2 * 16.6)) #self._meta['eye_length']))
         self._meta['deg'] = rad2deg(radians)
         self._meta['mm/deg'] = self._meta['retImg'] / self._meta['deg']
 
@@ -95,6 +95,11 @@ class SchematicEyeAnalysis(object):
         else:
             pupil_range = np.array([3])
 
+        if 'wavelength' in analysis_args:
+            wavelen = np.arange(400, 800, 10)
+        else:
+            wavelen = np.array([550])
+
         j = 0
         for dist in dist_range:
             for focus in focus_range:
@@ -106,6 +111,7 @@ class SchematicEyeAnalysis(object):
                             'focus': focus,
                             'off_axis': axis,
                             'pupil_size': pupil, 
+                            'wavelength': wavelen,
                             'line': self.addLineStyle(dist, focus, axis, pupil), }
                         j += 1
         
@@ -149,7 +155,8 @@ class SchematicEyeAnalysis(object):
                                 self.Analysis[key]['dist'], 
                                 self.Analysis[key]['off_axis'], 
                                 self.Analysis[key]['pupil_size'], 
-                                self.Analysis[key]['focus'])
+                                self.Analysis[key]['focus'],
+                                self.Analysis[key]['wavelength'])
             self.Analysis[key]['mtf'] = genMTF(intensity)
 
             self.Analysis[key]['preCone'] = (powerlaw[ind[0]:ind[1]] * 
@@ -162,7 +169,7 @@ class SchematicEyeAnalysis(object):
         self.diffract['freqs'] = self.freqs
         self.diffract['mtf'] = diffraction(self._meta['mm/deg'], 
                             self._meta['samples'], self._meta['pupil_size'],
-                            self._meta['eye_length'])
+                            16.6) #self._meta['eye_length'])
         self.diffract['preCone'] =  (powerlaw[ind[0]:ind[1]] * 
                 self.diffract['mtf'][ind[0]:ind[1]])
         self.diffract['retina'] = (self.diffract['preCone'] *

@@ -407,20 +407,20 @@ class Plotter(object):
         #ax.plot(self.freqs, FourtyDeg, 'b--')
         
         #OSLO ray trace data:
-        intensity = traceEye(1e8, 0, 3, 0)
+        intensity = traceEye(1e8, 0, 4, 0, 632.8)
         mtf = genMTF(intensity)
         ax.plot(self.freqs, mtf, 'm-', label='fovea')
 
-        intensity = traceEye(1e8, 10, 3, 0)
+        intensity = traceEye(1e8, 10, 4, 0, 632.8)
         mtf = genMTF(intensity)
         ax.plot(self.freqs, mtf, 'r-', label='10 deg')  
 
-        intensity = traceEye(1e8, 20, 3, 0)
+        intensity = traceEye(1e8, 20, 4, 0, 632.8)
         mtf = genMTF(intensity)      
         ax.plot(self.freqs, mtf, 'g-', label='20 deg')
 
-        intensity = traceEye(1e8, 40, 3, 0)
-        mtf = genMTF(intensity)
+        #intensity = traceEye(1e8, 40, 4, 0, 632.8)
+        #mtf = genMTF(intensity)
         #ax.plot(self.freqs, mtf, 'b-', label='40 deg')
                 
         ax.legend(loc='upper right')#,title='object dist, retinal location')

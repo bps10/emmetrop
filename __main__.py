@@ -45,7 +45,9 @@ def main(args):
         analysis_args.append('focus')
     if args.off_axis or args.verbose:
         analysis_args.append('off_axis')
-    
+    if args.wavelength or args.verbose:
+        analysis_args.append('wavelength')
+
     if not args.eyegrow:    
         Eye = SchematicEyeAnalysis(analysis_args=analysis_args,
                                    plot_args=plot_args, 
@@ -84,7 +86,9 @@ if __name__ == "__main__":
                         help="include object set in analyses")
     parser.add_argument('-o', "--off_axis", action="store_true",
                         help="include far periphery in analyses")
-                        
+    parser.add_argument('-w', "--wavelength", action="store_true",
+                        help="include wavelength in analyses")
+
     parser.add_argument("-v", "--verbose", action="store_true",
                         help="run all analyses and plots")
     parser.add_argument("-s", "--save", action="store_true",
