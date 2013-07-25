@@ -105,15 +105,16 @@ class SchematicEyeAnalysis(object):
             for focus in focus_range:
                 for axis in axis_range:
                     for pupil in pupil_range:
+                        for wave in wavelen:
 
-                        self.Analysis[j] = {
-                            'dist': dist,
-                            'focus': focus,
-                            'off_axis': axis,
-                            'pupil_size': pupil, 
-                            'wavelength': wavelen,
-                            'line': self.addLineStyle(dist, focus, axis, pupil), }
-                        j += 1
+                            self.Analysis[j] = {
+                                'dist': dist,
+                                'focus': focus,
+                                'off_axis': axis,
+                                'pupil_size': pupil, 
+                                'wavelength': wave,
+                                'line': self.addLineStyle(dist, focus, axis, pupil), }
+                            j += 1
         
         self.ComputeConeActivity()      
         self.TotalActivity()
@@ -149,7 +150,7 @@ class SchematicEyeAnalysis(object):
             
         for key in self.Analysis:
             ind = [0, 100] 
-
+            
             # generate MTFs for each condition:
             intensity = traceEye(
                                 self.Analysis[key]['dist'], 
