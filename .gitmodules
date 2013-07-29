@@ -1,3 +1,6 @@
 [submodule "SchematicEye"]
 	path = SchematicEye
 	url = git://github.com/bps10/SchematicEye.git
+[submodule "base"]
+	path = base
+	url = https://github.com/bps10/base

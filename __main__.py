@@ -25,9 +25,6 @@ def main(args):
     if args.activity or args.verbose:
         plot_args.append('activity')
 
-    if args.comp or args.verbose:
-        plot_args.append('comp')
-
     if args.dog or args.verbose:
         plot_args.append('plotDoG')
 
@@ -75,8 +72,6 @@ if __name__ == "__main__":
                         help="display activity plots")
     parser.add_argument("-i", "--info", action="store_true",
                         help="display information plot")
-    parser.add_argument("-c", "--comp", action="store_true",
-                        help="display comparison plot with Williams et al.")
     parser.add_argument("-q", "--series", action="store_true",
                         help="display wireframe series plot.")   
                         

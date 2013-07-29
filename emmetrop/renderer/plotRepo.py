@@ -2,7 +2,8 @@ from __future__ import division
 import matplotlib.pylab as plt
 import numpy as np
 
-from emmetrop.renderer import PlottingFun as pf
+from base import plot as pf
+
 from emmetrop.scene import SignalProcessing as sig
 
 class Plotter(object):
@@ -10,6 +11,7 @@ class Plotter(object):
 
     .. todo::
        Add self.ext to allow user to save as png or svg.
+       Move plotting routines into seperate files
     """
     def __init__(self, analysis_args, diff, Analysis, recepitive_field, 
                 imageData, plots, save_plots, legend):
@@ -360,87 +362,6 @@ class Plotter(object):
         if save_plots:
             fig.show()
             fig.savefig(self.figPath + 'MTFfamily.png')
-            plt.close()
-        else:
-            plt.show()
-            
-    def plotComparisonMTF(self, save_plots=False, legend=False):
-        """
-        Plot peripheral MTF with a comparison to Navarro et al 1993 or 
-        Williams et al. 1996
-        
-        :param save_plots: decide whether to save plots (True) or not (False).
-        :type save_plots: bool
-        :param legend: turn legend on (True) or off (False). Default = True. \n
-        :type legend: bool
-        
-        Currently supports 0, 10, 20, 40 degrees eccentricity.
-        
-        **This produces:**
-        
-        .. figure:: ../../Figures/MTFperiphery.png
-           :height: 300px
-           :width: 400px
-           :align: center        
-           
-           **Fig 1:** A family of MTF curves from experimental data (dotted) 
-           and schematic eye.        
-        """
-        from emmetrop.eye.Optics import MTF
-        from emmetrop.eye.eyeModel import traceEye, genMTF
-        
-        Fovea = MTF(self.freqs, 0)
-        TenDeg = MTF(self.freqs, 10)
-        TwentyDeg = MTF(self.freqs,20)
-        FourtyDeg = MTF(self.freqs,40)
-        
-        fig = plt.figure(figsize=(8,6))
-        ax = fig.add_subplot(111)
-
-        pf.AxisFormat()
-        pf.TufteAxis(ax, ['left', 'bottom'], [5,5])
-        
-        #Navarro et al 1993 analytical func:
-        ax.plot(self.freqs, Fovea, 'm--')
-        ax.plot(self.freqs, TenDeg, 'r--')
-        ax.plot(self.freqs, TwentyDeg, 'g--')
-        #ax.plot(self.freqs, FourtyDeg, 'b--')
-        
-        #OSLO ray trace data:
-        intensity = traceEye(1e8, 0, 4, 0, 632.8)
-        mtf = genMTF(intensity)
-        ax.plot(self.freqs, mtf, 'm-', label='fovea')
-
-        intensity = traceEye(1e8, 10, 4, 0, 632.8)
-        mtf = genMTF(intensity)
-        ax.plot(self.freqs, mtf, 'r-', label='10 deg')  
-
-        intensity = traceEye(1e8, 20, 4, 0, 632.8)
-        mtf = genMTF(intensity)      
-        ax.plot(self.freqs, mtf, 'g-', label='20 deg')
-
-        #intensity = traceEye(1e8, 40, 4, 0, 632.8)
-        #mtf = genMTF(intensity)
-        #ax.plot(self.freqs, mtf, 'b-', label='40 deg')
-                
-        ax.legend(loc='upper right')#,title='object dist, retinal location')
-        
-        ax.get_xaxis().tick_bottom()
-        ax.get_yaxis().tick_left()
-        
-        mi, ma = plt.ylim()
-        
-        #plt.ylim([10**-2.5, 10**0])
-        plt.xlim([0, 60])
-        
-        plt.xlabel('spatial frequency (cycles / deg)')
-        plt.ylabel('modulation transfer')
-        
-        plt.tight_layout()
-        
-        if save_plots:
-            fig.show()
-            fig.savefig(self.figPath + 'MTFperiphery.png')
             plt.close()
         else:
             plt.show()

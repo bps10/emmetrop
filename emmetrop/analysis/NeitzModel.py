@@ -1,13 +1,15 @@
 from __future__ import division
 import numpy as np
 
+from base import optics as o
+from base.data import rad2deg
+from base import cones as cones
+
 # emmetrop imports:
-from emmetrop.cones.dogRFields import genReceptiveFields
-from emmetrop.eye.eyeModel import traceEye, diffraction, genMTF
 from emmetrop.scene.Images import Images
-from emmetrop.scene.DataManip import rad2deg
 from emmetrop.analysis import Information as info
 from emmetrop.renderer import plotRepo as pr
+from emmetrop.eye.eyeModel import traceEye
 from emmetrop.eye.movement import brownian_motion
 
 class SchematicEyeAnalysis(object):
@@ -41,7 +43,7 @@ class SchematicEyeAnalysis(object):
         self.ImageData = Images().returnImageData()
         
         # receptive field stuff:        
-        self.rec_field = genReceptiveFields(self.freqs, 2)
+        self.rec_field = cones.genReceptiveFields(self.freqs, 2)
         
         # analysis stuff:
         self.NeitzModel(analysis_args)
@@ -158,7 +160,8 @@ class SchematicEyeAnalysis(object):
                                 self.Analysis[key]['pupil_size'], 
                                 self.Analysis[key]['focus'],
                                 self.Analysis[key]['wavelength'])
-            self.Analysis[key]['mtf'] = genMTF(intensity)
+            psf = o.genPSF(intensity, self.freqs)[1]
+            self.Analysis[key]['mtf'] = o.genMTF(psf)
 
             self.Analysis[key]['preCone'] = (powerlaw[ind[0]:ind[1]] * 
                 self.Analysis[key]['mtf'][ind[0]:ind[1]])
@@ -168,9 +171,12 @@ class SchematicEyeAnalysis(object):
         # compute the diffraction limited case seperately
         self.diffract = {}
         self.diffract['freqs'] = self.freqs
-        self.diffract['mtf'] = diffraction(self._meta['mm/deg'], 
-                            self._meta['samples'], self._meta['pupil_size'],
-                            16.6) #self._meta['eye_length'])
+        self.diffract['mtf'] = o.diffraction(self._meta['samples'], 
+                                            self._meta['pupil_size'],
+                                            16.6, 
+                                            ref_index=1.336, 
+                                            wavelength=550.0)[0]
+        print self.diffract['mtf']
         self.diffract['preCone'] =  (powerlaw[ind[0]:ind[1]] * 
                 self.diffract['mtf'][ind[0]:ind[1]])
         self.diffract['retina'] = (self.diffract['preCone'] *

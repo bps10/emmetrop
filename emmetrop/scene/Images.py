@@ -4,8 +4,10 @@ from scipy import io as sio
 from scipy import optimize
 import os, sys
 
-from emmetrop.scene import SignalProcessing as sig
-from emmetrop.scene import DataManip as dm
+from base import image as sig
+from base import data as dm
+from base import files as f
+
 from emmetrop.database import Database as db
 
 
@@ -16,8 +18,7 @@ class Images(object):
     Currently working on using a database of images.
     
     .. todo::
-       * create a cython wrapper around c++ implementation. \
-       or write own ray tracer
+       Better image analysis routines.
        
     """
     
@@ -106,7 +107,7 @@ class Images(object):
         for group in Directory:
             GroupName = group[index[0]:index[1]]
     
-            files = dm.getAllFiles(group, suffix='.JPG', subdirectories=1)
+            files = f.getAllFiles(group, suffix='.JPG', subdirectories=1)
             if self.Dbase.Exists(GroupName) == False:
                 self.Dbase.CreateGroup(GroupName)
                 
