@@ -51,15 +51,15 @@ def main(args):
                 save_plots=save_plots)
           
         if args.activity or args.verbose:
-            pr.plotActivity(cpd, Activity, diffract, figPath='Figures/', 
+            pr.plotActivity(cpd, Analysis, diffract, figPath='Figures/', 
                 save_plots=save_plots, legend=False)
 
         if args.info:
-            pr.plot_Information(Analysis, save_plots=save_plots, 
-                figpath='Figures/', legend=False)
+            pr.plotInformation(Analysis, figpath='Figures/', 
+                save_plots=save_plots, legend=False)
 
         if args.series:
-            plotSeries(cpd, Analysis, analysis_args, save_plots=False)
+            pr.plotSeries(cpd, Analysis, analysis_args, save_plots=False)
 
     if args.dog or args.verbose:
         _meta, cpd = genMeta()

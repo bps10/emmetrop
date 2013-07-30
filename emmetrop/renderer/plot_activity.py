@@ -3,9 +3,9 @@ import matplotlib.pylab as plt
 import numpy as np
 
 from base import plot as pf
-
+from emmetrop.scene import SignalProcessing as sig
             
-def plotActivity(cpd, Activity, diffract, figPath='Figures/', 
+def plotActivity(cpd, Analysis, diffract, figPath='Figures/', 
         save_plots=False, legend=False):
     """Plot powerlaw amplitude spectrum after accounting for MTF and MTF \
     + receptive field
@@ -69,7 +69,7 @@ def plotActivity(cpd, Activity, diffract, figPath='Figures/',
     ax.get_xaxis().tick_bottom()
     ax.get_yaxis().tick_left()
    
-    plt.ylim([self.min_dB, 0])
+    plt.ylim([-20, 0])
     plt.xlim([0, 60])
     
     plt.xlabel('spatial frequency (cycles / deg)')
@@ -113,7 +113,7 @@ def plotActivity(cpd, Activity, diffract, figPath='Figures/',
     
     mi, ma = plt.ylim()
 
-    plt.ylim([self.min_dB, 0])
+    plt.ylim([-20, 0])
     plt.xlim([0, 60])
     
     plt.xlabel('spatial frequency (cycles / deg)')

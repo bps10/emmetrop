@@ -4,7 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 
 from base import plot as pf
-
+from emmetrop.scene import SignalProcessing as sig
 
 def plotSeries(cpd, Analysis, analysis_args, figPath='Figures/', save_plots=False):
     '''

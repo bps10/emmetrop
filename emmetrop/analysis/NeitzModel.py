@@ -38,7 +38,7 @@ def NeitzModel(ImageData, rec_field, cpd, _meta, analysis_args):
     Analysis = {}
 
     if 'dist' in analysis_args:
-        dist_range = 10 ** (np.arange(5, 26) / 3.0)
+        dist_range = 10 ** (np.arange(5, 23) / 3.0)
     else:
         dist_range = np.array([1e8])
 
@@ -58,7 +58,7 @@ def NeitzModel(ImageData, rec_field, cpd, _meta, analysis_args):
         pupil_range = np.array([3])
 
     if 'wavelength' in analysis_args:
-        wavelen = np.arange(400, 800, 20)
+        wavelen = np.arange(400, 801, 20)
     else:
         wavelen = np.array([550])
 
@@ -88,10 +88,11 @@ def NeitzModel(ImageData, rec_field, cpd, _meta, analysis_args):
 def addLineStyle(dist, focus, axis, pupil):
     """Add line style for use with plots
     """
-    r = focus / 2
-    g = np.log10(dist) / (25 / 3)
-    b = axis / 20
-    rgb = [r, g, b]
+    r = 0 #focus / 2
+    g = 0 #np.log10(dist) / (25 / 3)
+    b = 0 #axis / 20
+    a = 0.4
+    rgb = [r, g, b, a]
     line = {'style': '-', 'color': rgb}
     return line
      
@@ -138,7 +139,7 @@ def computeConeActivity(Analysis, ImageData, rec_field, cpd, _meta,
     diffract['mtf'] = o.diffraction(_meta['samples'], 
                                     _meta['pupil_size'],
                                     16.6, 
-                                    ref_index=1.336, 
+                                    ref_index=1.4, 
                                     wavelength=550.0)[0]
 
     diffract['preCone'] =  (powerlaw[ind[0]:ind[1]] * 

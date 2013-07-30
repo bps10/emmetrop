@@ -6,7 +6,7 @@ from base import plot as pf
 from emmetrop.scene import SignalProcessing as sig
 
 
-def plotDoG(rec_field, min_dB=20, figPath='Figures', save_plots=False):
+def plotDoG(rec_field, min_dB=-20, figPath='Figures', save_plots=False):
 
     """
     Currently this function outputs the following:
@@ -76,7 +76,7 @@ def plotDoG(rec_field, min_dB=20, figPath='Figures', save_plots=False):
     ax.get_xaxis().tick_bottom()
     ax.get_yaxis().tick_left()
 
-    plt.ylim([min_dB, 0])
+    plt.ylim([-20, 0])
     plt.xlim([0, 100])
     plt.xlabel('spatial frequency (cycles / deg)')
     plt.ylabel('contrast sensitivity (dB)')
