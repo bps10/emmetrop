@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from emmetrop.analysis.NeitzModel import NeitzModel, genMeta
-from emmetrop.renderer import plotRepo as pr
+from emmetrop import renderer as pr
 from emmetrop.scene.Images import Images
 
 from base import cones as cones
@@ -29,43 +29,47 @@ def main(args):
     if args.wavelength or args.verbose:
         analysis_args.append('wavelength')
 
-    # get meta data:
-    _meta, cpd = genMeta()
+    if analysis_args != []:
+        # get meta data:
+        _meta, cpd = genMeta()
 
-    # get image data stuff:
-    ImageData = Images().returnImageData()
+        # get image data stuff:
+        imageData = Images().returnImageData()
 
-    # receptive field stuff:        
-    rec_field = cones.genReceptiveFields(cpd, 2)
+        # receptive field stuff:        
+        rec_field = cones.genReceptiveFields(cpd, 2)
 
-    Analysis, diffract = NeitzModel(ImageData, rec_field, cpd, _meta, analysis_args)
+        Analysis, diffract = NeitzModel(imageData, rec_field, cpd, _meta, analysis_args)
 
 
+        if args.mtf or args.verbose:
+            pr.plotMTFfamily(cpd, Analysis, diffract, figPath='Figures/', 
+                save_plots=False, legend=False)   
+        
+        if args.amp or args.verbose:
+            pr.plotAmpSpec(imageData, figPath='Figures/', _brownian=True, 
+                save_plots=save_plots)
+          
+        if args.activity or args.verbose:
+            pr.plotActivity(cpd, Activity, diffract, figPath='Figures/', 
+                save_plots=save_plots, legend=False)
 
-    plot_args = []
+        if args.info:
+            pr.plot_Information(Analysis, save_plots=save_plots, 
+                figpath='Figures/', legend=False)
 
-    if args.mtf or args.verbose:
-        plot_args.append('mtf')   
-    
-    if args.amp or args.verbose:
-        plot_args.append('amp')
-      
-    if args.activity or args.verbose:
-        plot_args.append('activity')
+        if args.series:
+            plotSeries(cpd, Analysis, analysis_args, save_plots=False)
 
     if args.dog or args.verbose:
-        plot_args.append('plotDoG')
-
-    if args.info:
-        plot_args.append('info')
-
-    if args.series:
-        plot_args.append('seriesPlot')
-
-    # send to renderer module for plotting:
-    pr.Plotter(analysis_args, diffract, Analysis, rec_field, 
-                ImageData, plot_args, save_plots=save_plots, legend=False)
+        _meta, cpd = genMeta()
+        rec_field = cones.genReceptiveFields(cpd, 2)
         
+        pr.plotDoG(rec_field, min_dB=20, figPath='Figures', save_plots=False)
+
+    if args.big:
+        pr.big_analysis_plot()    
+
     if args.eyegrow:
         from emmetrop.analysis import Eye_Grow as eg
         eg.main()
@@ -100,7 +104,9 @@ if __name__ == "__main__":
                         help="run all analyses and plots")
     parser.add_argument("-s", "--save", action="store_true",
                         help="save all plots")
-                                                
+                                              
+    parser.add_argument("-b", "--big", action="store_true",
+                        help="plot big analysis")                                              
     parser.add_argument("-e", "--eyegrow", action="store_true",
                         help="plot predicted eye growth against age")
                         

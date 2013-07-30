@@ -167,8 +167,9 @@ def totalActivity(Analysis, diffract, print_opt=True):
 
     if print_opt:
         print ' '
-        print 'Total activity (proportion of diffraction)'
-        print '-------------------------------------------'
+        print 'Photoreceptor Activity (proportion of diffraction)'
+        print ' '
+        print 'index\tobj_dist_mm\tfocus_D\toff_axis_deg\twavelen_nm\tproportion'
         for key in Analysis:
             line = (str(key) + 
                 '\t' + str(round(Analysis[key]['dist'], 3)) +
