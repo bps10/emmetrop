@@ -98,7 +98,7 @@ class Database():
         ds[:] = Data
 
 
-    def OpenDatabase(self, DatabaseName, PRINT = 0):
+    def OpenDatabase(self, DatabaseName, PRINT = False):
         """
         
         Open a specific database.
@@ -118,7 +118,7 @@ class Database():
 
             if test:
                 self.file = tables.openFile(DatabaseName, mode = "a")
-                if PRINT == 0:
+                if PRINT:
                     print '{0} database opened'.format(DatabaseName)
                 
         except IOError:
@@ -355,7 +355,7 @@ class Database():
         
                 
 
-    def CloseDatabase(self, PRINT = 0):
+    def CloseDatabase(self, PRINT = False):
         """
         
         Close a database.
@@ -367,7 +367,7 @@ class Database():
         
         """
         self.file.close()
-        if PRINT == 0:
+        if PRINT:
             print "database closed"
 
 

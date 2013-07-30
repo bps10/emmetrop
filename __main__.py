@@ -1,5 +1,10 @@
 #!/usr/bin/env python
-from emmetrop.analysis.NeitzModel import SchematicEyeAnalysis
+from emmetrop.analysis.NeitzModel import NeitzModel, genMeta
+from emmetrop.renderer import plotRepo as pr
+from emmetrop.scene.Images import Images
+
+from base import cones as cones
+
 import argparse
 
 
@@ -13,6 +18,29 @@ def main(args):
     else:
         save_plots = False
         
+    analysis_args = []
+    
+    if args.distance:
+        analysis_args.append('dist')
+    if args.focus:
+        analysis_args.append('focus')
+    if args.off_axis or args.verbose:
+        analysis_args.append('off_axis')
+    if args.wavelength or args.verbose:
+        analysis_args.append('wavelength')
+
+    # get meta data:
+    _meta, cpd = genMeta()
+
+    # get image data stuff:
+    ImageData = Images().returnImageData()
+
+    # receptive field stuff:        
+    rec_field = cones.genReceptiveFields(cpd, 2)
+
+    Analysis, diffract = NeitzModel(ImageData, rec_field, cpd, _meta, analysis_args)
+
+
 
     plot_args = []
 
@@ -33,30 +61,14 @@ def main(args):
 
     if args.series:
         plot_args.append('seriesPlot')
-    
-    analysis_args = []
-    
-    if args.distance:
-        analysis_args.append('dist')
-    if args.focus:
-        analysis_args.append('focus')
-    if args.off_axis or args.verbose:
-        analysis_args.append('off_axis')
-    if args.wavelength or args.verbose:
-        analysis_args.append('wavelength')
 
-    if not args.eyegrow:    
-        Eye = SchematicEyeAnalysis(analysis_args=analysis_args,
-                                   plot_args=plot_args, 
-                                   save_arg=save_plots)
-        return Eye
+    # send to renderer module for plotting:
+    pr.Plotter(analysis_args, diffract, Analysis, rec_field, 
+                ImageData, plot_args, save_plots=save_plots, legend=False)
         
     if args.eyegrow:
         from emmetrop.analysis import Eye_Grow as eg
         eg.main()
-
-    
-    
 
 
 if __name__ == "__main__": 

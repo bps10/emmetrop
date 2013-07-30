@@ -22,7 +22,7 @@ class Plotter(object):
         self.imageData = imageData
         self.diffract = diff
         
-        self.freqs = diff['freqs']
+        self.cpd = diff['cpd']
         foo = '../../../bps10.github.com/presentations/static/'
         self.figPath = foo + 'figures/myopiaModel/'
         #options:      
@@ -71,7 +71,7 @@ class Plotter(object):
             Z = np.zeros((50, keys))
 
             for key in self.Analysis:
-                X[:, key] = self.freqs[:50]
+                X[:, key] = self.cpd[:50]
                 if analysis == 'dist':
                     Y[:, key] = np.ones(50) * np.log10(self.Analysis[key]['dist'])
                 else:
@@ -92,7 +92,7 @@ class Plotter(object):
             pf.AxisFormat()
 
             for key in self.Analysis:
-                X[:, key] = self.freqs[:50]
+                X[:, key] = self.cpd[:50]
                 if analysis == 'dist':
                     Y[:, key] = np.ones(50) * np.log10(self.Analysis[key]['dist'])
                 else:
@@ -232,7 +232,7 @@ class Plotter(object):
         ax.get_yaxis().tick_left()
     
         plt.ylim([self.min_dB, 0])
-        plt.xlim([self.freqs[1], 100])
+        plt.xlim([self.cpd[1], 100])
         plt.xlabel('spatial frequency (cycles / deg)')
         plt.ylabel('contrast sensitivity (dB)')
         
@@ -343,10 +343,10 @@ class Plotter(object):
         
         for key in self.Analysis:
             mtf = self.Analysis[key]['mtf']
-            ax.plot(self.freqs, mtf,
+            ax.plot(self.cpd, mtf,
                       self.Analysis[key]['line']['style'],
                       c = self.Analysis[key]['line']['color'],)
-        ax.plot(self.freqs, self.diffract['mtf'], 'k-', linewidth=2)
+        ax.plot(self.cpd, self.diffract['mtf'], 'k-', linewidth=2)
 
         if legend: 
             ax.legend(loc='upper right')#title='object, retina')
@@ -416,11 +416,11 @@ class Plotter(object):
             contrast = (self.Analysis[key]['preCone'] / 
                     np.max(self.Analysis[key]['preCone']))
 
-            ax.semilogx(self.freqs[0:100], sig.decibels(contrast),
+            ax.semilogx(self.cpd[0:100], sig.decibels(contrast),
                       self.Analysis[key]['line']['style'],
                       c = self.Analysis[key]['line']['color'], label=key)
         contrast = self.diffract['preCone'] / np.max(self.diffract['preCone'])
-        ax.plot(self.freqs[0:100], sig.decibels(contrast),
+        ax.plot(self.cpd[0:100], sig.decibels(contrast),
             'k-', linewidth=2)
 
         if legend: 
@@ -461,11 +461,11 @@ class Plotter(object):
         for key in self.Analysis:
             contrast = (self.Analysis[key]['retina'] / 
                     np.max(self.Analysis[key]['retina']))
-            ax.semilogx(self.freqs[0:100], sig.decibels(contrast),
+            ax.semilogx(self.cpd[0:100], sig.decibels(contrast),
                       self.Analysis[key]['line']['style'],
                       c = self.Analysis[key]['line']['color'], label=key)
         contrast = self.diffract['retina'] / np.max(self.diffract['retina'])                
-        ax.plot(self.freqs[0:100], sig.decibels(contrast),
+        ax.plot(self.cpd[0:100], sig.decibels(contrast),
                     'k-', linewidth=2)
 
         if legend: 
