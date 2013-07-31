@@ -44,9 +44,11 @@ def plotDoG(rec_field, min_dB=-20, figPath='Figures', save_plots=False):
 
     pf.AxisFormat()
     pf.TufteAxis(ax, ['left', 'bottom'], [5,5])
-    
-    ax.plot(rec_field['xvals'], rec_field['dog'], 
-            'k', linewidth=2.5)
+
+    for wv in rec_field:
+      if wv != 'max':
+        ax.plot(rec_field[wv]['xvals'],rec_field[wv]['dog'], 
+                    c=pf.wav2RGB(wv), linewidth=2.5)
 
     plt.xlabel('distance (arcmin)')
     plt.ylabel('amplitude')
@@ -65,18 +67,19 @@ def plotDoG(rec_field, min_dB=-20, figPath='Figures', save_plots=False):
     pf.AxisFormat()
     pf.TufteAxis(ax, ['left', 'bottom'], [5, 5])
     
-    length = rec_field['length']
     
-    normFFT = (rec_field['coneResponse']['fft'][length:] / 
-        np.max(rec_field['coneResponse']['fft'][length:]))
-    ax.semilogx(rec_field['xvals'][length:] * 60, 
-              sig.decibels(normFFT), 
-                'k', linewidth=2.5)
+    for wv in rec_field:
+      if wv != 'max':
+        length = rec_field[wv]['length']
+        normFFT = (rec_field[wv]['coneResponse'][length:] / rec_field['max'])
+        ax.semilogx(rec_field[wv]['xvals'][length:] * 60, 
+                  sig.decibels(normFFT), 
+                    c=pf.wav2RGB(wv), linewidth=2.5)
 
     ax.get_xaxis().tick_bottom()
     ax.get_yaxis().tick_left()
 
-    plt.ylim([-20, 0])
+    plt.ylim([-40, 0])
     plt.xlim([0, 100])
     plt.xlabel('spatial frequency (cycles / deg)')
     plt.ylabel('contrast sensitivity (dB)')

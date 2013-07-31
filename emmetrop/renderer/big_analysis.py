@@ -24,7 +24,7 @@ def big_analysis_plot():
 		if diop <= 3.5: #diop - round(diop, 0) == 0:
 
 			x = data['wavelen_nm'][ind]
-			y = np.log10(data['obj_dist_mm'][ind])
+			y = np.log10(data['obj_dist_mm'][ind] / 1000.0)
 			z = data['proportion'][ind]
 
 			Nx = len(np.unique(x))
@@ -38,7 +38,7 @@ def big_analysis_plot():
 			ax.set_title('lens ' + str(diop) + 'D', fontsize=20)
 
 			if i == 0 or i == 4:
-				ax.set_ylabel('obj. distance log10(mm)')
+				ax.set_ylabel('obj. distance log10(m)')
 			else:
 				ax.set_yticklabels(([]))
 

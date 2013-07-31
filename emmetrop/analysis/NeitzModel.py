@@ -10,7 +10,7 @@ from emmetrop.analysis import Information as info
 from emmetrop.eye.eyeModel import traceEye
 from emmetrop.eye.movement import brownian_motion
 
- 
+
 def genMeta():
     '''Just temporary.
     '''
@@ -29,7 +29,7 @@ def genMeta():
 
     return _meta, cpd
 
-def NeitzModel(ImageData, rec_field, cpd, _meta, analysis_args):
+def NeitzModel(ImageData, rec_field, cpd, field_angle, _meta, analysis_args):
     '''This function organizes the entire operation.
     A dictionary self.Analysis is created to reflect the 
     user options. All subsequent methods will use the keys
@@ -50,7 +50,7 @@ def NeitzModel(ImageData, rec_field, cpd, _meta, analysis_args):
     if 'off_axis' in analysis_args:
         axis_range = np.arange(0, 21, 2)
     else:
-        axis_range = np.array([10])
+        axis_range = np.array([field_angle])
 
     if 'pupil_size' in analysis_args:
         pupil_range = np.arange(2, 9, 1)
@@ -58,7 +58,7 @@ def NeitzModel(ImageData, rec_field, cpd, _meta, analysis_args):
         pupil_range = np.array([3])
 
     if 'wavelength' in analysis_args:
-        wavelen = np.arange(400, 801, 20)
+        wavelen = np.arange(430, 701, 10)
     else:
         wavelen = np.array([550])
 
@@ -77,6 +77,10 @@ def NeitzModel(ImageData, rec_field, cpd, _meta, analysis_args):
                             'wavelength': wave,
                             'line': addLineStyle(dist, focus, axis, pupil), }
                         j += 1
+
+                        # generate new rec field base on wavelen if necessary
+
+    # then find biggest response, normalize everything else to that
     
     Analysis, diffract = computeConeActivity(Analysis, ImageData,
         rec_field, cpd, _meta)      
@@ -104,7 +108,7 @@ def computeConeActivity(Analysis, ImageData, rec_field, cpd, _meta,
     :param Receptive_Field: a handle to the spline fitted receptive field.
     :type Receptive_Field: function handle.
     """
-    Rec_Field = rec_field['fft']  
+    Rec_Field = (rec_field[540]['fft'] / rec_field['max']) 
         
     ImageData['fitLaw'] = ImageData['powerlaw'](cpd[1:])
     powerlaw = ImageData['fitLaw']
@@ -135,7 +139,10 @@ def computeConeActivity(Analysis, ImageData, rec_field, cpd, _meta,
                                     Rec_Field[ind])
 
     for key in Analysis:
-        
+        # find cone fft:
+        wv = Analysis[key]['wavelength']
+        Rec_Field = (rec_field[wv]['fft'] / rec_field['max'])
+
         # generate MTFs for each condition:
         intensity = traceEye(
                             Analysis[key]['dist'], 
@@ -176,7 +183,7 @@ def totalActivity(Analysis, diffract, print_opt=True):
         print ' '
         print 'Photoreceptor Activity (proportion of diffraction)'
         print ' '
-        print 'index\tobj_dist_mm\tfocus_D\toff_axis_deg\twavelen_nm\tproportion'
+        print 'index\tobj_dist_mm\tfocus_D\toff_axis_deg\twavelen_nm\tpupil_mm\tproportion'
         for key in Analysis:
             line = (str(key) + 
                 '\t' + str(round(Analysis[key]['dist'], 3)) +
@@ -184,7 +191,7 @@ def totalActivity(Analysis, diffract, print_opt=True):
                 '\t' + str(round(Analysis[key]['off_axis'], 3)) +
                 '\t' + str(round(Analysis[key]['wavelength'], 3)) +
                 '\t' + str(round(Analysis[key]['pupil_size'],1)) +
-                '\t' + str(round(Analysis[key]['percent'], 3)))
+                '\t' + str(round(Analysis[key]['percent'], 4)))
             print line
 
     return Analysis
