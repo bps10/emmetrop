@@ -29,7 +29,6 @@ def plotMTFfamily(cpd, Analysis, diffract, figPath='Figures/',
        **Fig 1:** A family of MTF curves from OSLO data.
        
     """
-    
     fig = plt.figure(figsize=(8,6))
     ax = fig.add_subplot(111)
     pf.AxisFormat()

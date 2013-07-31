@@ -24,7 +24,7 @@ def genMeta():
     _meta['deg'] = rad2deg(radians)
     _meta['mm/deg'] = 2 * _meta['retImg'] / _meta['deg']
 
-    cycles = np.arange(0, _meta['samples']) / 2
+    cycles = np.arange(0, _meta['samples']) / 2.0
     cpd = (cycles / _meta['retImg']) * _meta['mm/deg'] 
 
     return _meta, cpd
@@ -81,7 +81,7 @@ def NeitzModel(ImageData, rec_field, cpd, _meta, analysis_args):
     Analysis, diffract = computeConeActivity(Analysis, ImageData,
         rec_field, cpd, _meta)      
     Analysis = totalActivity(Analysis, diffract)
-    Analysis = estimateInfo(Analysis, ImageData)
+    Analysis = estimateInfo(Analysis, ImageData, diffract)
 
     return Analysis, diffract
 
@@ -111,12 +111,30 @@ def computeConeActivity(Analysis, ImageData, rec_field, cpd, _meta,
 
     if _brownian:    
         temp = np.arange(1, 80)
-        spat = cpd[1:]
-        movement_filter = brownian_motion(spat, temp)
+        movement_filter = brownian_motion(cpd[1:], temp)
         powerlaw *= movement_filter
-        
+
+    # compute the diffraction limited case seperately
+    diffract = {}
+    diff, _x = o.diffraction(_meta['samples'], 
+                                    _meta['pupil_size'],
+                                    16.6, 
+                                    ref_index=1.4, 
+                                    wavelength=550.0)
+    # now interpolate mtf into cpd's of analysis:
+    mtf = np.interp(cpd, _x, diff)
+
+    # remove zeros to avoid errors in future computations:
+    ind = np.where(mtf != 0)[0]
+    diffract['cpd'] = cpd[ind]
+    diffract['mtf'] = mtf[ind]
+
+    diffract['preCone'] =  (powerlaw[ind] * 
+            diffract['mtf'][ind])
+    diffract['retina'] = (diffract['preCone'] *
+                                    Rec_Field[ind])
+
     for key in Analysis:
-        ind = [0, 100] 
         
         # generate MTFs for each condition:
         intensity = traceEye(
@@ -126,26 +144,13 @@ def computeConeActivity(Analysis, ImageData, rec_field, cpd, _meta,
                             Analysis[key]['focus'],
                             Analysis[key]['wavelength'])
         psf = o.genPSF(intensity, _meta['samples'])[1]
-        Analysis[key]['mtf'] = o.genMTF(psf)
+        Analysis[key]['mtf'] = o.genMTF(psf)[ind]
 
-        Analysis[key]['preCone'] = (powerlaw[ind[0]:ind[1]] * 
-            Analysis[key]['mtf'][ind[0]:ind[1]])
+        Analysis[key]['preCone'] = (powerlaw[ind] * 
+            Analysis[key]['mtf'])
 
         Analysis[key]['retina'] = (Analysis[key]['preCone'] *
-                                    Rec_Field[ind[0]:ind[1]])
-    # compute the diffraction limited case seperately
-    diffract = {}
-    diffract['cpd'] = cpd
-    diffract['mtf'] = o.diffraction(_meta['samples'], 
-                                    _meta['pupil_size'],
-                                    16.6, 
-                                    ref_index=1.4, 
-                                    wavelength=550.0)[0]
-
-    diffract['preCone'] =  (powerlaw[ind[0]:ind[1]] * 
-            diffract['mtf'][ind[0]:ind[1]])
-    diffract['retina'] = (diffract['preCone'] *
-                                    Rec_Field[ind[0]:ind[1]])
+                                    Rec_Field[ind])
 
     return Analysis, diffract
                   
@@ -161,6 +166,7 @@ def totalActivity(Analysis, diffract, print_opt=True):
     
     """
     diffraction_total = np.sum(diffract['retina'])
+    print diffraction_total
     for key in Analysis:
         total = np.sum(Analysis[key]['retina'])
         Analysis[key]['percent'] = (total /
@@ -184,7 +190,7 @@ def totalActivity(Analysis, diffract, print_opt=True):
     return Analysis
 
         
-def estimateInfo(Analysis, ImageData, print_opt=False):
+def estimateInfo(Analysis, ImageData, diffract, print_opt=False):
     """Estimate the information in a simple linear cone receptive field.
     
     Information is estimated with Garrigan et al.'s Gaussian approximation
@@ -232,8 +238,8 @@ def estimateInfo(Analysis, ImageData, print_opt=False):
     for amp in ImageData['rawAmp']:
 
         for key in Analysis:
-            ind = 100
-            fooInfo = info.SingleConeEntropyFunc((amp[:ind]**2 *
+            ind = len(diffract['cpd'])
+            fooInfo = info.SingleConeEntropyFunc((amp[ind] ** 2 *
                                         Analysis[key]['retina']), 
                                         Analysis[key]['cones'])      
             Analysis[key]['info'] += fooInfo / total_images

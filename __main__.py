@@ -43,7 +43,7 @@ def main(args):
 
 
         if args.mtf or args.verbose:
-            pr.plotMTFfamily(cpd, Analysis, diffract, figPath='Figures/', 
+            pr.plotMTFfamily(diffract['cpd'], Analysis, diffract, figPath='Figures/', 
                 save_plots=False, legend=False)   
         
         if args.amp or args.verbose:
@@ -51,7 +51,7 @@ def main(args):
                 save_plots=save_plots)
           
         if args.activity or args.verbose:
-            pr.plotActivity(cpd, Analysis, diffract, figPath='Figures/', 
+            pr.plotActivity(diffract['cpd'], Analysis, diffract, figPath='Figures/', 
                 save_plots=save_plots, legend=False)
 
         if args.info:
@@ -59,7 +59,7 @@ def main(args):
                 save_plots=save_plots, legend=False)
 
         if args.series:
-            pr.plotSeries(cpd, Analysis, analysis_args, save_plots=False)
+            pr.plotSeries(diffract['cpd'], Analysis, analysis_args, save_plots=False)
 
     if args.dog or args.verbose:
         _meta, cpd = genMeta()
