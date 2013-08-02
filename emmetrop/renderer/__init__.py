@@ -6,3 +6,4 @@ from plot_DoG import *
 from plot_Information import *
 from plot_MTF import *
 from plot_series import *
+from plot_filters import *

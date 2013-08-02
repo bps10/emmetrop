@@ -9,7 +9,7 @@ from base import cones as cones
 from emmetrop.analysis import Information as info
 from emmetrop.eye.eyeModel import traceEye
 from emmetrop.eye.movement import brownian_motion
-
+from emmetrop.eye.filter import gauss
 
 def genMeta():
     '''Just temporary.
@@ -29,7 +29,7 @@ def genMeta():
 
     return _meta, cpd
 
-def NeitzModel(ImageData, rec_field, cpd, field_angle, _meta, analysis_args):
+def NeitzModel(ImageData, rec_field, cpd, field_angle, _meta, analysis_args, glasses):
     '''This function organizes the entire operation.
     A dictionary self.Analysis is created to reflect the 
     user options. All subsequent methods will use the keys
@@ -38,12 +38,12 @@ def NeitzModel(ImageData, rec_field, cpd, field_angle, _meta, analysis_args):
     Analysis = {}
 
     if 'dist' in analysis_args:
-        dist_range = 10 ** (np.arange(5, 23) / 3.0)
+        dist_range = 10 ** (np.arange(5, 23, 0.5) / 3.0)
     else:
         dist_range = np.array([1e8])
 
     if 'focus' in analysis_args:
-        focus_range = np.arange(0, 8.5, 0.5)
+        focus_range = np.arange(0, 3.6, 0.5)
     else: 
         focus_range = np.array([0])
 
@@ -57,10 +57,9 @@ def NeitzModel(ImageData, rec_field, cpd, field_angle, _meta, analysis_args):
     else:
         pupil_range = np.array([3])
 
-    if 'wavelength' in analysis_args:
-        wavelen = np.arange(430, 701, 10)
-    else:
-        wavelen = np.array([550])
+    wavelen = rec_field.keys()
+    wavelen.remove('max')
+    wavelen = np.sort(wavelen)
 
     j = 0
     for dist in dist_range:
@@ -83,7 +82,7 @@ def NeitzModel(ImageData, rec_field, cpd, field_angle, _meta, analysis_args):
     # then find biggest response, normalize everything else to that
     
     Analysis, diffract = computeConeActivity(Analysis, ImageData,
-        rec_field, cpd, _meta)      
+        rec_field, cpd, _meta, True, glasses)      
     Analysis = totalActivity(Analysis, diffract)
     Analysis = estimateInfo(Analysis, ImageData, diffract)
 
@@ -102,7 +101,7 @@ def addLineStyle(dist, focus, axis, pupil):
      
 
 def computeConeActivity(Analysis, ImageData, rec_field, cpd, _meta,
-                _brownian=True):
+                _brownian=True, glasses=False):
     """Compute the estimated activity of a cone photoreceptor.
     
     :param Receptive_Field: a handle to the spline fitted receptive field.
@@ -137,6 +136,10 @@ def computeConeActivity(Analysis, ImageData, rec_field, cpd, _meta,
             diffract['mtf'][ind])
     diffract['retina'] = (diffract['preCone'] *
                                     Rec_Field[ind])
+
+    if glasses:
+        # if glasses on, compute effect after diffraction case
+        powerlaw *= gauss(cpd[1:], 15)
 
     for key in Analysis:
         # find cone fft:

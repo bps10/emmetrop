@@ -21,6 +21,7 @@ def main(args):
         save_plots = False
         
     analysis_args = []
+    rec_field = {}
     
     if args.distance:
         analysis_args.append('dist')
@@ -29,7 +30,6 @@ def main(args):
     if args.off_axis or args.verbose:
         analysis_args.append('off_axis')
     if args.wavelength or args.verbose:
-        rec_field = {}
         _max = 0
         for wv in range(430, 701, 10):
             rec_field[wv] = cones.genReceptiveFields(cpd, 2, [559, 530], wv)
@@ -42,7 +42,7 @@ def main(args):
         analysis_args.append('wavelength')
 
     else:
-        rec_field[540] = cones.genReceptiveFields(cpd, 2)
+        rec_field[540] = cones.genReceptiveFields(cpd, 0.5)
         length = rec_field[540]['length']
         rec_field['max'] = max(rec_field[540]['coneResponse'][length:])
 
@@ -54,7 +54,7 @@ def main(args):
         #rec_field = cones.genReceptiveFields(cpd, 2)
 
         Analysis, diffract = NeitzModel(imageData, rec_field, cpd, 
-            args.field_angle, _meta, analysis_args)
+            args.field_angle, _meta, analysis_args, glasses=args.glasses)
 
 
         if args.mtf or args.verbose:
@@ -74,7 +74,8 @@ def main(args):
                 save_plots=save_plots, legend=False)
 
         if args.series:
-            pr.plotSeries(diffract['cpd'], Analysis, analysis_args, save_plots=False)
+            pr.plotSeries(diffract['cpd'], diffract, Analysis, 
+                analysis_args, save_plots=False)
 
     if args.dog or args.verbose:
 
@@ -104,6 +105,9 @@ def main(args):
         from emmetrop.analysis import Eye_Grow as eg
         eg.main()
 
+    if args.filter:
+        pr.plotMovement()
+        pr.plotGlasses()
 
 if __name__ == "__main__": 
     parser = argparse.ArgumentParser()
@@ -138,10 +142,16 @@ if __name__ == "__main__":
                         help="save all plots")
                                               
     parser.add_argument("-b", "--big", action="store_true",
-                        help="plot big analysis")                                              
+                        help="plot big analysis")      
+    parser.add_argument("--glasses_analysis", action="store_true",
+                        help="use big plot to plot diff between states")                                        
     parser.add_argument("-e", "--eyegrow", action="store_true",
                         help="plot predicted eye growth against age")
-                        
+    parser.add_argument("--glasses", action="store_true",
+                        help="add diffuser glasses")
+    parser.add_argument("--filter", action="store_true",
+                        help="plot movement and glasses filter")
+
     args = parser.parse_args()
     
     Eye = main(args)

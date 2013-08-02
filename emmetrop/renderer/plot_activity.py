@@ -54,7 +54,7 @@ def plotActivity(cpd, Analysis, diffract, figPath='Figures/',
 
     for key in Analysis:
         contrast = (Analysis[key]['preCone'] / 
-                np.max(Analysis[key]['preCone']))
+                np.max(diffract['preCone']))
 
         ax.semilogx(cpd[0:100], sig.decibels(contrast),
                   Analysis[key]['line']['style'],
@@ -100,7 +100,7 @@ def plotActivity(cpd, Analysis, diffract, figPath='Figures/',
 
     for key in Analysis:
         contrast = (Analysis[key]['retina'] / 
-                np.max(Analysis[key]['retina']))
+                np.max(diffract['retina']))
         ax.semilogx(cpd[0:100], sig.decibels(contrast),
                   Analysis[key]['line']['style'],
                   c = Analysis[key]['line']['color'], label=key)

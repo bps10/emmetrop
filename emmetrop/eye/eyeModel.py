@@ -1,5 +1,4 @@
-import os, sys
-import shlex
+import sys, os
 import numpy as np
 
 if os.path.basename(os.getcwd()) == 'emmetrop':

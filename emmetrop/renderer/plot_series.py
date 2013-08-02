@@ -6,7 +6,7 @@ import numpy as np
 from base import plot as pf
 from emmetrop.scene import SignalProcessing as sig
 
-def plotSeries(cpd, Analysis, analysis_args, figPath='Figures/', save_plots=False):
+def plotSeries(cpd, diffract, Analysis, analysis_args, figPath='Figures/', save_plots=False):
     '''
     '''
 
@@ -28,6 +28,7 @@ def plotSeries(cpd, Analysis, analysis_args, figPath='Figures/', save_plots=Fals
         Z = np.zeros((50, keys))
 
         for key in Analysis:
+            # X is cpd of plot
             X[:, key] = cpd[:50]
             if analysis == 'dist':
                 Y[:, key] = np.ones(50) * np.log10(Analysis[key]['dist'])
@@ -60,7 +61,7 @@ def plotSeries(cpd, Analysis, analysis_args, figPath='Figures/', save_plots=Fals
             else:
                 Y[:, key] = np.ones(50) * Analysis[key][analysis]
             contrast = (Analysis[key]['retina'][:50] / 
-                    np.max(Analysis[key]['retina'][:50]))
+                    np.max(diffract['retina'][:50]))
             Z[:, key] = sig.decibels(contrast)
 
         ax.plot_wireframe(X, Y, Z)

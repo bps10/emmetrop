@@ -8,14 +8,20 @@ import numpy as np
 from base import plot as pf
 
 
-def big_analysis_plot():
+def big_analysis_plot(glasses_analysis=False):
 	'''
 	'''
 	handle = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-		'../../analysis.txt')
+		'../../analysis_fovea.txt')
 
 	data = np.genfromtxt(handle, delimiter='\t', skip_header=5, names=True)
 	#print data.dtype.names
+
+	if glasses_analysis:
+		glasses_handle = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+			'../../analysis_glasses.txt')
+		glasses_data = np.genfromtxt(glasses_handle, 
+			delimiter='\t', skip_header=5, names=True)
 
 	fig = plt.figure(figsize=(14,8))
 	pf.AxisFormat(TickDirection='in')
@@ -25,7 +31,11 @@ def big_analysis_plot():
 
 			x = data['wavelen_nm'][ind]
 			y = np.log10(data['obj_dist_mm'][ind] / 1000.0)
-			z = data['proportion'][ind]
+
+			if not glasses_analysis:
+				z = data['proportion'][ind]
+			else:
+				z = data['proportion'][ind] - data['proportion'][ind]
 
 			Nx = len(np.unique(x))
 			Ny = len(np.unique(y))
@@ -44,12 +54,15 @@ def big_analysis_plot():
 
 			if i > 3:
 				ax.set_xlabel('wavelength (nm)')
-				ax.set_xticks([400, 600, 800])
+				ax.set_xticks([450, 550, 650])
 			else:
-				ax.set_xticks([400, 600, 800])
+				ax.set_xticks([450, 550, 650])
 				ax.set_xticklabels(([]))
 
-	#plt.colorbar(im)
 	plt.subplots_adjust(bottom=0.01, hspace=0.01, wspace=0.01)
 	plt.tight_layout()
+	plt.show()
+
+	plt.figure()
+	plt.colorbar(im, orientation='horizontal')
 	plt.show()
