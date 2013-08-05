@@ -139,7 +139,7 @@ def computeConeActivity(Analysis, ImageData, rec_field, cpd, _meta,
 
     if glasses:
         # if glasses on, compute effect after diffraction case
-        powerlaw *= gauss(cpd[1:], 15)
+        powerlaw *= gauss(cpd[1:], 10)
 
     for key in Analysis:
         # find cone fft:

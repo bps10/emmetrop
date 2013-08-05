@@ -51,8 +51,6 @@ def main(args):
         # get image data stuff:
         imageData = Images().returnImageData()
 
-        #rec_field = cones.genReceptiveFields(cpd, 2)
-
         Analysis, diffract = NeitzModel(imageData, rec_field, cpd, 
             args.field_angle, _meta, analysis_args, glasses=args.glasses)
 
@@ -99,7 +97,9 @@ def main(args):
         pr.plotDoG(rec_field, min_dB=20, figPath='Figures', save_plots=False)
 
     if args.big:
-        pr.big_analysis_plot()    
+        pr.big_analysis_plot(args.glasses)
+        if args.glasses:
+            pr.glasses_comp_plot()    
 
     if args.eyegrow:
         from emmetrop.analysis import Eye_Grow as eg
